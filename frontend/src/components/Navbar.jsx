@@ -84,12 +84,12 @@ const Navbar = () => {
           <div className='flex flex-wrap justify-between items-center'>
             <Link to='/' className='text-2xl font-bold text-emerald-400 items-center space-x-2 flex'>
               <div className="flex items-center ">
-                <img src='/icon.png' alt='Moss-x logo' className='w-14 h-14 object-contain' />
+                <img src='/icon.png' alt='Moss-x logo' className='w-10 h-10 object-contain' />
               </div>
             </Link>
             {/* Centered Search Bar */}
             <div className="flex-1 flex justify-center items-center relative z-50">
-              <div className="w-full max-w-md relative">
+              <div className="w-36 md:w-full max-w-md relative">
                 <div className="flex items-center bg-gray-800 rounded-lg px-3 py-1 border border-gray-700 focus-within:ring-2 focus-within:ring-emerald-500">
                   <Search className="w-5 h-5 text-gray-400 mr-2" />
                   <input
