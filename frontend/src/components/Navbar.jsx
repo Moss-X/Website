@@ -79,7 +79,7 @@ const Navbar = () => {
       {showOverlay && (
         <div className="sticky inset-0 bg-black/60 z-40 transition-opacity" onClick={() => setShowOverlay(false)} />
       )}
-      <header className='absolute top-0 left-0 w-full  bg-opacity-90 backdrop-blur-md shadow-lg z-50 transition-all duration-300 '>
+      <header className='absolute top-0 left-0 w-full  bg-opacity-90 z-50 transition-all duration-300 '>
         <div className='container mx-auto px-4 py-3'>
           <div className='flex flex-wrap justify-between items-center'>
             <Link to='/' className='text-2xl font-bold text-heading items-center space-x-2 flex'>
@@ -132,7 +132,7 @@ const Navbar = () => {
             <nav className='flex flex-wrap items-center gap-4'>
               <Link
                 to={"/"}
-                className='text-secondary hover:text-emerald-300 transition duration-300
+                className='text-primary md:text-secondary hover:text-emerald-300 transition duration-300
              ease-in-out'
               >
                 Home
@@ -140,7 +140,7 @@ const Navbar = () => {
               {user && (
                 <Link
                   to={"/cart"}
-                  className='relative group text-secondary hover:text-emerald-300 transition duration-300 
+                  className='relative group text-primary md:text-secondary hover:text-emerald-300 transition duration-300 
                 ease-in-out'
                 >
                   <ShoppingCart className='inline-block mr-1 group-hover:text-emerald-300' size={20} />
@@ -169,14 +169,14 @@ const Navbar = () => {
                 <>
                   <Link
                     to='/signup'
-                    className='text-secondary hover:text-a transition duration-300 ease-in-out flex items-center'
+                    className='text-primary md:text-secondary hover:text-emerald-300 transition duration-300 ease-in-out flex items-center'
                   >
                     <UserPlus className='inline-block mr-1' size={20} />
                     <span className='hidden sm:inline'>Sign Up</span>
                   </Link>
                   <Link
                     to='/login'
-                    className='text-darkGreen hover:text-heading transition duration-300 ease-in-out flex items-center'
+                    className='text-primary md:text-secondary hover:text-emerald-300 transition duration-300 ease-in-out flex items-center'
                   >
                     <LogIn className='inline-block mr-1' size={20} />
                     <span className='hidden sm:inline'>Login</span>
@@ -186,7 +186,7 @@ const Navbar = () => {
               {user && (
                 <button
                   onClick={logout}
-                  className='text-darkGreen hover:text-red-400 transition duration-300 ease-in-out flex items-center'
+                  className='text-primary md:text-darkGreen hover:text-red-400 transition duration-300 ease-in-out flex items-center'
                 >
                   <LogOut className='inline-block mr-1' size={20} />
                   <span className='hidden sm:inline'>Logout</span>
