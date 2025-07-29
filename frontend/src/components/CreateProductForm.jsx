@@ -68,8 +68,8 @@ const CreateProductForm = () => {
 						name='name'
 						value={newProduct.name}
 						onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-						className='mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2
-						 px-3 text-white focus:outline-none focus:ring-2
+						className='mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-xs py-2
+						 px-3 text-white focus:outline-hidden focus:ring-2
 						focus:ring-emerald-500 focus:border-emerald-500'
 						required
 					/>
@@ -85,8 +85,8 @@ const CreateProductForm = () => {
 						value={newProduct.description}
 						onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
 						rows='3'
-						className='mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm
-						 py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 
+						className='mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-xs
+						 py-2 px-3 text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 
 						 focus:border-emerald-500'
 						required
 					/>
@@ -103,8 +103,8 @@ const CreateProductForm = () => {
 						value={newProduct.price}
 						onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
 						step='0.01'
-						className='mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm 
-						py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500
+						className='mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-xs 
+						py-2 px-3 text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500
 						 focus:border-emerald-500'
 						required
 					/>
@@ -120,7 +120,7 @@ const CreateProductForm = () => {
 						value={newProduct.category}
 						onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
 						className='mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md
-						 shadow-sm py-2 px-3 text-white focus:outline-none 
+						 shadow-xs py-2 px-3 text-white focus:outline-hidden 
 						 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500'
 						required
 					>
@@ -137,7 +137,7 @@ const CreateProductForm = () => {
 					<input type='file' id='image' className='sr-only' accept='image/*' onChange={handleImageChange} />
 					<label
 						htmlFor='image'
-						className='cursor-pointer bg-gray-700 py-2 px-3 border border-gray-600 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-300 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500'
+						className='cursor-pointer bg-gray-700 py-2 px-3 border border-gray-600 rounded-md shadow-xs text-sm leading-4 font-medium text-gray-300 hover:bg-gray-600 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500'
 					>
 						<Upload className='h-5 w-5 inline-block mr-2' />
 						Upload Image
@@ -149,8 +149,8 @@ const CreateProductForm = () => {
 				<button
 					type='submit'
 					className='w-full flex justify-center py-2 px-4 border border-transparent rounded-md 
-					shadow-sm text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 
-					focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50'
+					shadow-xs text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 
+					focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50'
 					disabled={loading}
 				>
 					{loading ? (

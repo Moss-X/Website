@@ -6,10 +6,10 @@ const CartItem = ({ item }) => {
 
 	if (item.type === "bundle") {
 		return (
-			<div className="rounded-lg border p-4 shadow-sm border-emerald-700 bg-gray-800 md:p-6">
+			<div className="rounded-lg border p-4 shadow-xs border-emerald-700 bg-gray-800 md:p-6">
 				<div className="flex flex-col md:flex-row md:items-center md:gap-6">
 					<div className="shrink-0 mb-4 md:mb-0">
-						<img className="h-24 w-24 md:h-32 md:w-32 rounded object-cover" src={item.image} alt={item.title} />
+						<img className="h-24 w-24 md:h-32 md:w-32 rounded-sm object-cover" src={item.image} alt={item.title} />
 					</div>
 					<div className="flex-1 min-w-0 space-y-2">
 						<div className="flex items-center gap-2 mb-1">
@@ -19,9 +19,9 @@ const CartItem = ({ item }) => {
 						<p className="text-sm text-gray-400 mb-2 line-clamp-2">{item.description}</p>
 						<div className="flex flex-wrap gap-2 items-center mb-2">
 							{item.products?.slice(0, 4).map((p) => (
-								<div key={p._id} className="flex items-center gap-1 bg-gray-900 rounded px-2 py-1 text-xs">
-									{p.image && <img src={p.image} alt={p.name} className="w-5 h-5 object-cover rounded" />}
-									<span className="text-gray-200 max-w-[4rem] truncate">{p.name}</span>
+								<div key={p._id} className="flex items-center gap-1 bg-gray-900 rounded-sm px-2 py-1 text-xs">
+									{p.image && <img src={p.image} alt={p.name} className="w-5 h-5 object-cover rounded-sm" />}
+									<span className="text-gray-200 max-w-16 truncate">{p.name}</span>
 								</div>
 							))}
 							{item.products?.length > 4 && (
@@ -31,14 +31,14 @@ const CartItem = ({ item }) => {
 						<div className="flex items-center gap-4 mt-2">
 							<div className="flex items-center gap-2">
 								<button
-									className="inline-flex h-5 w-5 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+									className="inline-flex h-5 w-5 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
 									onClick={() => updateQuantity(item._id, item.quantity - 1, item.type)}
 								>
 									<Minus className="text-gray-300" />
 								</button>
 								<p>{item.quantity}</p>
 								<button
-									className="inline-flex h-5 w-5 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+									className="inline-flex h-5 w-5 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
 									onClick={() => updateQuantity(item._id, item.quantity + 1, item.type)}
 								>
 									<Plus className="text-gray-300" />
@@ -62,10 +62,10 @@ const CartItem = ({ item }) => {
 
 	if (item.type === "collection") {
 		return (
-			<div className="rounded-lg border p-4 shadow-sm border-emerald-700 bg-gray-800 md:p-6">
+			<div className="rounded-lg border p-4 shadow-xs border-emerald-700 bg-gray-800 md:p-6">
 				<div className="flex flex-col md:flex-row md:items-center md:gap-6">
 					<div className="shrink-0 mb-4 md:mb-0">
-						<img className="h-24 w-24 md:h-32 md:w-32 rounded object-cover" src={item.image} alt={item.title} />
+						<img className="h-24 w-24 md:h-32 md:w-32 rounded-sm object-cover" src={item.image} alt={item.title} />
 					</div>
 					<div className="flex-1 min-w-0 space-y-2">
 						<div className="flex items-center gap-2 mb-1">
@@ -75,9 +75,9 @@ const CartItem = ({ item }) => {
 						<p className="text-sm text-gray-400 mb-2 line-clamp-2">{item.description}</p>
 						<div className="flex flex-wrap gap-2 items-center mb-2">
 							{item.products?.slice(0, 4).map((p) => (
-								<div key={p._id} className="flex items-center gap-1 bg-gray-900 rounded px-2 py-1 text-xs">
-									{p.image && <img src={p.image} alt={p.name} className="w-5 h-5 object-cover rounded" />}
-									<span className="text-gray-200 max-w-[4rem] truncate">{p.name}</span>
+								<div key={p._id} className="flex items-center gap-1 bg-gray-900 rounded-sm px-2 py-1 text-xs">
+									{p.image && <img src={p.image} alt={p.name} className="w-5 h-5 object-cover rounded-sm" />}
+									<span className="text-gray-200 max-w-16 truncate">{p.name}</span>
 								</div>
 							))}
 							{item.products?.length > 4 && (
@@ -87,14 +87,14 @@ const CartItem = ({ item }) => {
 						<div className="flex items-center gap-4 mt-2">
 							<div className="flex items-center gap-2">
 								<button
-									className="inline-flex h-5 w-5 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+									className="inline-flex h-5 w-5 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
 									onClick={() => updateQuantity(item._id, item.quantity - 1, item.type)}
 								>
 									<Minus className="text-gray-300" />
 								</button>
 								<p>{item.quantity}</p>
 								<button
-									className="inline-flex h-5 w-5 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+									className="inline-flex h-5 w-5 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
 									onClick={() => updateQuantity(item._id, item.quantity + 1, item.type)}
 								>
 									<Plus className="text-gray-300" />
@@ -118,24 +118,24 @@ const CartItem = ({ item }) => {
 
 	// Default: product item
 	return (
-		<div className='rounded-lg border p-4 shadow-sm border-gray-700 bg-gray-800 md:p-6'>
+		<div className='rounded-lg border p-4 shadow-xs border-gray-700 bg-gray-800 md:p-6'>
 			<div className='space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0'>
 				<div className='shrink-0 md:order-1'>
-					<img className='h-20 md:h-32 rounded object-cover' src={item.image} />
+					<img className='h-20 md:h-32 rounded-sm object-cover' src={item.image} />
 				</div>
 				<label className='sr-only'>Choose quantity:</label>
 
 				<div className='flex items-center justify-between md:order-3 md:justify-end'>
 					<div className='flex items-center gap-2'>
 						<button
-							className='inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500'
+							className='inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500'
 							onClick={() => updateQuantity(item._id, item.quantity - 1, item.type)}
 						>
 							<Minus className='text-gray-300' />
 						</button>
 						<p>{item.quantity}</p>
 						<button
-							className='inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-emerald-500'
+							className='inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md border border-gray-600 bg-gray-700 hover:bg-gray-600 focus:outline-hidden focus:ring-2 focus:ring-emerald-500'
 							onClick={() => updateQuantity(item._id, item.quantity + 1, item.type)}
 						>
 							<Plus className='text-gray-300' />

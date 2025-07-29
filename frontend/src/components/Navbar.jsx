@@ -101,7 +101,7 @@ const Navbar = () => {
                     onBlur={handleInputBlur}
                     onKeyDown={handleKeyDown}
                     placeholder="Search plants..."
-                    className="bg-transparent outline-none border-none text-white w-full py-2 placeholder-gray-400"
+                    className="bg-transparent outline-hidden border-none text-white w-full py-2 placeholder-gray-400"
                     aria-label="Search plants"
                   />
                 </div>
@@ -119,7 +119,7 @@ const Navbar = () => {
                           onMouseDown={() => handleSuggestionClick(s._id)}
                           tabIndex={0}
                         >
-                          <img src={s.image} alt={s.name} className="w-8 h-8 object-cover rounded" />
+                          <img src={s.image} alt={s.name} className="w-8 h-8 object-cover rounded-sm" />
                           <span className="text-white font-medium line-clamp-1">{s.name}</span>
                           <span className="text-xs text-gray-400 ml-auto">${s.price}</span>
                         </div>

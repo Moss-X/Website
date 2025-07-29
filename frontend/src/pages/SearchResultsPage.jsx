@@ -101,7 +101,7 @@ function SearchResultsPage() {
             <select
               value={category}
               onChange={e => setCategory(e.target.value)}
-              className="bg-gray-700 text-white rounded px-3 py-2"
+              className="bg-gray-700 text-white rounded-sm px-3 py-2"
             >
               <option value="">All</option>
               {productCategories.map(cat => (
@@ -117,7 +117,7 @@ function SearchResultsPage() {
               min="0"
               value={minPrice}
               onChange={e => setMinPrice(e.target.value)}
-              className="bg-gray-700 text-white rounded px-3 py-2 w-24"
+              className="bg-gray-700 text-white rounded-sm px-3 py-2 w-24"
               placeholder="₹"
             />
           </div>
@@ -129,20 +129,20 @@ function SearchResultsPage() {
               min="0"
               value={maxPrice}
               onChange={e => setMaxPrice(e.target.value)}
-              className="bg-gray-700 text-white rounded px-3 py-2 w-24"
+              className="bg-gray-700 text-white rounded-sm px-3 py-2 w-24"
               placeholder="₹"
             />
           </div>
           <button
             type="submit"
-            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded transition-colors"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 rounded-sm transition-colors"
           >
             {loading ? <span className="flex items-center gap-2"><svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg> Loading...</span> : "Apply Filters"}
           </button>
           <button
             type="button"
             onClick={resetFilters}
-            className="bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold px-4 py-2 rounded transition-colors"
+            className="bg-gray-700 hover:bg-gray-600 text-gray-200 font-semibold px-4 py-2 rounded-sm transition-colors"
           >
             Reset
           </button>
@@ -182,7 +182,7 @@ function SearchResultsPage() {
               {bundles.map(bundle => (
                 <div
                   key={bundle._id}
-                  className="bg-gray-800 rounded-lg p-0 shadow-lg cursor-pointer hover:ring-2 hover:ring-emerald-400 transition transform hover:scale-[1.025] flex flex-col aspect-[4/5]"
+                  className="bg-gray-800 rounded-lg p-0 shadow-lg cursor-pointer hover:ring-2 hover:ring-emerald-400 transition transform hover:scale-[1.025] flex flex-col aspect-4/5"
                   onClick={() => handleBundleClick(bundle._id)}
                   tabIndex={0}
                   role="button"
@@ -204,9 +204,9 @@ function SearchResultsPage() {
                     </div>
                     <div className="flex flex-wrap gap-2 mt-auto pt-2 border-t border-gray-700">
                       {bundle.products.slice(0, 4).map(p => (
-                        <span key={p._id} className="flex items-center gap-1 bg-gray-900 rounded px-2 py-1 text-xs">
-                          {p.image && <img src={p.image} alt={p.name} className="w-6 h-6 object-cover rounded" />}
-                          <span className="text-gray-200 max-w-[5rem] truncate">{p.name}</span>
+                        <span key={p._id} className="flex items-center gap-1 bg-gray-900 rounded-sm px-2 py-1 text-xs">
+                          {p.image && <img src={p.image} alt={p.name} className="w-6 h-6 object-cover rounded-sm" />}
+                          <span className="text-gray-200 max-w-20 truncate">{p.name}</span>
                         </span>
                       ))}
                       {bundle.products.length > 4 && (
@@ -226,7 +226,7 @@ function SearchResultsPage() {
               {collections.map(collection => (
                 <div
                   key={collection._id}
-                  className="bg-gray-800 rounded-lg p-0 shadow-lg cursor-pointer hover:ring-2 hover:ring-emerald-400 transition transform hover:scale-[1.025] flex flex-col aspect-[4/5]"
+                  className="bg-gray-800 rounded-lg p-0 shadow-lg cursor-pointer hover:ring-2 hover:ring-emerald-400 transition transform hover:scale-[1.025] flex flex-col aspect-4/5"
                   onClick={() => handleCollectionClick(collection._id)}
                   tabIndex={0}
                   role="button"
@@ -247,9 +247,9 @@ function SearchResultsPage() {
                     </div>
                     <div className="flex flex-wrap gap-2 mt-auto pt-2 border-t border-gray-700">
                       {collection.products.slice(0, 4).map(p => (
-                        <span key={p._id} className="flex items-center gap-1 bg-gray-900 rounded px-2 py-1 text-xs">
-                          {p.image && <img src={p.image} alt={p.name} className="w-6 h-6 object-cover rounded" />}
-                          <span className="text-gray-200 max-w-[5rem] truncate">{p.name}</span>
+                        <span key={p._id} className="flex items-center gap-1 bg-gray-900 rounded-sm px-2 py-1 text-xs">
+                          {p.image && <img src={p.image} alt={p.name} className="w-6 h-6 object-cover rounded-sm" />}
+                          <span className="text-gray-200 max-w-20 truncate">{p.name}</span>
                         </span>
                       ))}
                       {collection.products.length > 4 && (

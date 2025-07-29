@@ -63,7 +63,7 @@ function CreateCollectionForm() {
         value={form.title}
         onChange={handleChange}
         placeholder="Title"
-        className="bg-gray-700 rounded px-3 py-2 text-white"
+        className="bg-gray-700 rounded-sm px-3 py-2 text-white"
         required
       />
       <p className="text-xs text-gray-400 mb-1">The first character should be uppercase.</p>
@@ -72,14 +72,14 @@ function CreateCollectionForm() {
         value={form.description}
         onChange={handleChange}
         placeholder="Description"
-        className="bg-gray-700 rounded px-3 py-2 text-white"
+        className="bg-gray-700 rounded-sm px-3 py-2 text-white"
         required
       />
       <div>
         <label className="block text-gray-300 font-medium mb-1">Collection Image</label>
         <input type="file" accept="image/*" onChange={handleImageChange} className="block w-full text-sm text-gray-400" required />
         <p className="text-xs text-gray-400 mt-1">For best results, use a 1:1 aspect ratio image.</p>
-        {image && <img src={image} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded" />}
+        {image && <img src={image} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded-sm" />}
       </div>
       <div>
         <div className="mb-1 text-gray-300 font-medium">Select Products</div>
@@ -100,7 +100,7 @@ function CreateCollectionForm() {
       <button
         type="submit"
         disabled={loading}
-        className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded transition-colors disabled:opacity-50"
+        className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-sm transition-colors disabled:opacity-50"
       >
         {loading ? "Creating..." : "Create Collection"}
       </button>

@@ -43,8 +43,8 @@ const FeaturedProducts = ({ featuredProducts }) => {
 							style={{ transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)` }}
 						>
 							{featuredProducts?.map((product) => (
-								<div key={product._id} className='w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 flex-shrink-0 px-2'>
-									<div className='bg-white bg-opacity-10 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden h-full transition-all duration-300 hover:shadow-xl border border-emerald-500/30'>
+								<div key={product._id} className='w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 shrink-0 px-2'>
+									<div className='bg-white bg-opacity-10 backdrop-blur-xs rounded-lg shadow-lg overflow-hidden h-full transition-all duration-300 hover:shadow-xl border border-emerald-500/30'>
 										<div className='overflow-hidden'>
 											<img
 												src={product.image}

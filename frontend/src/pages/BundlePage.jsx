@@ -33,7 +33,7 @@ function BundlePage() {
   return (
     <div className="min-h-screen bg-gray-900">
       {/* Hero Banner */}
-      <section className="relative w-full max-w-screen-xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-8 px-4 sm:px-6 lg:px-8 pt-12 pb-8">
+      <section className="relative w-full max-w-(--breakpoint-xl) mx-auto flex flex-col md:flex-row items-center md:items-start gap-8 px-4 sm:px-6 lg:px-8 pt-12 pb-8">
         <div className="w-full md:w-1/2 flex flex-col items-center md:items-start">
           <div className="bg-gray-900 rounded-xl flex items-center justify-center w-full aspect-square max-w-md mb-4 md:mb-0">
             <img src={bundle.image} alt={bundle.title} className="w-full h-full object-contain rounded-xl" />
@@ -41,8 +41,8 @@ function BundlePage() {
         </div>
         <div className="w-full md:w-1/2 flex flex-col items-center md:items-start">
           <div className="flex gap-2 mb-2">
-            {isBestValue && <span className="bg-emerald-700 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">Best Value</span>}
-            <span className="bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow">Save ₹{savings}</span>
+            {isBestValue && <span className="bg-emerald-700 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Best Value</span>}
+            <span className="bg-green-600 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm">Save ₹{savings}</span>
           </div>
           <h1 className="text-4xl sm:text-5xl font-bold text-emerald-400 mb-2 text-center md:text-left">{bundle.title}</h1>
           <p className="text-lg text-gray-200 mb-4 text-center md:text-left">{bundle.description}</p>
@@ -54,18 +54,18 @@ function BundlePage() {
         </div>
         {/* Sticky Action Bar (mobile/desktop) */}
         <div className="fixed bottom-0 left-0 w-full z-40 bg-gray-900/95 border-t border-emerald-800 flex justify-center md:static md:w-auto md:bg-transparent md:border-none md:justify-start md:mt-6">
-          <div className="flex gap-4 py-4 px-4 md:p-0 w-full max-w-screen-xl mx-auto">
-            <button className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded transition-colors text-lg" onClick={() => addBundleToCart(bundle)}>
+          <div className="flex gap-4 py-4 px-4 md:p-0 w-full max-w-(--breakpoint-xl) mx-auto">
+            <button className="flex-1 md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-sm transition-colors text-lg" onClick={() => addBundleToCart(bundle)}>
               Add Bundle to Cart
             </button>
-            <button className="flex-1 md:flex-none bg-white/10 hover:bg-white/20 text-emerald-400 font-semibold py-3 px-6 rounded transition-colors text-lg">
+            <button className="flex-1 md:flex-none bg-white/10 hover:bg-white/20 text-emerald-400 font-semibold py-3 px-6 rounded-sm transition-colors text-lg">
               Buy Bundle
             </button>
           </div>
         </div>
       </section>
       {/* Included Plants */}
-      <section className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <section className="max-w-(--breakpoint-xl) mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         <motion.h2
           className="text-2xl font-bold text-emerald-300 mb-6"
           initial={{ opacity: 0, y: 20 }}

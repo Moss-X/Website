@@ -15,12 +15,12 @@ function CollectionsList() {
         <div key={collection._id} className="bg-gray-800 rounded-lg p-6 flex flex-col gap-2">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <img src={collection.image} alt={collection.title} className="w-20 h-20 object-cover rounded" />
+              <img src={collection.image} alt={collection.title} className="w-20 h-20 object-cover rounded-sm" />
               <h3 className="text-xl font-bold text-emerald-300">{collection.title}</h3>
             </div>
             <button
               onClick={() => deleteCollection(collection._id)}
-              className="text-red-400 hover:text-red-300 text-sm border border-red-400 rounded px-2 py-1 ml-4"
+              className="text-red-400 hover:text-red-300 text-sm border border-red-400 rounded-sm px-2 py-1 ml-4"
             >
               Delete
             </button>

@@ -12,7 +12,7 @@ function ProductCard({ product, variant = "default" }) {
   if (variant === "mini") {
     return (
       <div
-        className="bg-gray-800 rounded-lg shadow p-2 flex flex-col aspect-square w-full hover:ring-2 hover:ring-emerald-400 transition cursor-pointer"
+        className="bg-gray-800 rounded-lg shadow-sm p-2 flex flex-col aspect-square w-full hover:ring-2 hover:ring-emerald-400 transition cursor-pointer"
         tabIndex={0}
         role="button"
         aria-label={`View product ${product.name}`}
@@ -54,7 +54,7 @@ function ProductCard({ product, variant = "default" }) {
 
   return (
     <div
-      className="bg-gray-800 rounded-lg p-0 shadow-lg cursor-pointer hover:ring-2 hover:ring-emerald-400 transition transform hover:scale-[1.025] flex flex-col aspect-[4/5]"
+      className="bg-gray-800 rounded-lg p-0 shadow-lg cursor-pointer hover:ring-2 hover:ring-emerald-400 transition transform hover:scale-[1.025] flex flex-col aspect-4/5"
       tabIndex={0}
       role="button"
       aria-label={`View product ${product.name}`}
@@ -76,7 +76,7 @@ function ProductCard({ product, variant = "default" }) {
         </div>
         <div className="flex gap-2 mt-2">
           <button
-            className="flex bg-emerald-600 hover:bg-emerald-700 text-white  py-2 px-4 rounded transition-colors text-base"
+            className="flex bg-emerald-600 hover:bg-emerald-700 text-white  py-2 px-4 rounded-sm transition-colors text-base"
             onClick={handleAddToCart}
             tabIndex={0}
           >
@@ -84,7 +84,7 @@ function ProductCard({ product, variant = "default" }) {
             Add to Cart
           </button>
           <button
-            className="flex-1 bg-white/10 hover:bg-white/20 text-emerald-400  py-2 px-4 rounded transition-colors text-base"
+            className="flex-1 bg-white/10 hover:bg-white/20 text-emerald-400  py-2 px-4 rounded-sm transition-colors text-base"
             onClick={handleBuyNow}
             tabIndex={0}
           >
