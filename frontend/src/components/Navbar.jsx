@@ -77,12 +77,12 @@ const Navbar = () => {
   return (
     <>
       {showOverlay && (
-        <div className="fixed inset-0 bg-black/60 z-40 transition-opacity" onClick={() => setShowOverlay(false)} />
+        <div className="sticky inset-0 bg-black/60 z-40 transition-opacity" onClick={() => setShowOverlay(false)} />
       )}
-      <header className='fixed top-0 left-0 w-full bg-gray-900 bg-opacity-90 backdrop-blur-md shadow-lg z-50 transition-all duration-300 border-b border-emerald-800'>
+      <header className='absolute top-0 left-0 w-full  bg-opacity-90 backdrop-blur-md shadow-lg z-50 transition-all duration-300 '>
         <div className='container mx-auto px-4 py-3'>
           <div className='flex flex-wrap justify-between items-center'>
-            <Link to='/' className='text-2xl font-bold text-emerald-400 items-center space-x-2 flex'>
+            <Link to='/' className='text-2xl font-bold text-heading items-center space-x-2 flex'>
               <div className="flex items-center ">
                 <img src='/icon.png' alt='Moss-x logo' className='w-10 h-10 object-contain' />
               </div>
@@ -90,8 +90,8 @@ const Navbar = () => {
             {/* Centered Search Bar */}
             <div className="flex-1 flex justify-center items-center relative z-50">
               <div className="w-36 md:w-full max-w-md relative">
-                <div className="flex items-center bg-gray-800 rounded-lg px-3 py-1 border border-gray-700 focus-within:ring-2 focus-within:ring-emerald-500">
-                  <Search className="w-5 h-5 text-gray-400 mr-2" />
+                <div className="flex items-center bg-primary rounded-lg px-3 py-1 border border-[var(--color-neutral)] focus-within:ring-2 focus-within:ring-[var(--color-darkGreen)] gap-2">
+                  <Search className="w-5 h-5 text-white" />
                   <input
                     ref={inputRef}
                     type="text"
@@ -101,16 +101,16 @@ const Navbar = () => {
                     onBlur={handleInputBlur}
                     onKeyDown={handleKeyDown}
                     placeholder="Search plants..."
-                    className="bg-transparent outline-hidden border-none text-white w-full py-2 placeholder-gray-400"
+                    className="bg-transparent outline-hidden border-none text-white w-full py-2 placeholder-gray-300"
                     aria-label="Search plants"
                   />
                 </div>
                 {showOverlay && search && (
-                  <div className="absolute left-0 right-0 mt-2 bg-gray-900 rounded-lg shadow-lg border border-gray-700 z-50 max-h-72 overflow-y-auto">
+                  <div className="absolute left-0 right-0 mt-2 bg-gray-900 rounded-lg shadow-lg border border-[var(--color-neutral)] z-50 max-h-72 overflow-y-auto">
                     {loading ? (
-                      <div className="p-4 text-gray-400 text-center">Loading...</div>
+                      <div className="p-4 text-[color:var(--color-neutral)/70] text-center">Loading...</div>
                     ) : suggestions.length === 0 ? (
-                      <div className="p-4 text-gray-400 text-center">No results found</div>
+                      <div className="p-4 text-[color:var(--color-neutral)/70] text-center">No results found</div>
                     ) : (
                       suggestions.map((s, i) => (
                         <div
@@ -121,7 +121,7 @@ const Navbar = () => {
                         >
                           <img src={s.image} alt={s.name} className="w-8 h-8 object-cover rounded-sm" />
                           <span className="text-white font-medium line-clamp-1">{s.name}</span>
-                          <span className="text-xs text-gray-400 ml-auto">${s.price}</span>
+                          <span className="text-xs text-[color:var(--color-neutral)/70] ml-auto">${s.price}</span>
                         </div>
                       ))
                     )}
@@ -132,7 +132,7 @@ const Navbar = () => {
             <nav className='flex flex-wrap items-center gap-4'>
               <Link
                 to={"/"}
-                className='text-gray-300 hover:text-emerald-400 transition duration-300
+                className='text-secondary hover:text-emerald-300 transition duration-300
              ease-in-out'
               >
                 Home
@@ -140,14 +140,14 @@ const Navbar = () => {
               {user && (
                 <Link
                   to={"/cart"}
-                  className='relative group text-gray-300 hover:text-emerald-400 transition duration-300 
+                  className='relative group text-secondary hover:text-emerald-300 transition duration-300 
                 ease-in-out'
                 >
-                  <ShoppingCart className='inline-block mr-1 group-hover:text-emerald-400' size={20} />
+                  <ShoppingCart className='inline-block mr-1 group-hover:text-emerald-300' size={20} />
                   <span className='hidden sm:inline'>Cart</span>
                   {cart.length > 0 && (
                     <span
-                      className='absolute -top-2 -left-2 bg-emerald-500 text-white rounded-full px-2 py-0.5 
+                      className='absolute -top-2 -left-2 bg-darkGreen text-white rounded-full px-2 py-0.5 
                     text-xs group-hover:bg-emerald-400 transition duration-300 ease-in-out'
                     >
                       {cart.length}
@@ -157,7 +157,7 @@ const Navbar = () => {
               )}
               {isAdmin && (
                 <Link
-                  className='bg-emerald-700 hover:bg-emerald-600 text-white px-3 py-1 rounded-md font-medium
+                  className='bg-[var(--color-darkGreen)] hover:bg-primary text-white px-3 py-1 rounded-md font-medium
                    transition duration-300 ease-in-out flex items-center'
                   to={"/secret-dashboard"}
                 >
@@ -169,14 +169,14 @@ const Navbar = () => {
                 <>
                   <Link
                     to='/signup'
-                    className='text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out flex items-center'
+                    className='text-secondary hover:text-a transition duration-300 ease-in-out flex items-center'
                   >
                     <UserPlus className='inline-block mr-1' size={20} />
                     <span className='hidden sm:inline'>Sign Up</span>
                   </Link>
                   <Link
                     to='/login'
-                    className='text-gray-300 hover:text-emerald-400 transition duration-300 ease-in-out flex items-center'
+                    className='text-darkGreen hover:text-heading transition duration-300 ease-in-out flex items-center'
                   >
                     <LogIn className='inline-block mr-1' size={20} />
                     <span className='hidden sm:inline'>Login</span>
@@ -186,7 +186,7 @@ const Navbar = () => {
               {user && (
                 <button
                   onClick={logout}
-                  className='text-gray-300 hover:text-red-400 transition duration-300 ease-in-out flex items-center'
+                  className='text-darkGreen hover:text-red-400 transition duration-300 ease-in-out flex items-center'
                 >
                   <LogOut className='inline-block mr-1' size={20} />
                   <span className='hidden sm:inline'>Logout</span>
