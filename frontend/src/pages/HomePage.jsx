@@ -32,6 +32,8 @@ function HomePage() {
             <HeroCarousel featuredProducts={products} />
           </div>
         )}
+        {/* Existing Featured Products section moved below categories */}
+        {!isLoading && products.length > 0 && <FeaturedProducts featuredProducts={products} />}
         {/* Bundles Section */}
         <BundlesPreview />
         {/* Collections Section */}
@@ -47,8 +49,6 @@ function HomePage() {
             <CategoryItem category={category} key={category.name} />
           ))}
         </div>
-        {/* Existing Featured Products section moved below categories */}
-        {!isLoading && products.length > 0 && <FeaturedProducts featuredProducts={products} />}
       </div>
     </div>
   );

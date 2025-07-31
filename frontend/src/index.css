@@ -8,6 +8,19 @@
   If we ever want to remove these styles, we need to add an explicit border
   color utility to any element that depends on these defaults.
 */
+
+@theme{
+  --color-gray:#f7f7f7;
+  --color-darkGray:#d1d1d1;
+  --color-black:#303030;
+  --color-primary:  #6c7c66;
+  --color-secondary:  #fffaf6;
+  --color-neutral:  #c0d3bb;
+  --color-heading: #21201e;
+  --color-textGreen: #7e9774;
+  --color-darkGreen: #07592c;
+
+}
 @layer base {
   *,
   ::after,
