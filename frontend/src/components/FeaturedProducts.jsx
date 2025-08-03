@@ -39,9 +39,9 @@ const FeaturedProducts = ({ featuredProducts }) => {
 
 	return (
 		<div className=" relative flex flex-col px-4 items-center py-8">
-			<div className="mr-auto">
-				<h1 className=" text-black text-xl font-sans mb-1">Meet our</h1>
-				<h1 className=" text-black font-semibold text-4xl font-sans mb-4">Best Sellers</h1>
+			<div className="mr-auto my-12">
+				{/* <h1 className=" text-black text-2xl font-sans mb-1">Meet our</h1> */}
+				<h1 className=" text-heading font-bold text-5xl font-sans ">Best Sellers</h1>
 			</div>		
 
 			{/* Chevron Left */}
@@ -54,11 +54,10 @@ const FeaturedProducts = ({ featuredProducts }) => {
 			</button>
 
 			{/* Product Grid */}
-			<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3  gap-4 items-center">
+			<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3  gap-4 items-center">
 				{visibleProducts.map((product) => (
 					<ProductCard product={product} key={product._id} />
 				))}
-				<div>hello</div>
 			</div>
 
 			{/* Chevron Right */}
@@ -69,7 +68,7 @@ const FeaturedProducts = ({ featuredProducts }) => {
 			>
 				<ChevronRight />
 			</button>
-			<button className="text-secondary bg-primary rounded-full px-4 py-2 cursor-pointer hover:opacity-95">Show More</button>
+			<button className="mt-6 z-10 px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition">Show More</button>
 		</div>
 	);
 };

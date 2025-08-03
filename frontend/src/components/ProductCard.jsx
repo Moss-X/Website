@@ -1,5 +1,5 @@
 import toast from "react-hot-toast";
-import { ShoppingCart, IndianRupee, Plus } from "lucide-react";
+import { Plus} from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
 import { Link, useNavigate } from "react-router-dom";
@@ -9,27 +9,7 @@ function ProductCard({ product, variant = "default" }) {
   const { addToCart } = useCartStore();
   const navigate = useNavigate();
 
-  if (variant === "mini") {
-    return (
-      <div
-        className="bg-gray-800 rounded-lg shadow-sm p-2 flex flex-col aspect-square w-full hover:ring-2 hover:ring-emerald-400 transition cursor-pointer"
-        tabIndex={0}
-        role="button"
-        aria-label={`View product ${product.name}`}
-        onClick={() => navigate(`/product/${product._id}`)}
-        onKeyDown={e => { if (e.key === 'Enter') navigate(`/product/${product._id}`) }}
-      >
-        <div className="bg-gray-900 rounded-lg flex items-center justify-center w-full aspect-square max-h-[70%]">
-          <img src={product.image} alt={product.name} className="w-full h-full object-contain rounded-lg" />
-        </div>
-        <div className="w-full mt-2">
-          <h3 className="text-base font-bold text-emerald-300 mb-0.5 line-clamp-1 text-left">{product.name}</h3>
-          <div className="text-xs text-gray-400 line-clamp-1 text-left mb-1">{product.description}</div>
-          <span className="text-emerald-400 font-semibold text-lg text-left block">₹{product.price}</span>
-        </div>
-      </div>
-    )
-  }
+  const savings = Math.max(0, product.totalPrice - product.discountedPrice);
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
@@ -54,44 +34,52 @@ function ProductCard({ product, variant = "default" }) {
 
   return (
     <div
-    className="bg-gray
-           p-0 border-none cursor-pointer 
-           hover:ring-2 hover:bg-darkGray 
-           transition-all duration-200 ease-in-out 
-           flex flex-col aspect-square overflow-hidden"
-
-
+      className="bg-gray p-0 cursor-pointer  hover:scale-[1.01] transition transform flex flex-col aspect-4/5"
+      onClick={() => navigate(`/product/${product._id}`)}
       tabIndex={0}
       role="button"
       aria-label={`View product ${product.name}`}
-      onClick={() => navigate(`/product/${product._id}`)}
-      onKeyDown={e => { if (e.key === 'Enter') navigate(`/product/${product._id}`) }}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") navigate(`/product/${product._id}`);
+      }}
     >
-
-      <div className="relative bg-grey flex items-center justify-center w-full aspect-[4/3] h-[75%]">
+      <div className="relative bg-gray flex items-center justify-center w-full h-[75%] aspect-square basis-1/2 md:basis-auto">
         <img
           src={product.image}
           alt={product.name}
           className="w-full h-full object-contain"
         />
-        </div>
-
-        <div className="flex flex-row px-4 justify-center h-[25%] items-center">
-          <div className="flex flex-col gap-2 items-start ">
-            <p className="flex text-black text-xs 2xl:text-lg xl:text-base lg:text-sm md:text-xs sm:text-[10px] font-semibold">{product.name}</p>
-            <p className="flex flex-row items-center text-black text-xs 2xl:text-lg xl:text-base lg:text-sm md:text-xs sm:text-[10px]">
-
-                  <IndianRupee size={12} />
-                  <span>{product.price}</span>
-                </p>
-
+        {/* Conditional savings badge, similar to the bundle card */}
+        {savings > 0 && (
+          <span className="absolute top-2 left-2 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
+            Save ₹{savings}
+          </span>
+        )}
+      </div>
+      <div className="flex flex-row p-4">
+        <div className="flex-1 flex flex-col gap-1 ">
+          <h3 className="text-xl md:text-2xl  text-black font-bold  line-clamp-1">
+            {product.name}
+          </h3>
+          <div className="flex items-center gap-4 mb-4">
+            <span className="text-black font-semibold text-md md:text-xl">
+              ₹{product.price}
+            </span>
+            {/* Display discounted price if applicable */}
+            {product.discountedPrice && (
+              <span className="text-gray-400 line-through md:text-2xl">
+                ₹{product.totalPrice}
+              </span>
+            )}
           </div>
-          <div onClick={handleAddToCart} 
-          className="ml-auto p-1.5 hover:ring-amber-500 bg-black rounded-full">
-           <Plus size={24} />
+        </div>  
+          <div onClick={handleAddToCart}
+          className="flex text-white aspect-square hover:ring-amber-400 rounded-full items-center just">
+            <Plus size={48} className="bg-black rounded-full p-2 hover:border-neutral border-4 border-gray"/>
           </div>
-        </div>
+      </div>
     </div>
   );
 }
+
 export default ProductCard;

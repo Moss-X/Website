@@ -10,6 +10,7 @@
 */
 
 @theme{
+  --breakpoint-xs:460px;
   --color-gray:#f7f7f7;
   --color-darkGray:#d1d1d1;
   --color-black:#303030;
