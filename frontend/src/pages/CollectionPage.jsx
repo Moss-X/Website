@@ -82,7 +82,7 @@ function CollectionPage() {
         >
           <AnimatePresence initial={false}>
             {productsToShow.map(product => (
-              <ProductCard key={product._id} product={product} variant="mini" />
+              <ProductCard key={product._id} product={product} />
             ))}
           </AnimatePresence>
         </motion.div>

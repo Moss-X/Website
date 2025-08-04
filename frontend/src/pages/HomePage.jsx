@@ -5,6 +5,7 @@ import FeaturedProducts from "../components/FeaturedProducts";
 import HeroCarousel from "../components/HeroCarousel";
 import BundlesPreview from "../components/BundlesPreview";
 import CollectionsPreview from "../components/CollectionsPreview";
+import Footer from "../components/Footer";
 
 const categories = [
 	{ href: "/ornamental-houseplants", name: "Ornamental Houseplants", imageUrl: "/ornamental-houseplants.jpg" },
@@ -32,24 +33,15 @@ function HomePage() {
             <HeroCarousel featuredProducts={products} />
           </div>
         )}
+        {/* Existing Featured Products section moved below categories */}
+        {!isLoading && products.length > 0 && <FeaturedProducts featuredProducts={products} />}
         {/* Bundles Section */}
         <BundlesPreview />
         {/* Collections Section */}
         <CollectionsPreview />
-        <h1 className="text-center text-5xl sm:text-6xl font-bold text-emerald-400 mb-4">
-          Explore Our Categories
-        </h1>
-        <p className="text-center text-xl text-gray-300 mb-12">
-          Discover the latest trends in eco-friendly fashion
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {categories.map((category) => (
-            <CategoryItem category={category} key={category.name} />
-          ))}
-        </div>
-        {/* Existing Featured Products section moved below categories */}
-        {!isLoading && products.length > 0 && <FeaturedProducts featuredProducts={products} />}
+        
       </div>
+      <Footer/>
     </div>
   );
 }

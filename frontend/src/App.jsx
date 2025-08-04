@@ -36,9 +36,11 @@ function App() {
 	if (checkingAuth) return <LoadingSpinner />;
 
 	return (
-		<div className='min-h-screen bg-white text-heading relative overflow-hidden'>
+		<div className='min-h-screen bg-white text-white relative overflow-hidden'>
+			{/* Background gradient */}
+	
 
-			<div className=' z-50 '>
+			<div className='relative z-50'>
 				<Navbar />
 				<Routes>
 					<Route path='/' element={<HomePage />} />

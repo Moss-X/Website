@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCartStore } from "../stores/useCartStore";
+import ProductCard from "./ProductCard";
 
 const FeaturedProducts = ({ featuredProducts }) => {
 	const [currentIndex, setCurrentIndex] = useState(0);
@@ -10,8 +11,8 @@ const FeaturedProducts = ({ featuredProducts }) => {
 
 	useEffect(() => {
 		const handleResize = () => {
-			if (window.innerWidth < 640) setItemsPerPage(1);
-			else if (window.innerWidth < 1024) setItemsPerPage(2);
+			if (window.innerWidth < 640) setItemsPerPage(2);
+			else if (window.innerWidth < 1024) setItemsPerPage(3);
 			else if (window.innerWidth < 1280) setItemsPerPage(3);
 			else setItemsPerPage(4);
 		};
@@ -22,77 +23,54 @@ const FeaturedProducts = ({ featuredProducts }) => {
 	}, []);
 
 	const nextSlide = () => {
-		setCurrentIndex((prevIndex) => prevIndex + itemsPerPage);
+		setCurrentIndex((prev) =>
+			Math.min(prev + itemsPerPage, featuredProducts.length - itemsPerPage)
+		);
 	};
 
 	const prevSlide = () => {
-		setCurrentIndex((prevIndex) => prevIndex - itemsPerPage);
+		setCurrentIndex((prev) => Math.max(prev - itemsPerPage, 0));
 	};
 
 	const isStartDisabled = currentIndex === 0;
 	const isEndDisabled = currentIndex >= featuredProducts.length - itemsPerPage;
 
-	return (
-		<div className='py-12'>
-			<div className='container mx-auto px-4'>
-				<h2 className='text-center text-5xl sm:text-6xl font-bold text-emerald-400 mb-4'>Featured</h2>
-				<div className='relative'>
-					<div className='overflow-hidden'>
-						<div
-							className='flex transition-transform duration-300 ease-in-out'
-							style={{ transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)` }}
-						>
-							{featuredProducts?.map((product) => (
-								<div key={product._id} className='w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 shrink-0 px-2'>
-									<div className='bg-white bg-opacity-10 backdrop-blur-xs rounded-lg shadow-lg overflow-hidden h-full transition-all duration-300 hover:shadow-xl border border-emerald-500/30'>
-										<div className='overflow-hidden'>
-											<img
-												src={product.image}
-												alt={product.name}
-												className='w-full h-48 object-cover transition-transform duration-300 ease-in-out hover:scale-110'
-											/>
-										</div>
-										<div className='p-4'>
-											<h3 className='text-lg font-semibold mb-2 text-white'>{product.name}</h3>
-											<p className='text-emerald-300 font-medium mb-4'>
-												${product.price.toFixed(2)}
-											</p>
-											<button
-												onClick={() => addToCart(product)}
-												className='w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2 px-4 rounded transition-colors duration-300 
-												flex items-center justify-center'
-											>
-												<ShoppingCart className='w-5 h-5 mr-2' />
-												Add to Cart
-											</button>
-										</div>
-									</div>
-								</div>
-							))}
-						</div>
-					</div>
-					<button
-						onClick={prevSlide}
-						disabled={isStartDisabled}
-						className={`absolute top-1/2 -left-4 transform -translate-y-1/2 p-2 rounded-full transition-colors duration-300 ${
-							isStartDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-500"
-						}`}
-					>
-						<ChevronLeft className='w-6 h-6' />
-					</button>
+	const visibleProducts = featuredProducts.slice(currentIndex, currentIndex + itemsPerPage);
 
-					<button
-						onClick={nextSlide}
-						disabled={isEndDisabled}
-						className={`absolute top-1/2 -right-4 transform -translate-y-1/2 p-2 rounded-full transition-colors duration-300 ${
-							isEndDisabled ? "bg-gray-400 cursor-not-allowed" : "bg-emerald-600 hover:bg-emerald-500"
-						}`}
-					>
-						<ChevronRight className='w-6 h-6' />
-					</button>
-				</div>
+	return (
+		<div className=" relative flex flex-col px-4 items-center py-8">
+			<div className="mr-auto my-12">
+				{/* <h1 className=" text-black text-2xl font-sans mb-1">Meet our</h1> */}
+				<h1 className=" text-heading font-bold text-5xl font-sans ">Best Sellers</h1>
+			</div>		
+
+			{/* Chevron Left */}
+			<button
+				onClick={prevSlide}
+				disabled={isStartDisabled}
+				className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-darkGray text-black p-2 rounded-full shadow-md z-10 disabled:bg-gray disabled:opacity-55 disabled:text-gray-600"
+			>
+				<ChevronLeft />
+			</button>
+
+			{/* Product Grid */}
+			<div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3  gap-4 items-center">
+				{visibleProducts.map((product) => (
+					<ProductCard product={product} key={product._id} />
+				))}
 			</div>
+
+			{/* Chevron Right */}
+			<button
+				onClick={nextSlide}
+				disabled={isEndDisabled}
+				className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-darkGray p-2 text-black rounded-full shadow-md z-10 disabled:bg-gray disabled:opacity-55 disabled:text-gray-600	"
+			>
+				<ChevronRight />
+			</button>
+			<button className="mt-6 z-10 px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition">Show More</button>
 		</div>
 	);
 };
+
 export default FeaturedProducts;
