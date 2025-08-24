@@ -132,7 +132,7 @@ const Navbar = () => {
             <nav className='flex flex-wrap items-center gap-4'>
               <Link
                 to={"/"}
-                className='text-primary md:text-secondary hover:text-emerald-300 transition duration-300
+                className='text-primary lg:text-secondary hover:text-emerald-300 transition duration-300
              ease-in-out'
               >
                 Home
@@ -140,7 +140,7 @@ const Navbar = () => {
               {user && (
                 <Link
                   to={"/cart"}
-                  className='relative group text-primary md:text-secondary hover:text-emerald-300 transition duration-300 
+                  className='relative group text-primary lg:text-secondary hover:text-emerald-300 transition duration-300 
                 ease-in-out'
                 >
                   <ShoppingCart className='inline-block mr-1 group-hover:text-emerald-300' size={20} />
@@ -169,14 +169,14 @@ const Navbar = () => {
                 <>
                   <Link
                     to='/signup'
-                    className='text-primary md:text-secondary hover:text-emerald-300 transition duration-300 ease-in-out flex items-center'
+                    className='text-primary lg:text-secondary hover:text-emerald-300 transition duration-300 ease-in-out flex items-center'
                   >
                     <UserPlus className='inline-block mr-1' size={20} />
                     <span className='hidden sm:inline'>Sign Up</span>
                   </Link>
                   <Link
                     to='/login'
-                    className='text-primary md:text-secondary hover:text-emerald-300 transition duration-300 ease-in-out flex items-center'
+                    className='text-primary lg:text-secondary hover:text-emerald-300 transition duration-300 ease-in-out flex items-center'
                   >
                     <LogIn className='inline-block mr-1' size={20} />
                     <span className='hidden sm:inline'>Login</span>
