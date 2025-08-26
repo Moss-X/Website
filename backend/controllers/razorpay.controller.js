@@ -5,10 +5,17 @@ import crypto from "crypto";
 
 export const createRazorpayOrder = async (req, res) => {
 	try {
-		const { products, couponCode } = req.body;
+		const { products, couponCode, shippingAddress } = req.body;
 
 		if (!Array.isArray(products) || products.length === 0) {
 			return res.status(400).json({ error: "Invalid or empty products array" });
+		}
+
+		// Validate shipping address
+		if (!shippingAddress || !shippingAddress.fullName || !shippingAddress.phone || 
+			!shippingAddress.addressLine1 || !shippingAddress.city || 
+			!shippingAddress.state || !shippingAddress.postalCode) {
+			return res.status(400).json({ error: "Complete shipping address is required" });
 		}
 
 		let totalAmount = 0;
@@ -52,6 +59,7 @@ export const createRazorpayOrder = async (req, res) => {
 					}))
 				),
 				discountAmount: discountAmount.toString(),
+				shippingAddress: JSON.stringify(shippingAddress),
 			},
 		};
 
@@ -109,6 +117,8 @@ export const verifyRazorpayPayment = async (req, res) => {
 
 			// Create a new Order in database
 			const products = JSON.parse(razorpayOrder.notes.products);
+			const shippingAddress = JSON.parse(razorpayOrder.notes.shippingAddress);
+			
 			const newOrder = new Order({
 				user: razorpayOrder.notes.userId,
 				products: products.map((product) => ({
@@ -117,6 +127,7 @@ export const verifyRazorpayPayment = async (req, res) => {
 					price: product.price,
 				})),
 				totalAmount: razorpayOrder.amount / 100, // convert from paise to rupees
+				shippingAddress: shippingAddress,
 				razorpayOrderId: razorpay_order_id,
 				razorpayPaymentId: razorpay_payment_id,
 			});

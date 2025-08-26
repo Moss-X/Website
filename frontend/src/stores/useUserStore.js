@@ -18,9 +18,16 @@ export const useUserStore = create((set, get) => ({
 		try {
 			const res = await axios.post("/auth/signup", { name, email, password });
 			set({ user: res.data, loading: false });
+			// Merge guest cart after signup
+			await get().mergeGuestCart();
+			// Refresh cart items to reflect merged state
+			try {
+				const { useCartStore } = await import('./useCartStore');
+				await useCartStore.getState().getCartItems();
+			} catch { /* noop */ }
 		} catch (error) {
 			set({ loading: false });
-			toast.error(error.response.data.message || "An error occurred");
+			toast.error(error.response?.data?.message || "An error occurred");
 		}
 	},
 	login: async (email, password) => {
@@ -30,9 +37,16 @@ export const useUserStore = create((set, get) => ({
 			const res = await axios.post("/auth/login", { email, password });
 
 			set({ user: res.data, loading: false });
+			// Merge guest cart after login
+			await get().mergeGuestCart();
+			// Refresh cart items to reflect merged state
+			try {
+				const { useCartStore } = await import('./useCartStore');
+				await useCartStore.getState().getCartItems();
+			} catch { /* noop */ }
 		} catch (error) {
 			set({ loading: false });
-			toast.error(error.response.data.message || "An error occurred");
+			toast.error(error.response?.data?.message || "An error occurred");
 		}
 	},
 
@@ -46,12 +60,27 @@ export const useUserStore = create((set, get) => ({
 	},
 
 	checkAuth: async () => {
+		// Prevent multiple simultaneous auth checks
+		if (get().checkingAuth) {
+			console.log("Auth check already in progress, skipping...");
+			return;
+		}
+		
+		console.log("Starting auth check...");
 		set({ checkingAuth: true });
 		try {
+			console.log("Making request to /auth/profile...");
 			const response = await axios.get("/auth/profile");
+			console.log("Auth response received:", response.data);
 			set({ user: response.data, checkingAuth: false });
 		} catch (error) {
-			console.log(error.message);
+			console.log("Auth check failed:", error.message);
+			console.error("Auth error details:", {
+				message: error.message,
+				response: error.response?.data,
+				status: error.response?.status
+			});
+			// Always reset checkingAuth to false, even on error
 			set({ checkingAuth: false, user: null });
 		}
 	},
@@ -68,6 +97,16 @@ export const useUserStore = create((set, get) => ({
 		} catch (error) {
 			set({ user: null, checkingAuth: false });
 			throw error;
+		}
+	},
+
+	// Merge guest cart with user cart after login
+	mergeGuestCart: async () => {
+		try {
+			const { useCartStore } = await import('./useCartStore');
+			await useCartStore.getState().mergeGuestCart();
+		} catch (error) {
+			console.error("Error merging guest cart:", error);
 		}
 	},
 }));
