@@ -20,7 +20,7 @@ const LoginPage = () => {
 		}
 
 	return (
-		<div className='flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
+		<div className='flex flex-col pt-28 justify-center py-12 sm:px-6 lg:px-8'>
 
 			<div
 				className='flex flex-row relative mt-8 w-[90%] mx-auto shadow-2xl sm:w-full sm:max-w-md  md:max-w-3xl'
@@ -123,8 +123,15 @@ const LoginPage = () => {
 					
 				</div>
 							</div>
-			<div className="hidden md:block w-[52%] h-[100%] bg-darkGreen">
-				Lorem ipsum dolor sit amet consectetur adipisicing elit. Porro sapiente similique ad aliquid deleniti exercitationem quidem? Ut corporis fugiat, quod sint eveniet debitis iure, reprehenderit numquam, deleniti repellat temporibus voluptatibus!Lorem Lorem ipsum dolor sit amet, consectetur adipisicing elit. Magnam tenetur illo et ipsam vel explicabo voluptates voluptas quis, iusto, delectus similique? Sapiente reiciendis incidunt voluptate quisquam ducimus quaerat nostrum expedita minus, totam eveniet porro facilis harum commodi exercitationem veniam excepturi! Voluptas deserunt, excepturi maiores pariatur facilis repellat. Numquam quasi expedita iste? Ratione, officiis magnam nulla placeat enim dolorem. Necessitatibus, cum? Provident libero beatae reiciendis molestias maiores dolorum accusantium, iste porro labore odit omnis similique? Aut sapiente quia vel cum perferendis fuga accusamus quasi animi hic, culpa ea nam rem. Libero aliquid voluptates voluptatem tempore, neque accusamus vitae delectus quod possimus omnis nisi at? Laboriosam illo nobis voluptate mollitia rerum nemo aliquam commodi omnis voluptates totam! Sit, aspernatur.	
+			<div className="relative hidden md:block w-[52%] h-auto bg-darkGreen overflow-hidden">
+				<img
+					src="/leaf-pattern.png"
+					alt="Leaf Pattern"
+					className="w-full h-full object-cover object-center "
+				/>
+				<div className="absolute bottom-2 right-4 text-White font-bold text-6xl">
+					<p>Moss <span>X</span></p>
+				</div>
 			</div>
 			</div>
 		</div>

@@ -5,7 +5,7 @@ import { useNavigate, Link } from "react-router-dom"
 import { useCartStore } from "../stores/useCartStore"
 
 function CollectionCard({collection, odd}) {
-    
+  const navigate = useNavigate();
     
       function handleAddToCart(e, collection) {
         e.stopPropagation()
@@ -44,9 +44,12 @@ function CollectionCard({collection, odd}) {
     Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus voluptatibus harum nobis tenetur? Eaque accusantium mollitia beatae tempore, iusto Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ullam officia temporibus a ad, perferendis nostrum nobis assumenda
   </p>
 
-      <button className="absolute bottom-[6%] md:bottom-0 md:relative px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition">
-        Shop {collection.title}
-      </button>
+      <button
+          className="absolute bottom-[6%] md:bottom-0 md:relative px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition"
+          onClick={() => navigate(`/collections/${collection._id}`)}
+        >
+          Shop {collection.title}
+        </button>
     </div>
 
 
@@ -69,9 +72,12 @@ function CollectionCard({collection, odd}) {
     Lorem ipsum dolor sit amet consectetur adipisicing elit. Ducimus voluptatibus harum nobis tenetur? Eaque accusantium mollitia beatae tempore, iusto Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ullam officia temporibus a ad, perferendis nostrum nobis assumenda
   </p>
 
-      <button className="absolute bottom-[6%] md:bottom-0 md:relative px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition">
-        Shop {collection.title}
-      </button>
+      <button
+          className="absolute bottom-[6%] md:bottom-0 md:relative px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition"
+          onClick={() => navigate(`/collections/${collection._id}`)}
+        >
+          Shop {collection.title}
+        </button>
     </div>
 
   {/* Right Image Content */}

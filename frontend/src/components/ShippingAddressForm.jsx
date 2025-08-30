@@ -93,19 +93,19 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 
 	return (
 		<motion.div
-			className="bg-gray-800 rounded-lg p-6 shadow-lg"
+			className="bg-white rounded-lg p-6 shadow-lg"
 			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.5 }}
 		>
-			<h3 className="text-xl font-semibold text-emerald-400 mb-6">
+			<h3 className="text-xl font-semibold text-black mb-6">
 				{isCheckout ? "Shipping Address" : "Delivery Address"}
 			</h3>
 			
 			<form onSubmit={handleSubmit} className="space-y-4">
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div>
-						<label htmlFor="fullName" className="block text-sm font-medium text-gray-300 mb-1">
+						<label htmlFor="fullName" className="block text-sm font-medium text-black mb-1">
 							Full Name *
 						</label>
 						<input
@@ -114,8 +114,8 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 							name="fullName"
 							value={formData.fullName}
 							onChange={handleInputChange}
-							className={`w-full px-3 py-2 bg-gray-700 border rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-								errors.fullName ? 'border-red-500' : 'border-gray-600'
+							className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
+								errors.fullName ? 'border-red-500' : 'border-darkGray'
 							}`}
 							placeholder="Enter your full name"
 						/>
@@ -125,7 +125,7 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 					</div>
 
 					<div>
-						<label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-1">
+						<label htmlFor="phone" className="block text-sm font-medium text-black mb-1">
 							Phone Number *
 						</label>
 						<input
@@ -134,8 +134,8 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 							name="phone"
 							value={formData.phone}
 							onChange={handleInputChange}
-							className={`w-full px-3 py-2 bg-gray-700 border rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-								errors.phone ? 'border-red-500' : 'border-gray-600'
+							className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
+								errors.phone ? 'border-red-500' : 'border-darkGray'
 							}`}
 							placeholder="Enter 10-digit phone number"
 						/>
@@ -146,7 +146,7 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 				</div>
 
 				<div>
-					<label htmlFor="addressLine1" className="block text-sm font-medium text-gray-300 mb-1">
+					<label htmlFor="addressLine1" className="block text-sm font-medium text-black mb-1">
 						Address Line 1 *
 					</label>
 					<input
@@ -155,8 +155,8 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 						name="addressLine1"
 						value={formData.addressLine1}
 						onChange={handleInputChange}
-						className={`w-full px-3 py-2 bg-gray-700 border rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-							errors.addressLine1 ? 'border-red-500' : 'border-gray-600'
+						className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
+							errors.addressLine1 ? 'border-red-500' : 'border-darkGray'
 						}`}
 						placeholder="Street address, apartment, suite, etc."
 					/>
@@ -166,7 +166,7 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 				</div>
 
 				<div>
-					<label htmlFor="addressLine2" className="block text-sm font-medium text-gray-300 mb-1">
+					<label htmlFor="addressLine2" className="block text-sm font-medium text-black mb-1">
 						Address Line 2 (Optional)
 					</label>
 					<input
@@ -175,14 +175,14 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 						name="addressLine2"
 						value={formData.addressLine2}
 						onChange={handleInputChange}
-						className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+						className="w-full px-3 py-2 bg-white border border-darkGray rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen"
 						placeholder="Apartment, suite, unit, etc. (optional)"
 					/>
 				</div>
 
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 					<div>
-						<label htmlFor="city" className="block text-sm font-medium text-gray-300 mb-1">
+						<label htmlFor="city" className="block text-sm font-medium text-black mb-1">
 							City *
 						</label>
 						<input
@@ -191,8 +191,8 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 							name="city"
 							value={formData.city}
 							onChange={handleInputChange}
-							className={`w-full px-3 py-2 bg-gray-700 border rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-								errors.city ? 'border-red-500' : 'border-gray-600'
+							className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
+								errors.city ? 'border-red-500' : 'border-darkGray'
 							}`}
 							placeholder="Enter city"
 						/>
@@ -202,7 +202,7 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 					</div>
 
 					<div>
-						<label htmlFor="state" className="block text-sm font-medium text-gray-300 mb-1">
+						<label htmlFor="state" className="block text-sm font-medium text-black mb-1">
 							State *
 						</label>
 						<input
@@ -211,8 +211,8 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 							name="state"
 							value={formData.state}
 							onChange={handleInputChange}
-							className={`w-full px-3 py-2 bg-gray-700 border rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-								errors.state ? 'border-red-500' : 'border-gray-600'
+							className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
+								errors.state ? 'border-red-500' : 'border-darkGray'
 							}`}
 							placeholder="Enter state"
 						/>
@@ -222,7 +222,7 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 					</div>
 
 					<div>
-						<label htmlFor="postalCode" className="block text-sm font-medium text-gray-300 mb-1">
+						<label htmlFor="postalCode" className="block text-sm font-medium text-black mb-1">
 							Postal Code *
 						</label>
 						<input
@@ -231,8 +231,8 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 							name="postalCode"
 							value={formData.postalCode}
 							onChange={handleInputChange}
-							className={`w-full px-3 py-2 bg-gray-700 border rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-								errors.postalCode ? 'border-red-500' : 'border-gray-600'
+							className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
+								errors.postalCode ? 'border-red-500' : 'border-darkGray'
 							}`}
 							placeholder="Enter 6-digit postal code"
 						/>
@@ -243,7 +243,7 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 				</div>
 
 				<div>
-					<label htmlFor="country" className="block text-sm font-medium text-gray-300 mb-1">
+					<label htmlFor="country" className="block text-sm font-medium text-black mb-1">
 						Country
 					</label>
 					<select
@@ -251,7 +251,7 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 						name="country"
 						value={formData.country}
 						onChange={handleInputChange}
-						className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+						className="w-full px-3 py-2 bg-white border border-darkGray rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen"
 					>
 						<option value="India">India</option>
 					</select>
@@ -260,7 +260,7 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 				<div className="pt-4">
 					<button
 						type="submit"
-						className="w-full bg-emerald-600 text-white py-2 px-4 rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"
+						className="w-full bg-darkGreen text-white py-2 px-4 rounded-md hover:bg-primary focus:outline-hidden focus:ring-2 focus:ring-darkGreen transition-colors"
 					>
 						{isCheckout ? "Continue to Payment" : "Save Address"}
 					</button>
@@ -270,4 +270,4 @@ const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
 	);
 };
 
-export default ShippingAddressForm; 
+export default ShippingAddressForm;

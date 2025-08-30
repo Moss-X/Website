@@ -30,7 +30,7 @@ const CartPage = () => {
   return (
     <div className="py-8 md:py-16">
       <div className="mx-auto max-w-(--breakpoint-xl) px-4 2xl:px-0">
-        <div className="mt-6 sm:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
+        <div className="mt-16 md:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
           <motion.div
             className="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-4xl"
             initial={{ opacity: 0, x: -20 }}
@@ -80,7 +80,8 @@ const EmptyCartUI = () => (
       Looks like you {"haven't"} added anything to your cart yet.
     </p>
     <Link
-      className="mt-4 rounded-md bg-emerald-500 px-6 py-2 text-white transition-colors hover:bg-emerald-600"
+    
+      className="mt-4 px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition"
       to="/"
     >
       Start Shopping

@@ -166,8 +166,7 @@ const Navbar = () => {
               </Link>
               <Link
                 to={"/cart"}
-                className="relative group text-primary md:text-secondary hover:text-emerald-300 transition duration-300 
-                ease-in-out"
+                className={`relative group ${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out`}
               >
                 <ShoppingCart
                   className="inline-block mr-1 group-hover:text-emerald-300"
@@ -197,7 +196,7 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/signup"
-                    className="text-primary md:text-secondary hover:text-emerald-300 transition duration-300 ease-in-out flex items-center"
+                    className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out flex items-center`}
                   >
                     <UserPlus className="inline-block mr-1" size={20} />
                     <span className="hidden sm:inline">Sign Up</span>

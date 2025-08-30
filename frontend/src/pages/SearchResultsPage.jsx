@@ -4,6 +4,7 @@ import axios from "../lib/axios"
 import ProductCard from "../components/ProductCard"
 import { Tag, X, IndianRupee } from "lucide-react"
 import BundleCard from "../components/BundleCard"
+import PriceRangeSlider from "../components/PriceRangeSlider"
 
 const productCategories = [
   "Ornamental Houseplants",
@@ -37,7 +38,7 @@ function SearchResultsPage() {
   });
   const SLIDER_MIN = 0;
   const SLIDER_MAX = 10000;
-  const SLIDER_STEP = 100;
+  const SLIDER_STEP = 10;
   const [minPrice, setMinPrice] = useState(Number(queryParams.get("minPrice")) || SLIDER_MIN);
   const [maxPrice, setMaxPrice] = useState(Number(queryParams.get("maxPrice")) || SLIDER_MAX);
 
@@ -98,11 +99,15 @@ function SearchResultsPage() {
   if (maxPrice) activeFilters.push({ label: `Max ₹${maxPrice}`, type: "maxPrice" })
 
   return (
-    <div className="min-h-screen text-white pt-18 pb-12">
+    <div className=" text-white pt-18 pb-12">
       <div className="flex">
         
         {/* Filter Bar */}
-        <form onSubmit={applyFilters} className="sticky p-4 z-30 bg-secondary rounded-md flex flex-col sm:flex-col flex-wrap gap-4 items-start mb-8 text-primary">
+        <form
+  onSubmit={applyFilters}
+  className="sticky top-0 h-screen p-4 z-30 bg-secondary rounded-md flex flex-col flex-wrap gap-4 items-start  text-primary  max-w-xs min-w-[260px] sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-lg"
+  style={{ maxWidth: "400px" }} // Add this line for a hard limit
+>
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Tag className="w-3 h-3" />
             <label className="text-sm font-medium mb-1">Category</label>
@@ -126,39 +131,20 @@ function SearchResultsPage() {
                 </label>
               ))}
             </div>
-          <div className="w-full flex flex-col gap-2">
-            <label className="block text-xs font-medium mb-1 text-black">Price Range</label>
-            <div className="flex items-center gap-4">
-              <span className="text-xs text-black">₹{minPrice}</span>
-              <input
-                type="range"
-                min={SLIDER_MIN}
-                max={maxPrice}
-                step={SLIDER_STEP}
-                value={minPrice}
-                onChange={e => {
-                  const val = Number(e.target.value);
-                  setMinPrice(val > maxPrice ? maxPrice : val);
-                }}
-              />
-              <span className="text-xs text-black">Min</span>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <IndianRupee className="w-3 h-3 " />
+            <label className="text-sm font-medium mb-1">Price</label>
             </div>
-            <div className="flex items-center gap-4 mt-2">
-              <span className="text-xs text-black">₹{maxPrice}</span>
-              <input
-                type="range"
-                min={minPrice}
-                max={SLIDER_MAX}
-                step={SLIDER_STEP}
-                value={maxPrice}
-                onChange={e => {
-                  const val = Number(e.target.value);
-                  setMaxPrice(val < minPrice ? minPrice : val);
-                }}
-              />
-              <span className="text-xs text-black">Max</span>
-            </div>
-          </div>
+
+          <PriceRangeSlider
+          min={SLIDER_MIN}
+          max={SLIDER_MAX}
+          step={SLIDER_STEP}
+          minVal={minPrice}
+          maxVal={maxPrice}
+          setMinVal={setMinPrice}
+          setMaxVal={setMaxPrice}
+/>
           <button
             type="submit"
             className="bg-primary text-white font-semibold px-4 py-2 rounded-sm cursor-pointer transition-colors"
@@ -220,4 +206,4 @@ function SearchResultsPage() {
   )
 }
 
-export default SearchResultsPage 
+export default SearchResultsPage

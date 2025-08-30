@@ -59,7 +59,7 @@ function App() {
 					<Route path='/category/:category' element={<CategoryPage />} />
 					<Route path='/bundle/:id' element={<BundlePage />} />
 					<Route path='/product/:id' element={<ProductPage />} />
-					<Route path='/collection/:id' element={<CollectionPage />} />
+					<Route path='/collections/:id' element={<CollectionPage />} />
 					{/* Cart route - no authentication required for guest users */}
 					<Route path='/cart' element={<CartPage />} />
 					<Route path='/search' element={<SearchResultsPage />} />

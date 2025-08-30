@@ -34,7 +34,9 @@ function HomePage() {
           </div>
         )}
         {/* Existing Featured Products section moved below categories */}
+        <section id="best-seller-section">
         {!isLoading && products.length > 0 && <FeaturedProducts featuredProducts={products} />}
+        </section>
         {/* Bundles Section */}
         <BundlesPreview />
         {/* Collections Section */}
