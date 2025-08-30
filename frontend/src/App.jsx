@@ -23,19 +23,23 @@ import { useLocation } from "react-router-dom";
 
 function App() {
 	const { user, checkAuth, checkingAuth } = useUserStore();
-	const { getCartItems } = useCartStore();
-	const location = useLocation();
+	const { getCartItems, initializeSession } = useCartStore();
+	
 	useEffect(() => {
 		checkAuth();
-	}, [checkAuth]);
+	}, []); // Remove checkAuth dependency to prevent infinite loops
 
 	useEffect(() => {
-		if (!user) return;
+		// Initialize cart session for both guest and authenticated users
+		initializeSession();
+		
+		// Only fetch cart items if user is authenticated
+		if (user) {
+			getCartItems();
+		}
+	}, [user]); // Only depend on user changes
 
-		getCartItems();
-	}, [getCartItems, user]);
-
-	if (checkingAuth) return <LoadingSpinner />;
+	// if (checkingAuth) return <LoadingSpinner />;
 
 	return (
 		<div className='min-h-screen bg-white text-white relative overflow-hidden'>
@@ -56,7 +60,8 @@ function App() {
 					<Route path='/bundle/:id' element={<BundlePage />} />
 					<Route path='/product/:id' element={<ProductPage />} />
 					<Route path='/collection/:id' element={<CollectionPage />} />
-					<Route path='/cart' element={user ? <CartPage /> : <Navigate to='/login' />} />
+					{/* Cart route - no authentication required for guest users */}
+					<Route path='/cart' element={<CartPage />} />
 					<Route path='/search' element={<SearchResultsPage />} />
 					<Route
 						path='/purchase-success'

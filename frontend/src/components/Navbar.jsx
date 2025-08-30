@@ -1,4 +1,11 @@
-import { ShoppingCart, UserPlus, LogIn, LogOut, Lock, Search } from "lucide-react";
+import {
+  ShoppingCart,
+  UserPlus,
+  LogIn,
+  LogOut,
+  Lock,
+  Search,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
@@ -32,7 +39,9 @@ const Navbar = () => {
     clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await axios.get(`/products/search?q=${encodeURIComponent(search)}`);
+        const res = await axios.get(
+          `/products/search?q=${encodeURIComponent(search)}`
+        );
         setSuggestions(res.data);
       } catch {
         setSuggestions([]);
@@ -62,9 +71,9 @@ const Navbar = () => {
   function handleKeyDown(e) {
     if (!suggestions.length) return;
     if (e.key === "ArrowDown") {
-      setActiveIndex(i => (i + 1) % suggestions.length);
+      setActiveIndex((i) => (i + 1) % suggestions.length);
     } else if (e.key === "ArrowUp") {
-      setActiveIndex(i => (i - 1 + suggestions.length) % suggestions.length);
+      setActiveIndex((i) => (i - 1 + suggestions.length) % suggestions.length);
     } else if (e.key === "Enter") {
       if (activeIndex >= 0) {
         handleSuggestionClick(suggestions[activeIndex]._id);
@@ -79,14 +88,21 @@ const Navbar = () => {
   return (
     <>
       {showOverlay && (
-        <div className="sticky inset-0 bg-black/60 z-40 transition-opacity" onClick={() => setShowOverlay(false)} />
+        <div
+          className="sticky inset-0 bg-black/60 z-40 transition-opacity"
+          onClick={() => setShowOverlay(false)}
+        />
       )}
   <header className={`absolute top-0 left-0 w-full bg-opacity-90 z-50 transition-all duration-300${location.pathname !== '/' ? ' bg-primary' : ''}`}> 
         <div className={`w-full px-4 py-3`}>
           <div className='flex w-full flex-wrap justify-between items-center'>
             <Link to='/' className='text-2xl font-bold text-heading items-center space-x-2 flex'>
               <div className="flex items-center ">
-                <img src='/icon.png' alt='Moss-x logo' className='w-10 h-10 object-contain' />
+                <img
+                  src="/icon.png"
+                  alt="Moss-x logo"
+                  className="w-10 h-10 object-contain"
+                />
               </div>
             </Link>
             {/* Centered Search Bar */}
@@ -117,13 +133,23 @@ const Navbar = () => {
                       suggestions.map((s, i) => (
                         <div
                           key={s._id}
-                          className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-800 ${i === activeIndex ? "bg-gray-800" : ""}`}
+                          className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-800 ${
+                            i === activeIndex ? "bg-gray-800" : ""
+                          }`}
                           onMouseDown={() => handleSuggestionClick(s._id)}
                           tabIndex={0}
                         >
-                          <img src={s.image} alt={s.name} className="w-8 h-8 object-cover rounded-sm" />
-                          <span className="text-black font-medium line-clamp-1">{s.name}</span>
-                          <span className="text-xs text-black ml-auto">${s.price}</span>
+                          <img
+                            src={s.image}
+                            alt={s.name}
+                            className="w-8 h-8 object-cover rounded-sm"
+                          />
+                          <span className="text-white font-medium line-clamp-1">
+                            {s.name}
+                          </span>
+                          <span className="text-xs text-[color:var(--color-neutral)/70] ml-auto">
+                            ${s.price}
+                          </span>
                         </div>
                       ))
                     )}
@@ -131,54 +157,57 @@ const Navbar = () => {
                 )}
               </div>
             </div>
-            <nav className='flex flex-wrap items-center gap-4'>
+            <nav className="flex flex-wrap items-center gap-4">
               <Link
                 to={"/"}
                 className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out`}
               >
                 Home
               </Link>
-              {user && (
-                <Link
-                  to={"/cart"}
-                  className={`relative group ${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out`}
-                >
-                  <ShoppingCart className='inline-block mr-1 group-hover:text-emerald-300' size={20} />
-                  <span className='hidden sm:inline'>Cart</span>
-                  {cart.length > 0 && (
-                    <span
-                      className='absolute -top-2 -left-2 bg-darkGreen text-white rounded-full px-2 py-0.5 
-                    text-xs group-hover:bg-emerald-400 transition duration-300 ease-in-out'
-                    >
-                      {cart.length}
-                    </span>
-                  )}
-                </Link>
-              )}
+              <Link
+                to={"/cart"}
+                className="relative group text-primary md:text-secondary hover:text-emerald-300 transition duration-300 
+                ease-in-out"
+              >
+                <ShoppingCart
+                  className="inline-block mr-1 group-hover:text-emerald-300"
+                  size={20}
+                />
+                <span className="hidden sm:inline">Cart</span>
+                {cart.length > 0 && (
+                  <span
+                    className="absolute -top-2 -left-2 bg-darkGreen text-white rounded-full px-2 py-0.5 
+                    text-xs group-hover:bg-emerald-400 transition duration-300 ease-in-out"
+                  >
+                    {cart.length}
+                  </span>
+                )}
+              </Link>
               {isAdmin && (
                 <Link
-                  className='bg-[var(--color-darkGreen)] hover:bg-primary text-white px-3 py-1 rounded-md font-medium transition duration-300 ease-in-out flex items-center'
+                  className="bg-[var(--color-darkGreen)] hover:bg-primary text-white px-3 py-1 rounded-md font-medium
+                   transition duration-300 ease-in-out flex items-center"
                   to={"/secret-dashboard"}
                 >
-                  <Lock className='inline-block mr-1' size={18} />
-                  <span className='hidden sm:inline'>Dashboard</span>
+                  <Lock className="inline-block mr-1" size={18} />
+                  <span className="hidden sm:inline">Dashboard</span>
                 </Link>
               )}
               {!user && (
                 <>
                   <Link
-                    to='/signup'
-                    className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out flex items-center`}
+                    to="/signup"
+                    className="text-primary md:text-secondary hover:text-emerald-300 transition duration-300 ease-in-out flex items-center"
                   >
-                    <UserPlus className='inline-block mr-1' size={20} />
-                    <span className='hidden sm:inline'>Sign Up</span>
+                    <UserPlus className="inline-block mr-1" size={20} />
+                    <span className="hidden sm:inline">Sign Up</span>
                   </Link>
                   <Link
                     to='/login'
                     className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out flex items-center`}
                   >
-                    <LogIn className='inline-block mr-1' size={20} />
-                    <span className='hidden sm:inline'>Login</span>
+                    <LogIn className="inline-block mr-1" size={20} />
+                    <span className="hidden sm:inline">Login</span>
                   </Link>
                 </>
               )}
@@ -187,8 +216,8 @@ const Navbar = () => {
                   onClick={logout}
                   className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-red-400 transition duration-300 ease-in-out flex items-center`}
                 >
-                  <LogOut className='inline-block mr-1' size={20} />
-                  <span className='hidden sm:inline'>Logout</span>
+                  <LogOut className="inline-block mr-1" size={20} />
+                  <span className="hidden sm:inline">Logout</span>
                 </button>
               )}
             </nav>

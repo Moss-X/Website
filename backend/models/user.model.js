@@ -38,6 +38,20 @@ const userSchema = new mongoose.Schema(
 				},
 			},
 		],
+		// Default shipping address
+		defaultAddress: {
+			fullName: String,
+			phone: String,
+			addressLine1: String,
+			addressLine2: String,
+			city: String,
+			state: String,
+			postalCode: String,
+			country: {
+				type: String,
+				default: "India",
+			},
+		},
 		role: {
 			type: String,
 			enum: ["customer", "admin"],

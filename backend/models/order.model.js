@@ -31,7 +31,43 @@ const orderSchema = new mongoose.Schema(
 			required: true,
 			min: 0,
 		},
-		// Keeping for legacy reference but ensure it doesn’t cause duplicate-key errors
+		// Address fields - required for delivery
+		shippingAddress: {
+			fullName: {
+				type: String,
+				required: [true, "Full name is required for delivery"],
+			},
+			phone: {
+				type: String,
+				required: [true, "Phone number is required for delivery"],
+			},
+			addressLine1: {
+				type: String,
+				required: [true, "Address line 1 is required for delivery"],
+			},
+			addressLine2: {
+				type: String,
+				required: false,
+			},
+			city: {
+				type: String,
+				required: [true, "City is required for delivery"],
+			},
+			state: {
+				type: String,
+				required: [true, "State is required for delivery"],
+			},
+			postalCode: {
+				type: String,
+				required: [true, "Postal code is required for delivery"],
+			},
+			country: {
+				type: String,
+				required: [true, "Country is required for delivery"],
+				default: "India",
+			},
+		},
+		// Keeping for legacy reference but ensure it doesn't cause duplicate-key errors
 		// stripeSessionId: {
 		// 	type: String,
 		// 	unique: true,

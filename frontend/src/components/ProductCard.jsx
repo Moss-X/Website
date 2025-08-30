@@ -1,5 +1,5 @@
 import toast from "react-hot-toast";
-import { Plus} from "lucide-react";
+import { Plus } from "lucide-react";
 import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
 import { Link, useNavigate } from "react-router-dom";
@@ -13,23 +13,13 @@ function ProductCard({ product, variant = "default" }) {
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-    if (!user) {
-      toast.error("Please login to add products to cart", { id: "login" });
-      return;
-    } else {
-      addToCart(product);
-    }
+        addToCart(product);
   };
 
   const handleBuyNow = (e) => {
     e.stopPropagation();
-    if (!user) {
-      toast.error("Please login to buy products", { id: "login" });
-      return;
-    } else {
       addToCart(product);
       navigate("/cart");
-    }
   };
 
   return (
@@ -72,11 +62,16 @@ function ProductCard({ product, variant = "default" }) {
               </span>
             )}
           </div>
-        </div>  
-          <div onClick={handleAddToCart}
-          className="flex text-white aspect-square hover:ring-amber-400 rounded-full items-center just">
-            <Plus size={48} className="bg-black rounded-full p-2 hover:border-neutral border-4 border-gray"/>
-          </div>
+        </div>
+        <div
+          onClick={handleAddToCart}
+          className="flex text-white aspect-square hover:ring-amber-400 rounded-full items-center just"
+        >
+          <Plus
+            size={48}
+            className="bg-black rounded-full p-2 hover:border-neutral border-4 border-gray"
+          />
+        </div>
       </div>
     </div>
   );
