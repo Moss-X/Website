@@ -19,10 +19,12 @@ import CartPage from "./pages/CartPage";
 import { useCartStore } from "./stores/useCartStore";
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import PurchaseCancelPage from "./pages/PurchaseCancelPage";
+import { useLocation } from "react-router-dom";
 
 function App() {
 	const { user, checkAuth, checkingAuth } = useUserStore();
 	const { getCartItems } = useCartStore();
+	const location = useLocation();
 	useEffect(() => {
 		checkAuth();
 	}, [checkAuth]);
@@ -41,7 +43,7 @@ function App() {
 	
 
 			<div className='relative z-50'>
-				<Navbar />
+				{location.pathname !== '/login' && location.pathname !== '/signup' && <Navbar />}
 				<Routes>
 					<Route path='/' element={<HomePage />} />
 					<Route path='/signup' element={!user ? <SignUpPage /> : <Navigate to='/' />} />

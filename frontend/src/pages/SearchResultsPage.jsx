@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 import axios from "../lib/axios"
 import ProductCard from "../components/ProductCard"
 import { Tag, X, IndianRupee } from "lucide-react"
+import BundleCard from "../components/BundleCard"
 
 const productCategories = [
   "Ornamental Houseplants",
@@ -29,32 +30,39 @@ function SearchResultsPage() {
   const navigate = useNavigate()
 
   // Filter state
-  const [category, setCategory] = useState(queryParams.get("category") || "")
-  const [minPrice, setMinPrice] = useState(queryParams.get("minPrice") || "")
-  const [maxPrice, setMaxPrice] = useState(queryParams.get("maxPrice") || "")
+  const [category, setCategory] = useState(() => {
+    const cat = queryParams.get("category")
+    if (!cat) return [];
+    return cat.split(",");
+  });
+  const SLIDER_MIN = 0;
+  const SLIDER_MAX = 10000;
+  const SLIDER_STEP = 100;
+  const [minPrice, setMinPrice] = useState(Number(queryParams.get("minPrice")) || SLIDER_MIN);
+  const [maxPrice, setMaxPrice] = useState(Number(queryParams.get("maxPrice")) || SLIDER_MAX);
 
   // Update URL when filters change
   function applyFilters(e) {
-    if (e) e.preventDefault()
-    const params = new URLSearchParams()
-    if (query) params.set("q", query)
-    if (category) params.set("category", category)
-    if (minPrice) params.set("minPrice", minPrice)
-    if (maxPrice) params.set("maxPrice", maxPrice)
-    navigate(`/search?${params.toString()}`)
+    if (e) e.preventDefault();
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (category.length > 0) params.set("category", category.join(","));
+  if (minPrice !== SLIDER_MIN) params.set("minPrice", minPrice);
+  if (maxPrice !== SLIDER_MAX) params.set("maxPrice", maxPrice);
+    navigate(`/search?${params.toString()}`);
   }
   function resetFilters() {
-    setCategory("")
-    setMinPrice("")
-    setMaxPrice("")
+  setCategory([])
+  setMinPrice(SLIDER_MIN)
+  setMaxPrice(SLIDER_MAX)
     const params = new URLSearchParams()
     if (query) params.set("q", query)
     navigate(`/search?${params.toString()}`)
   }
   function removeFilter(type) {
-    if (type === "category") setCategory("")
-    if (type === "minPrice") setMinPrice("")
-    if (type === "maxPrice") setMaxPrice("")
+  if (type === "category") setCategory([])
+  if (type === "minPrice") setMinPrice(SLIDER_MIN)
+  if (type === "maxPrice") setMaxPrice(SLIDER_MAX)
     setTimeout(applyFilters, 0)
   }
 
@@ -85,53 +93,71 @@ function SearchResultsPage() {
 
   // Active filter chips
   const activeFilters = []
-  if (category) activeFilters.push({ label: category, type: "category" })
+  if (category.length > 0) category.forEach(cat => activeFilters.push({ label: cat, type: "category" }));
   if (minPrice) activeFilters.push({ label: `Min ₹${minPrice}`, type: "minPrice" })
   if (maxPrice) activeFilters.push({ label: `Max ₹${maxPrice}`, type: "maxPrice" })
 
   return (
-    <div className="min-h-screen text-white pt-4 pb-12 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen text-white pt-18 pb-12">
+      <div className="flex">
         
         {/* Filter Bar */}
-        <form onSubmit={applyFilters} className="sticky top-20 z-30 bg-secondary rounded-md p-4 flex flex-col sm:flex-row flex-wrap gap-4 items-end mb-8">
+        <form onSubmit={applyFilters} className="sticky p-4 z-30 bg-secondary rounded-md flex flex-col sm:flex-col flex-wrap gap-4 items-start mb-8 text-primary">
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Tag className="w-4 h-4 text-black" />
-            <label className="block text-xs font-medium text-black mb-1">Category</label>
-            <select
-              value={category}
-              onChange={e => setCategory(e.target.value)}
-              className="bg-gray text-black rounded-sm px-3 py-2"
-            >
-              <option value="">All</option>
+            <Tag className="w-3 h-3" />
+            <label className="text-sm font-medium mb-1">Category</label>
+            </div>
+            <div className="flex pl-2 flex-col gap-4">
               {productCategories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+                <label key={cat} className="flex text-xs gap-1 items-center text-black">
+                  <input
+                    type="checkbox"
+                    value={cat}
+                    checked={category.includes(cat)}
+                    onChange={e => {
+                      if (e.target.checked) {
+                        setCategory(prev => [...prev, cat]);
+                      } else {
+                        setCategory(prev => prev.filter(c => c !== cat));
+                      }
+                    }}
+                  />
+                  <span>{cat}</span>
+                </label>
               ))}
-            </select>
-          </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <IndianRupee className="w-4 h-4 text-black" />
-            <label className="block text-xs font-medium text-black mb-1">Min Price</label>
-            <input
-              type="number"
-              min="0"
-              value={minPrice}
-              onChange={e => setMinPrice(e.target.value)}
-              className="bg-gray text-black rounded-sm px-3 py-2 w-24"
-              placeholder="₹"
-            />
-          </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <IndianRupee className="w-4 h-4 text-black" />
-            <label className="block text-xs font-medium text-black mb-1">Max Price</label>
-            <input
-              type="number"
-              min="0"
-              value={maxPrice}
-              onChange={e => setMaxPrice(e.target.value)}
-              className="bg-gray text-black rounded-sm px-3 py-2 w-24"
-              placeholder="₹"
-            />
+            </div>
+          <div className="w-full flex flex-col gap-2">
+            <label className="block text-xs font-medium mb-1 text-black">Price Range</label>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-black">₹{minPrice}</span>
+              <input
+                type="range"
+                min={SLIDER_MIN}
+                max={maxPrice}
+                step={SLIDER_STEP}
+                value={minPrice}
+                onChange={e => {
+                  const val = Number(e.target.value);
+                  setMinPrice(val > maxPrice ? maxPrice : val);
+                }}
+              />
+              <span className="text-xs text-black">Min</span>
+            </div>
+            <div className="flex items-center gap-4 mt-2">
+              <span className="text-xs text-black">₹{maxPrice}</span>
+              <input
+                type="range"
+                min={minPrice}
+                max={SLIDER_MAX}
+                step={SLIDER_STEP}
+                value={maxPrice}
+                onChange={e => {
+                  const val = Number(e.target.value);
+                  setMaxPrice(val < minPrice ? minPrice : val);
+                }}
+              />
+              <span className="text-xs text-black">Max</span>
+            </div>
           </div>
           <button
             type="submit"
@@ -142,11 +168,12 @@ function SearchResultsPage() {
           <button
             type="button"
             onClick={resetFilters}
-            className="bg-pastelpink text-black cursor-pointer font-semibold px-4 py-2 rounded-sm transition-colors"
+            className="bg-pastelpink text-secondary cursor-pointer font-semibold px-4 py-2 rounded-sm transition-colors"
           >
             Reset
           </button>
         </form>
+        <div className="p-4">
         <h1 className="text-3xl font-bold text-primary mb-6">Search Results for "{query}"</h1>
         {/* Active Filter Chips */}
         {activeFilters.length > 0 && (
@@ -181,88 +208,13 @@ function SearchResultsPage() {
             <h2 className="text-2xl font-semibold text-primary mb-4 mt-8">Bundles</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-2">
               {bundles.map(bundle => (
-                <div
-                  key={bundle._id}
-                  className="bg-gray-800 rounded-lg p-0 shadow-lg cursor-pointer hover:ring-2 hover:ring-primary transition transform hover:scale-[1.025] flex flex-col aspect-4/5"
-                  onClick={() => handleBundleClick(bundle._id)}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`View bundle ${bundle.title}`}
-                  onKeyDown={e => { if (e.key === 'Enter') handleBundleClick(bundle._id) }}
-                >
-                  <div className="relative bg-gray-900 rounded-t-lg flex items-center justify-center w-full aspect-square max-h-[50%]">
-                    <img src={bundle.image} alt={bundle.title} className="w-full h-full object-contain rounded-t-lg" />
-                    <span className="absolute top-2 right-2 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
-                      {bundle.products.length} plants
-                    </span>
-                  </div>
-                  <div className="flex-1 flex flex-col p-5">
-                    <h3 className="text-xl font-bold text-primary mb-1 line-clamp-1">{bundle.title}</h3>
-                    <div className="text-gray-200 mb-2 line-clamp-2 flex-1 max-h-[3.2em] overflow-hidden">{bundle.description}</div>
-                    <div className="flex items-center gap-4 mb-4">
-                      <span className="text-primary font-bold text-2xl md:text-3xl">₹{bundle.discountedPrice}</span>
-                      <span className="text-black line-through text-lg">₹{bundle.totalPrice}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-auto pt-2 border-t border-gray">
-                      {bundle.products.slice(0, 4).map(p => (
-                        <span key={p._id} className="flex items-center gap-1 bg-gray-900 rounded-sm px-2 py-1 text-xs">
-                          {p.image && <img src={p.image} alt={p.name} className="w-6 h-6 object-cover rounded-sm" />}
-                          <span className="text-gray-200 max-w-20 truncate">{p.name}</span>
-                        </span>
-                      ))}
-                      {bundle.products.length > 4 && (
-                        <span className="text-black text-xs">+{bundle.products.length - 4} more</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <BundleCard key={bundle._id} bundle={bundle} onClick={() => handleBundleClick(bundle._id)} />
               ))}
             </div>
           </>
         )}
-        {collections.length > 0 && (
-          <>
-            <h2 className="text-2xl font-semibold text-primary mb-4 mt-8">Collections</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-2">
-              {collections.map(collection => (
-                <div
-                  key={collection._id}
-                  className="bg-gray-800 rounded-lg p-0 shadow-lg cursor-pointer hover:ring-2 hover:ring-primary transition transform hover:scale-[1.025] flex flex-col aspect-4/5"
-                  onClick={() => handleCollectionClick(collection._id)}
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`View collection ${collection.title}`}
-                  onKeyDown={e => { if (e.key === 'Enter') handleCollectionClick(collection._id) }}
-                >
-                  <div className="relative bg-gray-900 rounded-t-lg flex items-center justify-center w-full aspect-square max-h-[50%]">
-                    <img src={collection.image} alt={collection.title} className="w-full h-full object-contain rounded-t-lg" />
-                    <span className="absolute top-2 right-2 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
-                      {collection.products.length} products
-                    </span>
-                  </div>
-                  <div className="flex-1 flex flex-col p-5">
-                    <h3 className="text-xl font-bold text-primary mb-1 line-clamp-1">{collection.title}</h3>
-                    <div className="text-gray-200 mb-2 line-clamp-2 flex-1 max-h-[3.2em] overflow-hidden">{collection.description}</div>
-                    <div className="flex items-center gap-4 mb-4">
-                      <span className="text-primary font-bold text-2xl md:text-3xl">₹{collection.totalPrice}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-auto pt-2 border-t border-gray">
-                      {collection.products.slice(0, 4).map(p => (
-                        <span key={p._id} className="flex items-center gap-1 bg-gray-900 rounded-sm px-2 py-1 text-xs">
-                          {p.image && <img src={p.image} alt={p.name} className="w-6 h-6 object-cover rounded-sm" />}
-                          <span className="text-gray-200 max-w-20 truncate">{p.name}</span>
-                        </span>
-                      ))}
-                      {collection.products.length > 4 && (
-                        <span className="text-black text-xs">+{collection.products.length - 4} more</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
+  
+      </div>
       </div>
     </div>
   )
