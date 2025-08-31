@@ -7,12 +7,14 @@ import {
   Search,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
 import { useState, useRef, useEffect } from "react";
 import axios from "../lib/axios";
 
 const Navbar = () => {
+  const location = useLocation();
   const { user, logout } = useUserStore();
   const isAdmin = user?.role === "admin";
   const { cart } = useCartStore();
@@ -91,13 +93,10 @@ const Navbar = () => {
           onClick={() => setShowOverlay(false)}
         />
       )}
-      <header className="absolute top-0 left-0 w-full  bg-opacity-90 z-50 transition-all duration-300 ">
-        <div className="container mx-auto px-4 py-3">
-          <div className="flex flex-wrap justify-between items-center">
-            <Link
-              to="/"
-              className="text-2xl font-bold text-heading items-center space-x-2 flex"
-            >
+  <header className={`absolute top-0 left-0 w-full bg-opacity-90 z-50 transition-all duration-300${location.pathname !== '/' ? ' bg-primary' : ''}`}> 
+        <div className={`w-full px-4 py-3`}>
+          <div className='flex w-full flex-wrap justify-between items-center'>
+            <Link to='/' className='text-2xl font-bold text-heading items-center space-x-2 flex'>
               <div className="flex items-center ">
                 <img
                   src="/icon.png"
@@ -109,8 +108,8 @@ const Navbar = () => {
             {/* Centered Search Bar */}
             <div className="flex-1 flex justify-center items-center relative z-50">
               <div className="w-36 md:w-full max-w-md relative">
-                <div className="flex items-center bg-primary rounded-lg px-3 py-1 border border-[var(--color-neutral)] focus-within:ring-2 focus-within:ring-[var(--color-darkGreen)] gap-2">
-                  <Search className="w-5 h-5 text-white" />
+                <div className={`flex items-center ${location.pathname === '/' ? ' bg-primary' : 'bg-secondary'} rounded-lg px-3 py-1 border border-neutral focus-within:ring-2 focus-within:ring-darkGreen gap-2`}>
+                  <Search className= {`w-5 h-5 ${location.pathname === '/' ? ' text-white' : 'text-black'}`} />
                   <input
                     ref={inputRef}
                     type="text"
@@ -120,20 +119,16 @@ const Navbar = () => {
                     onBlur={handleInputBlur}
                     onKeyDown={handleKeyDown}
                     placeholder="Search plants..."
-                    className="bg-transparent outline-hidden border-none text-white w-full py-2 placeholder-gray-300"
-                    aria-label="Search plants"
+                    className={`bg-transparent outline-hidden border-none ${location.pathname === '/' ? ' text-white' : 'text-black'} w-full py-2 placeholder-gray-300"
+                    aria-label="Search plants`}
                   />
                 </div>
                 {showOverlay && search && (
-                  <div className="absolute left-0 right-0 mt-2 bg-gray-900 rounded-lg shadow-lg border border-[var(--color-neutral)] z-50 max-h-72 overflow-y-auto">
+                  <div className="absolute left-0 right-0 mt-2 bg-secondary rounded-lg shadow-lg  border-[var(--color-gray)] border-2 z-50 max-h-72 overflow-y-auto">
                     {loading ? (
-                      <div className="p-4 text-[color:var(--color-neutral)/70] text-center">
-                        Loading...
-                      </div>
+                      <div className="p-4 text-black  text-center">Loading...</div>
                     ) : suggestions.length === 0 ? (
-                      <div className="p-4 text-[color:var(--color-neutral)/70] text-center">
-                        No results found
-                      </div>
+                      <div className="p-4 text-black text-center">No results found</div>
                     ) : (
                       suggestions.map((s, i) => (
                         <div
@@ -165,15 +160,13 @@ const Navbar = () => {
             <nav className="flex flex-wrap items-center gap-4">
               <Link
                 to={"/"}
-                className="text-primary md:text-secondary hover:text-emerald-300 transition duration-300
-             ease-in-out"
+                className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out`}
               >
                 Home
               </Link>
               <Link
                 to={"/cart"}
-                className="relative group text-primary md:text-secondary hover:text-emerald-300 transition duration-300 
-                ease-in-out"
+                className={`relative group ${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out`}
               >
                 <ShoppingCart
                   className="inline-block mr-1 group-hover:text-emerald-300"
@@ -203,14 +196,14 @@ const Navbar = () => {
                 <>
                   <Link
                     to="/signup"
-                    className="text-primary md:text-secondary hover:text-emerald-300 transition duration-300 ease-in-out flex items-center"
+                    className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out flex items-center`}
                   >
                     <UserPlus className="inline-block mr-1" size={20} />
                     <span className="hidden sm:inline">Sign Up</span>
                   </Link>
                   <Link
-                    to="/login"
-                    className="text-primary md:text-secondary hover:text-emerald-300 transition duration-300 ease-in-out flex items-center"
+                    to='/login'
+                    className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out flex items-center`}
                   >
                     <LogIn className="inline-block mr-1" size={20} />
                     <span className="hidden sm:inline">Login</span>
@@ -220,7 +213,7 @@ const Navbar = () => {
               {user && (
                 <button
                   onClick={logout}
-                  className="text-primary md:text-secondary hover:text-red-400 transition duration-300 ease-in-out flex items-center"
+                  className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-red-400 transition duration-300 ease-in-out flex items-center`}
                 >
                   <LogOut className="inline-block mr-1" size={20} />
                   <span className="hidden sm:inline">Logout</span>

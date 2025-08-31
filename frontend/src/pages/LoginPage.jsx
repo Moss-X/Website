@@ -16,28 +16,35 @@ const LoginPage = () => {
 		login(email, password);
 	};
 
-	return (
-		<div className='flex flex-col justify-center py-12 sm:px-6 lg:px-8'>
-			<motion.div
-				className='sm:mx-auto sm:w-full sm:max-w-md'
-				initial={{ opacity: 0, y: -20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.8 }}
-			>
-				<h2 className='mt-6 text-center text-3xl font-extrabold text-emerald-400'>Create your account</h2>
-			</motion.div>
+	const handleForgotPassword = () => {
+		}
 
-			<motion.div
-				className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'
-				initial={{ opacity: 0, y: 20 }}
-				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.8, delay: 0.2 }}
-			>
-				<div className='bg-gray-800 py-8 px-4 shadow-sm sm:rounded-lg sm:px-10'>
+	return (
+		<div className='flex flex-col pt-28 justify-center py-12 sm:px-6 lg:px-8'>
+
+			<div
+				className='flex flex-row relative mt-8 w-[90%] mx-auto shadow-2xl sm:w-full sm:max-w-md  md:max-w-3xl'
+			>	
+				<div className="p-4 md:p-2 w-full md:w-[48%]">
+
+				<div>
+					<p className="ml-2 absolute font-bold text-2xl text-black">Moss <span className="text-textGreen">X</span></p>
+				</div>
+				<div className='py-8 flex flex-col gap-8 sm:rounded-lg sm:px-6'>
+				<div>
+					<p className="pt-8 text-black text-3xl font-bold">Sign-In</p>
+				</div>
+				<div>
+					<p className="text-black opacity-70 text-sm font-medium">Don't have and account? 
+						<span> <Link to='/signup' className='font-medium text-textGreen hover:opacity-70'>
+							Create Now 
+						</Link></span>
+					</p>
+				</div>
 					<form onSubmit={handleSubmit} className='space-y-6'>
 						<div>
-							<label htmlFor='email' className='block text-sm font-medium text-gray-300'>
-								Email address
+							<label htmlFor='email' className='block text-sm font-medium text-black opacity-70 mb-2'>
+								E-mail
 							</label>
 							<div className='mt-1 relative rounded-md shadow-xs'>
 								<div className='absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none'>
@@ -49,17 +56,17 @@ const LoginPage = () => {
 									required
 									value={email}
 									onChange={(e) => setEmail(e.target.value)}
-									className=' block w-full px-3 py-2 pl-10 bg-gray-700 border border-gray-600 
-									rounded-md shadow-xs
-									 placeholder-gray-400 focus:outline-hidden focus:ring-emerald-500 
-									 focus:border-emerald-500 sm:text-sm'
-									placeholder='you@example.com'
-								/>
+									className=' block w-full px-3 py-2 pl-10 border border-darkGray  
+									rounded-md shadow-xs text-black
+									placeholder-gray-400 focus:outline-hidden focus:ring-black 
+									 focus:border-black sm:text-sm'
+									 placeholder='you@example.com'
+									 />
 							</div>
 						</div>
 
 						<div>
-							<label htmlFor='password' className='block text-sm font-medium text-gray-300'>
+							<label htmlFor='password' className='block text-sm font-medium text-black opacity-70 mb-2'>
 								Password
 							</label>
 							<div className='mt-1 relative rounded-md shadow-xs'>
@@ -72,20 +79,32 @@ const LoginPage = () => {
 									required
 									value={password}
 									onChange={(e) => setPassword(e.target.value)}
-									className=' block w-full px-3 py-2 pl-10 bg-gray-700 border border-gray-600 
-									rounded-md shadow-xs placeholder-gray-400 focus:outline-hidden focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm'
-									placeholder='••••••••'
-								/>
+									className=' block w-full px-3 py-2 pl-10 border border-darkGray  
+									rounded-md shadow-xs text-black
+									 placeholder-gray-400 focus:outline-hidden focus:ring-black 
+									 focus:border-black sm:text-sm'
+									 placeholder='••••••••'
+									 />
 							</div>
 						</div>
-
+						<div className='flex items-center justify-end'>
+							<div className='text-sm'>
+								<Link
+									to='#'
+									className='font-medium text-textGreen hover:opacity-70'
+									onClick={handleForgotPassword}
+								>
+									Forgot your password?
+								</Link>
+							</div>
+						</div>
 						<button
 							type='submit'
 							className='w-full flex justify-center py-2 px-4 border border-transparent 
-							rounded-md shadow-xs text-sm font-medium text-white bg-emerald-600
-							 hover:bg-emerald-700 focus:outline-hidden focus:ring-2 focus:ring-offset-2
-							  focus:ring-emerald-500 transition duration-150 ease-in-out disabled:opacity-50'
-							disabled={loading}
+							rounded-md shadow-xs text-sm font-medium text-white bg-textGreen
+							 hover:bg-darkGreen focus:outline-hidden focus:ring-2 focus:ring-offset-2
+							 focus:ring-emerald-500 transition duration-150 ease-in-out disabled:opacity-50'
+							 disabled={loading}
 						>
 							{loading ? (
 								<>
@@ -101,14 +120,20 @@ const LoginPage = () => {
 						</button>
 					</form>
 
-					<p className='mt-8 text-center text-sm text-gray-400'>
-						Not a member?{" "}
-						<Link to='/signup' className='font-medium text-emerald-400 hover:text-emerald-300'>
-							Sign up now <ArrowRight className='inline h-4 w-4' />
-						</Link>
-					</p>
+					
 				</div>
-			</motion.div>
+							</div>
+			<div className="relative hidden md:block w-[52%] h-auto bg-darkGreen overflow-hidden">
+				<img
+					src="/leaf-pattern.png"
+					alt="Leaf Pattern"
+					className="w-full h-full object-cover object-center "
+				/>
+				<div className="absolute bottom-2 right-4 text-White font-bold text-6xl">
+					<p>Moss <span>X</span></p>
+				</div>
+			</div>
+			</div>
 		</div>
 	);
 };

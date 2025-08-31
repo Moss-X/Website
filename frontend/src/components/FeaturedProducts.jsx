@@ -68,7 +68,6 @@ const FeaturedProducts = ({ featuredProducts }) => {
 			>
 				<ChevronRight />
 			</button>
-			<button className="mt-6 z-10 px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition">Show More</button>
 		</div>
 	);
 };

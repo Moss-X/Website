@@ -19,6 +19,7 @@ import CartPage from "./pages/CartPage";
 import { useCartStore } from "./stores/useCartStore";
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import PurchaseCancelPage from "./pages/PurchaseCancelPage";
+import { useLocation } from "react-router-dom";
 
 function App() {
 	const { user, checkAuth, checkingAuth } = useUserStore();
@@ -46,7 +47,7 @@ function App() {
 	
 
 			<div className='relative z-50'>
-				<Navbar />
+				{location.pathname !== '/login' && location.pathname !== '/signup' && <Navbar />}
 				<Routes>
 					<Route path='/' element={<HomePage />} />
 					<Route path='/signup' element={!user ? <SignUpPage /> : <Navigate to='/' />} />
@@ -58,7 +59,7 @@ function App() {
 					<Route path='/category/:category' element={<CategoryPage />} />
 					<Route path='/bundle/:id' element={<BundlePage />} />
 					<Route path='/product/:id' element={<ProductPage />} />
-					<Route path='/collection/:id' element={<CollectionPage />} />
+					<Route path='/collections/:id' element={<CollectionPage />} />
 					{/* Cart route - no authentication required for guest users */}
 					<Route path='/cart' element={<CartPage />} />
 					<Route path='/search' element={<SearchResultsPage />} />

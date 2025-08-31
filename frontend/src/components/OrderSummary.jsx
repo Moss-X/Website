@@ -152,7 +152,7 @@ const OrderSummary = () => {
       return (
         <Link
           to="/login"
-          className="flex w-full items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-hidden focus:ring-4 focus:ring-emerald-300 transition-colors"
+          className="flex w-full items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-darkGreen focus:outline-hidden transition-colors"
         >
           <User className="w-4 h-4 mr-2" />
           Login to Checkout
@@ -164,7 +164,7 @@ const OrderSummary = () => {
       return (
         <button
           onClick={() => setShowAddressForm(true)}
-          className="flex w-full items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-hidden focus:ring-4 focus:ring-emerald-300 transition-colors"
+          className="flex w-full items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-darkGreen transition-colors"
         >
           <MapPin className="w-4 h-4 mr-2" />
           Add Shipping Address
@@ -174,8 +174,7 @@ const OrderSummary = () => {
 
     return (
       <motion.button
-        className="flex w-full items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-hidden focus:ring-4 focus:ring-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed"
-        whileHover={{ scale: loading ? 1 : 1.05 }}
+        className="flex w-full items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-darkGreen focus:outline-hidden focus:ring-4 focus:ring-emerald-300 disabled:opacity-50 transition disabled:cursor-not-allowed"
         whileTap={{ scale: loading ? 1 : 0.95 }}
         onClick={handlePayment}
         disabled={loading || !razorpayKey}
@@ -187,19 +186,19 @@ const OrderSummary = () => {
 
   return (
     <motion.div
-      className="space-y-4 rounded-lg border border-gray-700 bg-gray-800 p-4 shadow-xs sm:p-6"
+      className="space-y-4 rounded-lg  bg-secondary p-4 shadow-xs sm:p-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <p className="text-xl font-semibold text-emerald-400">Order summary</p>
+      <p className="text-xl font-semibold text-black">Order summary</p>
 
       {shippingAddress && (
-        <div className="bg-gray-700 rounded-lg p-3">
+        <div className="rounded-lg p-3">
           <div className="flex items-start gap-2">
-            <MapPin className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-gray-300">
-              <p className="font-medium text-white">
+            <MapPin className="w-4 h-4 text-black mt-0.5 flex-shrink-0" />
+            <div className="text-sm text-black">
+              <p className="font-medium ">
                 {shippingAddress.fullName}
               </p>
               <p>{shippingAddress.addressLine1}</p>
@@ -211,7 +210,7 @@ const OrderSummary = () => {
                 {shippingAddress.postalCode}
               </p>
               <p>{shippingAddress.country}</p>
-              <p className="text-emerald-400">{shippingAddress.phone}</p>
+              <p className="text-black">{shippingAddress.phone}</p>
             </div>
           </div>
         </div>
@@ -220,18 +219,18 @@ const OrderSummary = () => {
       <div className="space-y-4">
         <div className="space-y-2">
           <dl className="flex items-center justify-between gap-4">
-            <dt className="text-base font-normal text-gray-300">
+            <dt className="text-base font-normal text-gray-600">
               Original price
             </dt>
-            <dd className="text-base font-medium text-white">
+            <dd className="text-base font-medium text-black">
               ₹{formattedSubtotal}
             </dd>
           </dl>
 
           {savings > 0 && (
             <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-300">Savings</dt>
-              <dd className="text-base font-medium text-emerald-400">
+              <dt className="text-base font-normal text-gray-600  ">Savings</dt>
+              <dd className="text-base font-medium text-black">
                 -₹{formattedSavings}
               </dd>
             </dl>
@@ -239,17 +238,17 @@ const OrderSummary = () => {
 
           {coupon && isCouponApplied && (
             <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-300">
+              <dt className="text-base font-normal text-black">
                 Coupon ({coupon.code})
               </dt>
-              <dd className="text-base font-medium text-emerald-400">
+              <dd className="text-base font-medium text-black">
                 -{coupon.discountPercentage}%
               </dd>
             </dl>
           )}
           <dl className="flex items-center justify-between gap-4 border-t border-gray-600 pt-2">
-            <dt className="text-base font-bold text-white">Total</dt>
-            <dd className="text-base font-bold text-emerald-400">
+            <dt className="text-base font-bold text-gray-600">Total</dt>
+            <dd className="text-base font-bold text-black">
               ₹{formattedTotal}
             </dd>
           </dl>
@@ -261,7 +260,7 @@ const OrderSummary = () => {
           <span className="text-sm font-normal text-gray-400">or</span>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-emerald-400 underline hover:text-emerald-300 hover:no-underline"
+            className="inline-flex items-center gap-2 text-sm font-medium text-primary underline hover:text-darkGreen hover:no-underline"
           >
             Continue Shopping
             <MoveRight size={16} />
