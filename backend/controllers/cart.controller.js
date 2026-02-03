@@ -40,9 +40,15 @@ const getCartItems = async (user, sessionId) => {
     const cartItems = await Promise.all(
       user.cartItems.map(async (item) => {
         const Model = MODEL_MAP[item.type];
-        if (!Model) return null;
+        if (!Model) {
+            console.warn(`Unknown model type: ${item.type} for item ${item.ref}`);
+            return null;
+        }
         const doc = await Model.findById(item.ref);
-        if (!doc) return null;
+        if (!doc) {
+            console.warn(`Referenced item not found: Type=${item.type}, ID=${item.ref}`);
+            return null;
+        }
         return {
           ...doc.toJSON(),
           quantity: item.quantity,
@@ -51,7 +57,7 @@ const getCartItems = async (user, sessionId) => {
       })
     );
     const filteredItems = cartItems.filter(Boolean);
-    console.log("User cart items:", filteredItems.length);
+    console.log(`User cart items: ${filteredItems.length} (original: ${user.cartItems.length})`);
     return filteredItems;
   } else {
     console.log("Getting cart items for guest user");
@@ -64,9 +70,15 @@ const getCartItems = async (user, sessionId) => {
     const cartItems = await Promise.all(
       guestCart.items.map(async (item) => {
         const Model = MODEL_MAP[item.type];
-        if (!Model) return null;
+        if (!Model) {
+             console.warn(`Unknown model type: ${item.type} for item ${item.ref}`);
+             return null;
+        }
         const doc = await Model.findById(item.ref);
-        if (!doc) return null;
+        if (!doc) {
+            console.warn(`Referenced item not found: Type=${item.type}, ID=${item.ref}`);
+            return null;
+        }
         return {
           ...doc.toJSON(),
           quantity: item.quantity,
@@ -75,62 +87,35 @@ const getCartItems = async (user, sessionId) => {
       })
     );
     const filteredItems = cartItems.filter(Boolean);
-    console.log("Guest cart items:", filteredItems.length);
+    console.log(`Guest cart items: ${filteredItems.length} (original: ${guestCart.items.length})`);
     return filteredItems;
   }
 };
 
 export const getCartProducts = async (req, res) => {
-  console.log("getCartProducts called with:", {
-    user: req.user ? req.user._id : "guest",
-    sessionId: req.cookies.sessionId || req.headers["x-session-id"],
-    cookies: req.cookies,
-    headers: req.headers,
-  });
+  console.log("getCartProducts called. Auth user:", req.user ? req.user._id : "none");
+  console.log("Headers x-session-id:", req.headers["x-session-id"]);
+  console.log("Cookies sessionId:", req.cookies.sessionId);
 
   try {
-    let effectiveUser = req.user;
-
-    if (!effectiveUser && req.cookies?.accessToken) {
-      const token = req.cookies.accessToken;
-      try {
-        if (process.env.JWT_SECRET) {
-          const payload = jwt.verify(token, process.env.JWT_SECRET);
-          if (payload?.userId) {
-            const dbUser = await User.findById(payload.userId);
-            if (dbUser) effectiveUser = dbUser;
-          }
-        } else {
-          const payload = jwt.decode(token);
-          if (payload?.userId) {
-            const dbUser = await User.findById(payload.userId);
-            if (dbUser) effectiveUser = dbUser;
-          }
-        }
-      } catch (e) {
-        console.log("Self-auth in getCartProducts failed:", e.message);
-        const payload = jwt.decode(token);
-        if (payload?.userId) {
-          const dbUser = await User.findById(payload.userId);
-          if (dbUser) effectiveUser = dbUser;
-        }
-      }
-    }
-
     let cartItems = [];
-    if (effectiveUser) {
-      const dbUser = await User.findById(effectiveUser._id);
-      console.log(
-        "Authenticated request. Ignoring session header. User:",
-        dbUser?._id
-      );
+    if (req.user) {
+      const dbUser = await User.findById(req.user._id);
+      console.log("Authenticated User found in DB:", dbUser ? dbUser._id : "not found");
+      if (dbUser) {
+        console.log("Raw cart items in DB:", JSON.stringify(dbUser.cartItems));
+      }
+      
       cartItems = await getCartItems(dbUser, null);
     } else {
       const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
       console.log("Guest request. Using session ID:", sessionId);
+      if (!sessionId) {
+        console.warn("WARNING: No user and no session ID provided to getCartProducts");
+      }
       cartItems = await getCartItems(null, sessionId);
     }
-    console.log("Cart items retrieved:", cartItems.length);
+    console.log("Final Cart items retrieved:", cartItems.length);
 
     res.set("Cache-Control", "no-store");
     res.set("Pragma", "no-cache");
@@ -152,11 +137,19 @@ export const addToCart = async (req, res) => {
         .status(400)
         .json({ message: "Invalid cart item type or refId" });
     }
+    
+    // Validate existence
+    const Model = MODEL_MAP[type];
+    const doc = await Model.findById(refId);
+    if (!doc) {
+        console.warn(`Attempt to add non-existent item to cart: Type=${type}, ID=${refId}`);
+        return res.status(404).json({ message: "Item not found" });
+    }
 
     if (req.user) {
       const user = req.user;
       const existingItem = user.cartItems.find(
-        (item) => item.ref.equals(refId) && item.type === type
+        (item) => item.ref.toString() === refId && item.type === type
       );
       if (existingItem) {
         existingItem.quantity += 1;
@@ -174,7 +167,7 @@ export const addToCart = async (req, res) => {
 
       const guestCart = await getOrCreateGuestCart(sessionId);
       const existingItem = guestCart.items.find(
-        (item) => item.ref.equals(refId) && item.type === type
+        (item) => item.ref.toString() === refId && item.type === type
       );
 
       if (existingItem) {
@@ -196,15 +189,24 @@ export const removeAllFromCart = async (req, res) => {
   try {
     const { refId, type } = req.body;
     const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
+    
+    console.log("removeAllFromCart called:", { 
+      userId: req.user?._id, 
+      sessionId, 
+      refId, 
+      type 
+    });
 
     if (req.user) {
       const user = req.user;
       if (!refId || !type) {
         user.cartItems = [];
       } else {
+        const initialLength = user.cartItems.length;
         user.cartItems = user.cartItems.filter(
-          (item) => !(item.ref.equals(refId) && item.type === type)
+          (item) => !(item.ref.toString() === refId && item.type === type)
         );
+        console.log(`User cart item removed. Before: ${initialLength}, After: ${user.cartItems.length}`);
       }
       await user.save();
       res.json(user.cartItems);
@@ -224,7 +226,7 @@ export const removeAllFromCart = async (req, res) => {
         guestCart.items = [];
       } else {
         guestCart.items = guestCart.items.filter(
-          (item) => !(item.ref.equals(refId) && item.type === type)
+          (item) => !(item.ref.toString() === refId && item.type === type)
         );
       }
 
@@ -232,6 +234,7 @@ export const removeAllFromCart = async (req, res) => {
       res.json(guestCart.items);
     }
   } catch (error) {
+    console.error("Error in removeAllFromCart:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -241,15 +244,26 @@ export const updateQuantity = async (req, res) => {
     const { refId, type, quantity } = req.body;
     const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
 
+    console.log("updateQuantity called:", { 
+      userId: req.user?._id, 
+      sessionId, 
+      refId, 
+      type, 
+      quantity 
+    });
+
     if (req.user) {
       const user = req.user;
       const existingItem = user.cartItems.find(
-        (item) => item.ref.equals(refId) && item.type === type
+        (item) => item.ref.toString() === refId && item.type === type
       );
+      
+      console.log("User item found:", !!existingItem);
+
       if (existingItem) {
         if (quantity === 0) {
           user.cartItems = user.cartItems.filter(
-            (item) => !(item.ref.equals(refId) && item.type === type)
+            (item) => !(item.ref.toString() === refId && item.type === type)
           );
           await user.save();
           return res.json(user.cartItems);
@@ -258,6 +272,7 @@ export const updateQuantity = async (req, res) => {
         await user.save();
         res.json(user.cartItems);
       } else {
+        console.log("Item not found in user cart");
         res.status(404).json({ message: "Cart item not found" });
       }
     } else {
@@ -273,12 +288,12 @@ export const updateQuantity = async (req, res) => {
       }
 
       const existingItem = guestCart.items.find(
-        (item) => item.ref.equals(refId) && item.type === type
+        (item) => item.ref.toString() === refId && item.type === type
       );
       if (existingItem) {
         if (quantity === 0) {
           guestCart.items = guestCart.items.filter(
-            (item) => !(item.ref.equals(refId) && item.type === type)
+            (item) => !(item.ref.toString() === refId && item.type === type)
           );
           await guestCart.save();
           return res.json(guestCart.items);

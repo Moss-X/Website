@@ -1,6 +1,6 @@
 import express from "express";
 import { addToCart, getCartProducts, removeAllFromCart, updateQuantity, mergeGuestCart } from "../controllers/cart.controller.js";
-import { protectRoute } from "../middleware/auth.middleware.js";
+import { protectRoute, optionalAuth } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -13,11 +13,11 @@ router.get("/health", (req, res) => {
 	});
 });
 
-// Cart operations - no authentication required (guest users can use cart)
-router.get("/", getCartProducts);
-router.post("/", addToCart);
-router.delete("/", removeAllFromCart);
-router.put("/:id", updateQuantity);
+// Cart operations - optional authentication (handles both guest and logged-in users)
+router.get("/", optionalAuth, getCartProducts);
+router.post("/", optionalAuth, addToCart);
+router.delete("/", optionalAuth, removeAllFromCart);
+router.put("/:id", optionalAuth, updateQuantity);
 
 // Merge guest cart with user cart after login - requires authentication
 router.post("/merge", protectRoute, mergeGuestCart);
