@@ -106,9 +106,13 @@ const Navbar = () => {
               </div>
             </Link>
             {/* Centered Search Bar */}
-            <div className="flex-1 flex justify-center items-center relative z-50">
-              <div className="w-36 md:w-full max-w-md relative">
-                <div className={`flex items-center ${location.pathname === '/' ? ' bg-primary' : 'bg-secondary'} rounded-lg px-3 py-1 border border-neutral focus-within:ring-2 focus-within:ring-darkGreen gap-2`}>
+            <div className="flex-1 flex justify-center md:justify-center items-center relative z-50">
+
+              {/* <div className="w-full max-w-md px-2 md:px-0 relative"> */}
+              <div className="w-full max-w-md relative">
+
+
+                <div className={`flex items-center ${location.pathname === '/' ? ' bg-primary' : 'bg-secondary'} rounded-lg px-2 md:px-3py-1 border border-neutral focus-within:ring-2 focus-within:ring-darkGreen gap-2`}>
                   <Search className= {`w-5 h-5 ${location.pathname === '/' ? ' text-white' : 'text-black'}`} />
                   <input
                     ref={inputRef}
@@ -118,13 +122,21 @@ const Navbar = () => {
                     onFocus={handleInputFocus}
                     onBlur={handleInputBlur}
                     onKeyDown={handleKeyDown}
-                    placeholder="Search plants..."
-                    className={`bg-transparent outline-hidden border-none ${location.pathname === '/' ? ' text-white placeholder-white' : 'text-black placeholder-text-primary'} w-full py-2 placeholder-opacity-70`}
+                    placeholder={window.innerWidth < 640 ? "Search…" : "Search plants…"}
+
+                    className={`bg-transparent outline-hidden border-none ${location.pathname === '/' ? ' text-white placeholder-white/80' : 'text-black placeholder-text-primary'} w-full py-2 placeholder-opacity-70`}
                     aria-label="Search plants"
                   />
                 </div>
                 {showOverlay && search && (
-                  <div className="absolute left-0 right-0 mt-2 bg-secondary rounded-lg shadow-lg  border-gray border-2 z-50 max-h-72 overflow-y-auto">
+<div className="
+  absolute left-0 right-0 mt-2
+  bg-secondary rounded-lg shadow-lg border border-gray
+  z-50
+  max-h-60 md:max-h-72
+  overflow-y-auto
+">
+
                     {/* issue */}
 
 
@@ -136,7 +148,8 @@ const Navbar = () => {
                       suggestions.map((s, i) => (
                         <div
                           key={s._id}
-                          className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100 ${i === activeIndex ? 'bg-gray-800' : ''}`}
+                          className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 ${i === activeIndex ? 'bg-gray-100' : ''}
+`}
                           onMouseDown={() => handleSuggestionClick(s._id)}
                           tabIndex={0}
                         >
@@ -148,9 +161,9 @@ const Navbar = () => {
                           <span className="text-gray-900 font-medium line-clamp-1">
                             {s.name}
                           </span>
-                          <span className="text-xs text-darkGreen  ml-auto">
+                          {/* <span className="text-xs text-darkGreen  ml-auto">
                             ${s.price}
-                          </span>
+                          </span> */}
                         </div>
                       ))
                     )}

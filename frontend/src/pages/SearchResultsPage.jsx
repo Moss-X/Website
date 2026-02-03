@@ -21,7 +21,23 @@ function useQuery() {
 }
 
 function SearchResultsPage() {
+  
   const [filtersOpen, setFiltersOpen] = useState(false);
+  useEffect(() => {
+  if (filtersOpen) {
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+  } else {
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
+  }
+
+  return () => {
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
+  };
+}, [filtersOpen]);
+
 
   const queryParams = useQuery()
   const query = queryParams.get("q") || ""
@@ -90,9 +106,6 @@ function SearchResultsPage() {
   function handleBundleClick(id) {
     navigate(`/bundle/${id}`)
   }
-  function handleCollectionClick(id) {
-    navigate(`/collection/${id}`)
-  }
 
   // Active filter chips
   const activeFilters = []
@@ -114,8 +127,6 @@ function SearchResultsPage() {
 
       <div className="flex">
         
-        {/* Filter Bar */}
-        {/* Mobile Overlay */}
 {filtersOpen && (
   <div
     className="fixed inset-0 bg-black/50 z-30 md:hidden"
@@ -130,12 +141,12 @@ function SearchResultsPage() {
   }}
 className={`
   fixed md:sticky
-  top-[64px] md:top-0
+  top-16 md:top-0
   left-0
   h-[calc(100vh-64px)] md:h-auto
   bg-secondary p-4
   z-40
-  w-[260px] max-w-xs
+  w-65 max-w-xs
   transform transition-transform duration-300
   ${filtersOpen ? "translate-x-0" : "-translate-x-full"}
   md:translate-x-0
@@ -174,7 +185,7 @@ className={`
                       } else {
                         setCategory(prev => prev.filter(c => c !== cat));
                       }
-                      // if (window.innerWidth < 768) setFiltersOpen(false);
+
 
                     }}
                   />
