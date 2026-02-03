@@ -10,8 +10,7 @@ import { useEffect } from "react";
 import LoadingSpinner from "../components/LoadingSpinner";
 
 const CartPage = () => {
-  const { cart, loading, initializeSession, getCartItems, mergeGuestCart } =
-    useCartStore();
+  const { cart, loading, initializeSession, getCartItems } = useCartStore();
 
   useEffect(() => {
     if (!loading) {
@@ -80,7 +79,6 @@ const EmptyCartUI = () => (
       Looks like you {"haven't"} added anything to your cart yet.
     </p>
     <Link
-    
       className="mt-4 px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition"
       to="/"
     >

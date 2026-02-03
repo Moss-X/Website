@@ -146,8 +146,13 @@ export const useCartStore = create((set, get) => ({
   },
   addToCart: async (product) => {
     try {
-      // Set session headers for guest users
-      setAxiosHeaders();
+      const { useUserStore } = await import('./useUserStore');
+      const { user } = useUserStore.getState();
+      
+      if (!user) {
+        setAxiosHeaders();
+      }
+      
       await axios.post("/cart", { refId: product._id, type: "product" });
       toast.success("Product added to cart");
 
@@ -167,8 +172,13 @@ export const useCartStore = create((set, get) => ({
   },
   addBundleToCart: async (bundle) => {
     try {
-      // Set session headers for guest users
-      setAxiosHeaders();
+      const { useUserStore } = await import('./useUserStore');
+      const { user } = useUserStore.getState();
+      
+      if (!user) {
+        setAxiosHeaders();
+      }
+
       await axios.post("/cart", { refId: bundle._id, type: "bundle" });
       toast.success("Bundle added to cart");
       set((prevState) => {
@@ -203,8 +213,13 @@ export const useCartStore = create((set, get) => ({
   },
   addCollectionToCart: async (collection) => {
     try {
-      // Set session headers for guest users
-      setAxiosHeaders();
+      const { useUserStore } = await import('./useUserStore');
+      const { user } = useUserStore.getState();
+      
+      if (!user) {
+        setAxiosHeaders();
+      }
+
       await axios.post("/cart", { refId: collection._id, type: "collection" });
       toast.success("Collection added to cart");
       set((prevState) => {
@@ -238,25 +253,37 @@ export const useCartStore = create((set, get) => ({
     }
   },
   removeFromCart: async (id, type) => {
-    await axios.delete(`/cart`, { data: { refId: id, type } });
-    set((prevState) => ({
-      cart: prevState.cart.filter((item) => !(item._id === id && item.type === type)),
-    }));
-    get().calculateTotals();
+    console.log("removeFromCart called with:", { id, type });
+    try {
+      await axios.delete(`/cart`, { data: { refId: id, type } });
+      set((prevState) => ({
+        cart: prevState.cart.filter((item) => !(item._id === id && item.type === type)),
+      }));
+      get().calculateTotals();
+    } catch (error) {
+      console.error("removeFromCart failed:", error);
+      toast.error("Failed to remove item");
+    }
   },
   updateQuantity: async (id, quantity, type) => {
+    console.log("updateQuantity called with:", { id, quantity, type });
     if (quantity === 0) {
       get().removeFromCart(id, type);
       return;
     }
 
-    await axios.put(`/cart/${id}`, { refId: id, type, quantity });
-    set((prevState) => ({
-      cart: prevState.cart.map((item) =>
-        item._id === id && item.type === type ? { ...item, quantity } : item
-      ),
-    }));
-    get().calculateTotals();
+    try {
+      await axios.put(`/cart/${id}`, { refId: id, type, quantity });
+      set((prevState) => ({
+        cart: prevState.cart.map((item) =>
+          item._id === id && item.type === type ? { ...item, quantity } : item
+        ),
+      }));
+      get().calculateTotals();
+    } catch (error) {
+      console.error("updateQuantity failed:", error);
+      toast.error("Failed to update quantity");
+    }
   },
   calculateTotals: () => {
     const { cart, coupon } = get();
