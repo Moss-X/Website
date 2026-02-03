@@ -233,7 +233,7 @@ className={`
           </button>
         </form>
         <div className="p-4 flex-1">
-        <h1 className="text-3xl font-bold text-primary mb-6">Search Results for "{query}"</h1>
+        <h1 className="text-3xl font-bold text-primary mb-6">${`Search Results for "{query}"`}</h1>
         {/* Active Filter Chips */}
         {activeFilters.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
