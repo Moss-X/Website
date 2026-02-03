@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
 import HomePage from "./pages/HomePage";
 import SignUpPage from "./pages/SignUpPage";
@@ -19,10 +19,12 @@ import { useCartStore } from "./stores/useCartStore";
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import PurchaseCancelPage from "./pages/PurchaseCancelPage";
 import DisclaimerModal from "./components/DisclaimerModal";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 function App() {
-  const { user, checkAuth } = useUserStore();
+  const { user, checkAuth, checkingAuth } = useUserStore();
   const { getCartItems, initializeSession } = useCartStore();
+  const location = useLocation();
 
   useEffect(() => {
     checkAuth();
@@ -38,7 +40,7 @@ function App() {
     }
   }, [user]); // Only depend on user changes
 
-  // if (checkingAuth) return <LoadingSpinner />;
+  if (checkingAuth) return <LoadingSpinner />;
 
   return (
     <div className="min-h-screen bg-white text-white relative overflow-hidden">

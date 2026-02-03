@@ -60,35 +60,17 @@ export const useUserStore = create((set, get) => ({
 	},
 
 	checkAuth: async () => {
-		// Prevent multiple simultaneous auth checks
-		if (get().checkingAuth) {
-			console.log("Auth check already in progress, skipping...");
-			return;
-		}
-		
-		console.log("Starting auth check...");
 		set({ checkingAuth: true });
 		try {
-			console.log("Making request to /auth/profile...");
 			const response = await axios.get("/auth/profile");
-			console.log("Auth response received:", response.data);
 			set({ user: response.data, checkingAuth: false });
 		} catch (error) {
-			console.log("Auth check failed:", error.message);
-			console.error("Auth error details:", {
-				message: error.message,
-				response: error.response?.data,
-				status: error.response?.status
-			});
-			// Always reset checkingAuth to false, even on error
 			set({ checkingAuth: false, user: null });
 		}
 	},
 
 	refreshToken: async () => {
 		// Prevent multiple simultaneous refresh attempts
-		if (get().checkingAuth) return;
-
 		set({ checkingAuth: true });
 		try {
 			const response = await axios.post("/auth/refresh-token");
