@@ -21,6 +21,24 @@ function useQuery() {
 }
 
 function SearchResultsPage() {
+  
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  useEffect(() => {
+  if (filtersOpen) {
+    document.body.style.overflow = "hidden";
+    document.body.style.touchAction = "none";
+  } else {
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
+  }
+
+  return () => {
+    document.body.style.overflow = "";
+    document.body.style.touchAction = "";
+  };
+}, [filtersOpen]);
+
+
   const queryParams = useQuery()
   const query = queryParams.get("q") || ""
   const [products, setProducts] = useState([])
@@ -88,9 +106,6 @@ function SearchResultsPage() {
   function handleBundleClick(id) {
     navigate(`/bundle/${id}`)
   }
-  function handleCollectionClick(id) {
-    navigate(`/collection/${id}`)
-  }
 
   // Active filter chips
   const activeFilters = []
@@ -100,14 +115,59 @@ function SearchResultsPage() {
 
   return (
     <div className=" text-white pt-18 pb-12">
+      {/* Mobile Filters Button */}
+<div className="md:hidden p-4">
+  <button aria-label="Open filters"
+    onClick={() => setFiltersOpen(true)}
+    className="bg-primary text-white px-4 py-2 rounded-md font-semibold"
+  >
+    Filters
+  </button>
+</div>
+
       <div className="flex">
         
-        {/* Filter Bar */}
-        <form
-  onSubmit={applyFilters}
-  className="sticky top-0 h-screen p-4 z-30 bg-secondary rounded-md flex flex-col flex-wrap gap-4 items-start  text-primary  max-w-xs min-w-[260px] sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-lg"
-  style={{ maxWidth: "400px" }} // Add this line for a hard limit
+{filtersOpen && (
+  <div
+    className="fixed inset-0 bg-black/50 z-30 md:hidden"
+    onClick={() => setFiltersOpen(false)}
+  />
+)}
+
+<form
+  onSubmit={(e) => {
+    applyFilters(e);
+    setFiltersOpen(false);
+  }}
+className={`
+  fixed md:sticky
+  top-16 md:top-0
+  left-0
+  h-[calc(100vh-64px)] md:h-auto
+  bg-secondary p-4
+  z-40
+  w-65 max-w-xs
+  transform transition-transform duration-300
+  ${filtersOpen ? "translate-x-0" : "-translate-x-full"}
+  md:translate-x-0
+  md:relative
+  rounded-md
+  flex flex-col gap-4
+  text-primary
+`}
+
 >
+
+  <div className="flex justify-between items-center md:hidden mb-2">
+    <span className="font-semibold text-black">Filters</span>
+    <button
+      type="button"
+      onClick={() => setFiltersOpen(false)}
+    >
+      <X className="w-5 h-5 text-black" />
+    </button>
+  </div>
+
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <Tag className="w-3 h-3" />
             <label className="text-sm font-medium mb-1">Category</label>
@@ -125,6 +185,8 @@ function SearchResultsPage() {
                       } else {
                         setCategory(prev => prev.filter(c => c !== cat));
                       }
+
+
                     }}
                   />
                   <span>{cat}</span>
@@ -152,6 +214,17 @@ function SearchResultsPage() {
             {loading ? <span className="flex items-center gap-2"><svg className="animate-spin h-4 w-4 text-black" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg> Loading...</span> : "Apply Filters"}
           </button>
           <button
+  type="button"
+  onClick={() => {
+    resetFilters();
+    setFiltersOpen(false); // close on mobile
+  }}
+  className="bg-primary/80 text-white font-medium px-4 py-1.5 rounded-sm cursor-pointer transition-colors text-sm hover:bg-primary"
+>
+  Clear all filters
+</button>
+
+          <button
             type="button"
             onClick={resetFilters}
             className="bg-pastelpink text-secondary cursor-pointer font-semibold px-4 py-2 rounded-sm transition-colors"
@@ -159,8 +232,8 @@ function SearchResultsPage() {
             Reset
           </button>
         </form>
-        <div className="p-4">
-        <h1 className="text-3xl font-bold text-primary mb-6">Search Results for "{query}"</h1>
+        <div className="p-4 flex-1">
+        <h1 className="text-3xl font-bold text-primary mb-6">${`Search Results for "{query}"`}</h1>
         {/* Active Filter Chips */}
         {activeFilters.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6">
