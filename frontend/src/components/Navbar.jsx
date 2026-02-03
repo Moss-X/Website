@@ -119,12 +119,15 @@ const Navbar = () => {
                     onBlur={handleInputBlur}
                     onKeyDown={handleKeyDown}
                     placeholder="Search plants..."
-                    className={`bg-transparent outline-hidden border-none ${location.pathname === '/' ? ' text-white' : 'text-black'} w-full py-2 placeholder-gray-300"
+                    className={`bg-transparent outline-hidden border-none ${location.pathname === '/' ? ' text-white' : 'text-black'} w-full py-2 placeholder-white placeholder-opacity-70
                     aria-label="Search plants`}
                   />
                 </div>
                 {showOverlay && search && (
                   <div className="absolute left-0 right-0 mt-2 bg-secondary rounded-lg shadow-lg  border-[var(--color-gray)] border-2 z-50 max-h-72 overflow-y-auto">
+                    {/* issue */}
+
+
                     {loading ? (
                       <div className="p-4 text-black  text-center">Loading...</div>
                     ) : suggestions.length === 0 ? (
@@ -133,7 +136,7 @@ const Navbar = () => {
                       suggestions.map((s, i) => (
                         <div
                           key={s._id}
-                          className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-800 ${
+                          className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100
                             i === activeIndex ? "bg-gray-800" : ""
                           }`}
                           onMouseDown={() => handleSuggestionClick(s._id)}
@@ -144,10 +147,10 @@ const Navbar = () => {
                             alt={s.name}
                             className="w-8 h-8 object-cover rounded-sm"
                           />
-                          <span className="text-white font-medium line-clamp-1">
+                          <span className="text-gray-900 font-medium line-clamp-1">
                             {s.name}
                           </span>
-                          <span className="text-xs text-[color:var(--color-neutral)/70] ml-auto">
+                          <span className="text-xs text-darkGreen  ml-auto">
                             ${s.price}
                           </span>
                         </div>
