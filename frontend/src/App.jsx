@@ -40,6 +40,7 @@ function App() {
     }
   }, [user]); // Only depend on user changes
 
+  console.log("App checkingAuth:", checkingAuth);
   if (checkingAuth) return <LoadingSpinner />;
 
   return (
