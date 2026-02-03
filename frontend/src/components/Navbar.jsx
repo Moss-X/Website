@@ -119,12 +119,12 @@ const Navbar = () => {
                     onBlur={handleInputBlur}
                     onKeyDown={handleKeyDown}
                     placeholder="Search plants..."
-                    className={`bg-transparent outline-hidden border-none ${location.pathname === '/' ? ' text-white' : 'text-black'} w-full py-2 placeholder-white placeholder-opacity-70
-                    aria-label="Search plants`}
+                    className={`bg-transparent outline-hidden border-none ${location.pathname === '/' ? ' text-white placeholder-white' : 'text-black placeholder-text-primary'} w-full py-2 placeholder-opacity-70`}
+                    aria-label="Search plants"
                   />
                 </div>
                 {showOverlay && search && (
-                  <div className="absolute left-0 right-0 mt-2 bg-secondary rounded-lg shadow-lg  border-[var(--color-gray)] border-2 z-50 max-h-72 overflow-y-auto">
+                  <div className="absolute left-0 right-0 mt-2 bg-secondary rounded-lg shadow-lg  border-gray border-2 z-50 max-h-72 overflow-y-auto">
                     {/* issue */}
 
 
@@ -136,9 +136,7 @@ const Navbar = () => {
                       suggestions.map((s, i) => (
                         <div
                           key={s._id}
-                          className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100
-                            i === activeIndex ? "bg-gray-800" : ""
-                          }`}
+                          className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100 ${i === activeIndex ? 'bg-gray-800' : ''}`}
                           onMouseDown={() => handleSuggestionClick(s._id)}
                           tabIndex={0}
                         >
@@ -187,7 +185,7 @@ const Navbar = () => {
               </Link>
               {isAdmin && (
                 <Link
-                  className="bg-[var(--color-darkGreen)] hover:bg-primary text-white px-3 py-1 rounded-md font-medium
+                  className="bg-darkGreen hover:bg-primary text-white px-3 py-1 rounded-md font-medium
                    transition duration-300 ease-in-out flex items-center"
                   to={"/secret-dashboard"}
                 >
