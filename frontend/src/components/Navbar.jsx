@@ -89,19 +89,27 @@ const Navbar = () => {
     <>
       {showOverlay && (
         <div
-          className="sticky inset-0 bg-black/60 z-40 transition-opacity"
+          className="fixed inset-0 bg-black/60 z-40"
           onClick={() => setShowOverlay(false)}
         />
       )}
   <header className={`absolute top-0 left-0 w-full bg-opacity-90 z-50 transition-all duration-300${location.pathname !== '/' ? ' bg-primary' : ''}`}> 
-        <div className={`w-full px-4 py-3`}>
-          <div className='flex w-full flex-wrap justify-between items-center'>
-            <Link to='/' className='text-2xl font-bold text-heading items-center space-x-2 flex'>
+        <div className="w-full px-3 py-2 md:px-4 md:py-3">
+
+          <div className="flex w-full items-center gap-2 md:gap-4">
+
+
+          <Link
+  to="/"
+  className="flex items-center mr-1 md:mr-2"
+>
+
               <div className="flex items-center ">
                 <img
                   src="/icon.png"
                   alt="Moss-x logo"
-                  className="w-10 h-10 object-contain"
+                  className="w-8 h-8 md:w-10 md:h-10 object-contain"
+
                 />
               </div>
             </Link>
@@ -112,7 +120,8 @@ const Navbar = () => {
               <div className="w-full max-w-md relative">
 
 
-                <div className={`flex items-center ${location.pathname === '/' ? ' bg-primary' : 'bg-secondary'} rounded-lg px-2 md:px-3py-1 border border-neutral focus-within:ring-2 focus-within:ring-darkGreen gap-2`}>
+                <div className={`flex items-center ${location.pathname === '/' ? ' bg-primary' : 'bg-secondary'} rounded-lg px-2 py-1 md:px-3 md:py-2
+ border border-neutral focus-within:ring-2 focus-within:ring-darkGreen gap-2`}>
                   <Search className= {`w-5 h-5 ${location.pathname === '/' ? ' text-white' : 'text-black'}`} />
                   <input
                     ref={inputRef}
@@ -122,9 +131,15 @@ const Navbar = () => {
                     onFocus={handleInputFocus}
                     onBlur={handleInputBlur}
                     onKeyDown={handleKeyDown}
-                    placeholder={window.innerWidth < 640 ? "Search…" : "Search plants…"}
+                    placeholder="Search plants"
 
-                    className={`bg-transparent outline-hidden border-none ${location.pathname === '/' ? ' text-white placeholder-white/80' : 'text-black placeholder-text-primary'} w-full py-2 placeholder-opacity-70`}
+
+                    className={`bg-transparent outline-none border-none
+${location.pathname === "/"
+  ? "text-white placeholder-white/70"
+  : "text-black placeholder-gray-500"
+}
+w-full text-sm md:text-base py-1`}
                     aria-label="Search plants"
                   />
                 </div>
@@ -171,12 +186,14 @@ const Navbar = () => {
                 )}
               </div>
             </div>
-            <nav className="flex flex-wrap items-center gap-4">
+            <nav className="flex items-center gap-3 md:gap-4">
+
               <Link
                 to={"/"}
                 className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out`}
               >
-                Home
+                <span className="hidden md:inline">Home</span>
+
               </Link>
               <Link
                 to={"/cart"}
@@ -203,7 +220,7 @@ const Navbar = () => {
                   to={"/secret-dashboard"}
                 >
                   <Lock className="inline-block mr-1" size={18} />
-                  <span className="hidden sm:inline">Dashboard</span>
+                  <span className="hidden md:inline">Dashboard</span>
                 </Link>
               )}
               {!user && (
@@ -213,14 +230,15 @@ const Navbar = () => {
                     className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out flex items-center`}
                   >
                     <UserPlus className="inline-block mr-1" size={20} />
-                    <span className="hidden sm:inline">Sign Up</span>
+                    <span className="hidden md:inline">Sign Up</span>
+
                   </Link>
                   <Link
                     to='/login'
                     className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out flex items-center`}
                   >
                     <LogIn className="inline-block mr-1" size={20} />
-                    <span className="hidden sm:inline">Login</span>
+                    <span className="hidden md:inline">Login</span>
                   </Link>
                 </>
               )}
@@ -230,7 +248,7 @@ const Navbar = () => {
                   className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-red-400 transition duration-300 ease-in-out flex items-center`}
                 >
                   <LogOut className="inline-block mr-1" size={20} />
-                  <span className="hidden sm:inline">Logout</span>
+                  <span className="hidden md:inline">Logout</span>
                 </button>
               )}
             </nav>
