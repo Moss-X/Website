@@ -1,10 +1,10 @@
-import toast from "react-hot-toast";
-import { Plus } from "lucide-react";
-import { useUserStore } from "../stores/useUserStore";
-import { useCartStore } from "../stores/useCartStore";
-import { Link, useNavigate } from "react-router-dom";
+import toast from 'react-hot-toast';
+import { Plus } from 'lucide-react';
+import { useUserStore } from '../stores/useUserStore';
+import { useCartStore } from '../stores/useCartStore';
+import { Link, useNavigate } from 'react-router-dom';
 
-function ProductCard({ product, variant = "default" }) {
+function ProductCard({ product, variant = 'default' }) {
   const { user } = useUserStore();
   const { addToCart } = useCartStore();
   const navigate = useNavigate();
@@ -13,13 +13,13 @@ function ProductCard({ product, variant = "default" }) {
 
   const handleAddToCart = (e) => {
     e.stopPropagation();
-        addToCart(product);
+    addToCart(product);
   };
 
   const handleBuyNow = (e) => {
     e.stopPropagation();
-      addToCart(product);
-      navigate("/cart");
+    addToCart(product);
+    navigate('/cart');
   };
 
   return (
@@ -30,7 +30,7 @@ function ProductCard({ product, variant = "default" }) {
       role="button"
       aria-label={`View product ${product.name}`}
       onKeyDown={(e) => {
-        if (e.key === "Enter") navigate(`/product/${product._id}`);
+        if (e.key === 'Enter') navigate(`/product/${product._id}`);
       }}
     >
       <div className="relative bg-gray flex items-center justify-center w-full h-[75%] aspect-square basis-1/2 md:basis-auto">

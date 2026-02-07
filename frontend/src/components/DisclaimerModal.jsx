@@ -1,5 +1,5 @@
-import { X } from "lucide-react";
-import { useState, useEffect } from "react";
+import { X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const DisclaimerModal = () => {
   const [isOpen, setIsOpen] = useState(false);
