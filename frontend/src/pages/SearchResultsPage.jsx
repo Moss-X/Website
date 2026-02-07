@@ -92,7 +92,6 @@ function SearchResultsPage() {
       })
       .catch(() => setError('Failed to fetch search results'))
       .finally(() => setLoading(false));
-    // eslint-disable-next-line
   }, [query, category, minPrice, maxPrice]);
 
   function handleBundleClick(id) {

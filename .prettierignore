@@ -1,6 +1,9 @@
 # Ignore artifacts:
 build
 coverage
+dist
+frontend/dist
+frontend/node_modules
 
 #defaults
 **/.git

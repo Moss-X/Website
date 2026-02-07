@@ -9,7 +9,21 @@
     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
     "prepare": "husky",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "lint-staged": {
+    "backend/**/*.{js,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "frontend/**/*.{js,jsx,ts,tsx}": [
+      "prettier --write"
+    ],
+    "*.{json,md,css,html}": [
+      "prettier --write"
+    ]
   },
   "keywords": [],
   "author": "",
@@ -29,8 +43,11 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "eslint": "^9.9.0",
     "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.3.0",
     "husky": "^9.1.7",
+    "lint-staged": "^15.2.9",
     "nodemon": "^3.1.4",
     "prettier": "3.8.1"
   }
