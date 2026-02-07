@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon backend/server.js",
     "start": "node backend/server.js",
-    "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
+    "build": "pnpm install && pnpm install --prefix frontend && pnpm run build --prefix frontend",
+    "build_pnpm": "pnpm install && pnpm install --prefix frontend && pnpm run build --prefix frontend",
     "prepare": "husky",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
