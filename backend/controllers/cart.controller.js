@@ -4,8 +4,6 @@ import Collection from '../models/collection.model.js';
 import User from '../models/user.model.js';
 import jwt from 'jsonwebtoken';
 import GuestCart from '../models/guestCart.model.js';
-import { redis } from '../lib/redis.js';
-import { v4 as uuidv4 } from 'uuid';
 
 const MODEL_MAP = {
   product: Product,
