@@ -152,7 +152,7 @@ const LoginPage = () => {
         </div>
         <div className="relative hidden md:block w-[52%] h-auto bg-darkGreen overflow-hidden">
           <img
-            src="/leaf-pattern.png"
+            src="/leaf-pattern.avif"
             alt="Leaf Pattern"
             className="w-full h-full object-cover object-center "
           />

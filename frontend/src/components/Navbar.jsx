@@ -104,7 +104,7 @@ const Navbar = () => {
             >
               <div className="flex items-center ">
                 <img
-                  src="/icon.png"
+                  src="/icon.avif"
                   alt="Moss-x logo"
                   className="w-10 h-10 object-contain"
                 />

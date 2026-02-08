@@ -38,7 +38,7 @@ function HeroCarousel() {
         </div>
       </div>
       <img
-        src="/heroPlant.png"
+        src="/heroPlant.avif"
         alt=""
         srcSet=""
         className=" absolute h-52 xs:h-[50%] sm:h-[55%] lg:hidden bottom-0 right-0"
@@ -46,7 +46,7 @@ function HeroCarousel() {
       {/* Branding Right */}
       <div className="hidden lg:flex relative w-full lg:w-1/3 lg:h-[700px] bg-primary items-center justify-center">
         <img
-          src="/heroPlant.png"
+          src="/heroPlant.avif"
           alt="Moss-x Icon"
           className="z-[0] absolute top-5/8 -translate-y-1/2 -translate-x-1/2 md:min-h-full mb-6 drop-shadow-2xl object-cover pb-12 "
         />
