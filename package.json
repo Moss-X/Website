@@ -4,9 +4,10 @@
   "description": "",
   "main": "backend/server.js",
   "scripts": {
-    "dev": "nodemon backend/server.js",
+    "dev": "pnpm --filter . --filter frontend --parallel run dev",
     "start": "node backend/server.js",
-    "build": "pnpm install && pnpm install --prefix frontend && pnpm run build --prefix frontend",
+    "build": "pnpm install -r && pnpm --filter frontend build",
+    "build:profile": "pnpm install -r && pnpm --filter frontend build:profile",
     "build_pnpm": "pnpm install && pnpm install --prefix frontend && pnpm run build --prefix frontend",
     "prepare": "husky",
     "format": "prettier --write .",
