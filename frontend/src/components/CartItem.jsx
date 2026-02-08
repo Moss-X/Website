@@ -1,11 +1,11 @@
-import { Minus, Plus, Trash } from "lucide-react";
-import { useCartStore } from "../stores/useCartStore";
+import { Minus, Plus, Trash } from 'lucide-react';
+import { useCartStore } from '../stores/useCartStore';
 
 const CartItem = ({ item }) => {
   const { removeFromCart, updateQuantity } = useCartStore();
 
   // Responsive, consistent styling for all item types
-  if (item.type === "bundle" || item.type === "collection") {
+  if (item.type === 'bundle' || item.type === 'collection') {
     return (
       <div className="rounded-lg p-4 md:p-6 shadow-xs bg-gray-100 flex flex-col md:flex-row gap-4 md:gap-6 items-center">
         <div className="shrink-0 flex items-center justify-center w-full md:w-auto">
@@ -19,7 +19,7 @@ const CartItem = ({ item }) => {
           <div className="flex flex-wrap items-center gap-2 mb-1">
             <span className="text-base font-bold text-black">{item.title}</span>
             <span className="bg-primary text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-              {item.type === "bundle" ? "Bundle" : "Collection"}
+              {item.type === 'bundle' ? 'Bundle' : 'Collection'}
             </span>
           </div>
           <p className="text-sm text-gray-600 mb-2 line-clamp-2">
@@ -127,9 +127,7 @@ const CartItem = ({ item }) => {
             </button>
           </div>
           <div className="text-start md:w-32">
-            <p className="text-base font-bold text-black">
-              ₹{item.price}
-            </p>
+            <p className="text-base font-bold text-black">₹{item.price}</p>
           </div>
           <button
             className="inline-flex items-center text-sm font-medium text-red-500 hover:text-red-400 hover:underline ml-auto"

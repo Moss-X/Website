@@ -5,22 +5,22 @@ import {
   LogOut,
   Lock,
   Search,
-} from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
-import { useUserStore } from "../stores/useUserStore";
-import { useCartStore } from "../stores/useCartStore";
-import { useState, useRef, useEffect } from "react";
-import axios from "../lib/axios";
+} from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
+import { useUserStore } from '../stores/useUserStore';
+import { useCartStore } from '../stores/useCartStore';
+import { useState, useRef, useEffect } from 'react';
+import axios from '../lib/axios';
 
 const Navbar = () => {
   const location = useLocation();
   const { user, logout } = useUserStore();
-  const isAdmin = user?.role === "admin";
+  const isAdmin = user?.role === 'admin';
   const { cart } = useCartStore();
 
   // Search state
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [showOverlay, setShowOverlay] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -64,17 +64,17 @@ const Navbar = () => {
   }
   function handleSuggestionClick(id) {
     setShowOverlay(false);
-    setSearch("");
+    setSearch('');
     setSuggestions([]);
     navigate(`/product/${id}`);
   }
   function handleKeyDown(e) {
     if (!suggestions.length) return;
-    if (e.key === "ArrowDown") {
+    if (e.key === 'ArrowDown') {
       setActiveIndex((i) => (i + 1) % suggestions.length);
-    } else if (e.key === "ArrowUp") {
+    } else if (e.key === 'ArrowUp') {
       setActiveIndex((i) => (i - 1 + suggestions.length) % suggestions.length);
-    } else if (e.key === "Enter") {
+    } else if (e.key === 'Enter') {
       if (activeIndex >= 0) {
         handleSuggestionClick(suggestions[activeIndex]._id);
       } else {
@@ -93,20 +93,18 @@ const Navbar = () => {
           onClick={() => setShowOverlay(false)}
         />
       )}
-  <header className={`absolute top-0 left-0 w-full bg-opacity-90 z-50 transition-all duration-300${location.pathname !== '/' ? ' bg-primary' : ''}`}> 
-        <div className="w-full px-3 py-2 md:px-4 md:py-3">
-
-          <div className="flex w-full items-center gap-2 md:gap-4">
-
-
-          <Link
-  to="/"
-  className="flex items-center mr-1 md:mr-2"
->
-
+      <header
+        className={`absolute top-0 left-0 w-full bg-opacity-90 z-50 transition-all duration-300${location.pathname !== '/' ? ' bg-primary' : ''}`}
+      >
+        <div className={`w-full px-4 py-3`}>
+          <div className="flex w-full flex-wrap justify-between items-center">
+            <Link
+              to="/"
+              className="text-2xl font-bold text-heading items-center space-x-2 flex"
+            >
               <div className="flex items-center ">
                 <img
-                  src="/icon.png"
+                  src="/icon.avif"
                   alt="Moss-x logo"
                   className="w-8 h-8 md:w-10 md:h-10 object-contain"
 
@@ -114,15 +112,14 @@ const Navbar = () => {
               </div>
             </Link>
             {/* Centered Search Bar */}
-            <div className="flex-1 flex justify-center md:justify-center items-center relative z-50">
-
-              {/* <div className="w-full max-w-md px-2 md:px-0 relative"> */}
-              <div className="w-full max-w-md relative">
-
-
-                <div className={`flex items-center ${location.pathname === '/' ? ' bg-primary' : 'bg-secondary'} rounded-lg px-2 py-1 md:px-3 md:py-2
- border border-neutral focus-within:ring-2 focus-within:ring-darkGreen gap-2`}>
-                  <Search className= {`w-5 h-5 ${location.pathname === '/' ? ' text-white' : 'text-black'}`} />
+            <div className="flex-1 flex justify-center items-center relative z-50">
+              <div className="w-36 md:w-full max-w-md relative">
+                <div
+                  className={`flex items-center ${location.pathname === '/' ? ' bg-primary' : 'bg-secondary'} rounded-lg px-3 py-1 border border-neutral focus-within:ring-2 focus-within:ring-darkGreen gap-2`}
+                >
+                  <Search
+                    className={`w-5 h-5 ${location.pathname === '/' ? ' text-white' : 'text-black'}`}
+                  />
                   <input
                     ref={inputRef}
                     type="text"
@@ -154,11 +151,14 @@ w-full text-sm md:text-base py-1`}
 
                     {/* issue */}
 
-
                     {loading ? (
-                      <div className="p-4 text-black  text-center">Loading...</div>
+                      <div className="p-4 text-black  text-center">
+                        Loading...
+                      </div>
                     ) : suggestions.length === 0 ? (
-                      <div className="p-4 text-black text-center">No results found</div>
+                      <div className="p-4 text-black text-center">
+                        No results found
+                      </div>
                     ) : (
                       suggestions.map((s, i) => (
                         <div
@@ -189,14 +189,14 @@ w-full text-sm md:text-base py-1`}
             <nav className="flex items-center gap-3 md:gap-4">
 
               <Link
-                to={"/"}
+                to={'/'}
                 className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out`}
               >
                 <span className="hidden md:inline">Home</span>
 
               </Link>
               <Link
-                to={"/cart"}
+                to={'/cart'}
                 className={`relative group ${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out`}
               >
                 <ShoppingCart
@@ -217,7 +217,7 @@ w-full text-sm md:text-base py-1`}
                 <Link
                   className="bg-darkGreen hover:bg-primary text-white px-3 py-1 rounded-md font-medium
                    transition duration-300 ease-in-out flex items-center"
-                  to={"/secret-dashboard"}
+                  to={'/secret-dashboard'}
                 >
                   <Lock className="inline-block mr-1" size={18} />
                   <span className="hidden md:inline">Dashboard</span>
@@ -234,7 +234,7 @@ w-full text-sm md:text-base py-1`}
 
                   </Link>
                   <Link
-                    to='/login'
+                    to="/login"
                     className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out flex items-center`}
                   >
                     <LogIn className="inline-block mr-1" size={20} />

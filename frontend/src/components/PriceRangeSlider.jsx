@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 const PriceRangeSlider = ({
   min = 0,
@@ -40,7 +40,6 @@ const PriceRangeSlider = ({
 
   return (
     <div className="w-full max-w-md bg-secondary rounded-lg shadow-xs px-2 space-y-6">
-
       {/* Price Inputs */}
       <div className="flex items-center gap-4">
         <div className="flex flex-row gap-2 items-center flex-1">
@@ -60,8 +59,7 @@ const PriceRangeSlider = ({
             onChange={handleMaxInput}
             className="border border-darkGray rounded-md text-center text-sm p-2 w-10 focus:outline-hidden focus:ring-2 focus:ring-primary bg-white text-black"
           />
-                      <label className="text-sm text-black mb-1">Max</label>
-
+          <label className="text-sm text-black mb-1">Max</label>
         </div>
       </div>
 

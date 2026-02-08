@@ -1,11 +1,9 @@
-import Product from "../models/product.model.js";
-import Bundle from "../models/bundle.model.js";
-import Collection from "../models/collection.model.js";
-import User from "../models/user.model.js";
-import jwt from "jsonwebtoken";
-import GuestCart from "../models/guestCart.model.js";
-import { redis } from "../lib/redis.js";
-import { v4 as uuidv4 } from "uuid";
+import Product from '../models/product.model.js';
+import Bundle from '../models/bundle.model.js';
+import Collection from '../models/collection.model.js';
+import User from '../models/user.model.js';
+import jwt from 'jsonwebtoken';
+import GuestCart from '../models/guestCart.model.js';
 
 const MODEL_MAP = {
   product: Product,
@@ -14,15 +12,15 @@ const MODEL_MAP = {
 };
 
 const getOrCreateGuestCart = async (sessionId) => {
-  console.log("getOrCreateGuestCart called with sessionId:", sessionId);
+  console.log('getOrCreateGuestCart called with sessionId:', sessionId);
   let guestCart = await GuestCart.findOne({ sessionId });
   if (!guestCart) {
-    console.log("Creating new guest cart for sessionId:", sessionId);
+    console.log('Creating new guest cart for sessionId:', sessionId);
     guestCart = new GuestCart({ sessionId });
     await guestCart.save();
   } else {
     console.log(
-      "Found existing guest cart with items:",
+      'Found existing guest cart with items:',
       guestCart.items.length
     );
   }
@@ -30,13 +28,13 @@ const getOrCreateGuestCart = async (sessionId) => {
 };
 
 const getCartItems = async (user, sessionId) => {
-  console.log("getCartItems called with:", {
-    user: user ? user._id : "guest",
+  console.log('getCartItems called with:', {
+    user: user ? user._id : 'guest',
     sessionId,
   });
 
   if (user) {
-    console.log("Getting cart items for authenticated user");
+    console.log('Getting cart items for authenticated user');
     const cartItems = await Promise.all(
       user.cartItems.map(async (item) => {
         const Model = MODEL_MAP[item.type];
@@ -57,13 +55,13 @@ const getCartItems = async (user, sessionId) => {
       })
     );
     const filteredItems = cartItems.filter(Boolean);
-    console.log(`User cart items: ${filteredItems.length} (original: ${user.cartItems.length})`);
+    console.log('User cart items:', filteredItems.length);
     return filteredItems;
   } else {
-    console.log("Getting cart items for guest user");
+    console.log('Getting cart items for guest user');
     const guestCart = await GuestCart.findOne({ sessionId });
     if (!guestCart) {
-      console.log("No guest cart found, returning empty array");
+      console.log('No guest cart found, returning empty array');
       return [];
     }
 
@@ -87,55 +85,82 @@ const getCartItems = async (user, sessionId) => {
       })
     );
     const filteredItems = cartItems.filter(Boolean);
-    console.log(`Guest cart items: ${filteredItems.length} (original: ${guestCart.items.length})`);
+    console.log('Guest cart items:', filteredItems.length);
     return filteredItems;
   }
 };
 
 export const getCartProducts = async (req, res) => {
-  console.log("getCartProducts called. Auth user:", req.user ? req.user._id : "none");
-  console.log("Headers x-session-id:", req.headers["x-session-id"]);
-  console.log("Cookies sessionId:", req.cookies.sessionId);
+  console.log('getCartProducts called with:', {
+    user: req.user ? req.user._id : 'guest',
+    sessionId: req.cookies.sessionId || req.headers['x-session-id'],
+    cookies: req.cookies,
+    headers: req.headers,
+  });
 
   try {
-    let cartItems = [];
-    if (req.user) {
-      const dbUser = await User.findById(req.user._id);
-      console.log("Authenticated User found in DB:", dbUser ? dbUser._id : "not found");
-      if (dbUser) {
-        console.log("Raw cart items in DB:", JSON.stringify(dbUser.cartItems));
+    let effectiveUser = req.user;
+
+    if (!effectiveUser && req.cookies?.accessToken) {
+      const token = req.cookies.accessToken;
+      try {
+        if (process.env.JWT_SECRET) {
+          const payload = jwt.verify(token, process.env.JWT_SECRET);
+          if (payload?.userId) {
+            const dbUser = await User.findById(payload.userId);
+            if (dbUser) effectiveUser = dbUser;
+          }
+        } else {
+          const payload = jwt.decode(token);
+          if (payload?.userId) {
+            const dbUser = await User.findById(payload.userId);
+            if (dbUser) effectiveUser = dbUser;
+          }
+        }
+      } catch (e) {
+        console.log('Self-auth in getCartProducts failed:', e.message);
+        const payload = jwt.decode(token);
+        if (payload?.userId) {
+          const dbUser = await User.findById(payload.userId);
+          if (dbUser) effectiveUser = dbUser;
+        }
       }
-      
+    }
+
+    let cartItems = [];
+    if (effectiveUser) {
+      const dbUser = await User.findById(effectiveUser._id);
+      console.log(
+        'Authenticated request. Ignoring session header. User:',
+        dbUser?._id
+      );
       cartItems = await getCartItems(dbUser, null);
     } else {
-      const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
-      console.log("Guest request. Using session ID:", sessionId);
-      if (!sessionId) {
-        console.warn("WARNING: No user and no session ID provided to getCartProducts");
-      }
+      const sessionId = req.cookies.sessionId || req.headers['x-session-id'];
+      console.log('Guest request. Using session ID:', sessionId);
       cartItems = await getCartItems(null, sessionId);
     }
-    console.log("Final Cart items retrieved:", cartItems.length);
+    console.log('Cart items retrieved:', cartItems.length);
 
-    res.set("Cache-Control", "no-store");
-    res.set("Pragma", "no-cache");
-    res.set("Expires", "0");
+    res.set('Cache-Control', 'no-store');
+    res.set('Pragma', 'no-cache');
+    res.set('Expires', '0');
     res.json(cartItems);
   } catch (error) {
-    console.log("Error in getCartProducts controller", error.message);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.log('Error in getCartProducts controller', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
 export const addToCart = async (req, res) => {
   try {
     const { refId, type } = req.body;
-    const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
+    const sessionId = req.cookies.sessionId || req.headers['x-session-id'];
 
     if (!refId || !type || !MODEL_MAP[type]) {
       return res
         .status(400)
-        .json({ message: "Invalid cart item type or refId" });
+        .json({ message: 'Invalid cart item type or refId' });
     }
     
     // Validate existence
@@ -162,7 +187,7 @@ export const addToCart = async (req, res) => {
       if (!sessionId) {
         return res
           .status(400)
-          .json({ message: "Session ID required for guest cart" });
+          .json({ message: 'Session ID required for guest cart' });
       }
 
       const guestCart = await getOrCreateGuestCart(sessionId);
@@ -180,22 +205,15 @@ export const addToCart = async (req, res) => {
       res.json(guestCart.items);
     }
   } catch (error) {
-    console.log("Error in addToCart controller", error.message);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.log('Error in addToCart controller', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
 export const removeAllFromCart = async (req, res) => {
   try {
     const { refId, type } = req.body;
-    const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
-    
-    console.log("removeAllFromCart called:", { 
-      userId: req.user?._id, 
-      sessionId, 
-      refId, 
-      type 
-    });
+    const sessionId = req.cookies.sessionId || req.headers['x-session-id'];
 
     if (req.user) {
       const user = req.user;
@@ -214,7 +232,7 @@ export const removeAllFromCart = async (req, res) => {
       if (!sessionId) {
         return res
           .status(400)
-          .json({ message: "Session ID required for guest cart" });
+          .json({ message: 'Session ID required for guest cart' });
       }
 
       const guestCart = await GuestCart.findOne({ sessionId });
@@ -234,15 +252,14 @@ export const removeAllFromCart = async (req, res) => {
       res.json(guestCart.items);
     }
   } catch (error) {
-    console.error("Error in removeAllFromCart:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
 export const updateQuantity = async (req, res) => {
   try {
     const { refId, type, quantity } = req.body;
-    const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
+    const sessionId = req.cookies.sessionId || req.headers['x-session-id'];
 
     console.log("updateQuantity called:", { 
       userId: req.user?._id, 
@@ -272,19 +289,18 @@ export const updateQuantity = async (req, res) => {
         await user.save();
         res.json(user.cartItems);
       } else {
-        console.log("Item not found in user cart");
-        res.status(404).json({ message: "Cart item not found" });
+        res.status(404).json({ message: 'Cart item not found' });
       }
     } else {
       if (!sessionId) {
         return res
           .status(400)
-          .json({ message: "Session ID required for guest cart" });
+          .json({ message: 'Session ID required for guest cart' });
       }
 
       const guestCart = await GuestCart.findOne({ sessionId });
       if (!guestCart) {
-        return res.status(404).json({ message: "Guest cart not found" });
+        return res.status(404).json({ message: 'Guest cart not found' });
       }
 
       const existingItem = guestCart.items.find(
@@ -302,25 +318,25 @@ export const updateQuantity = async (req, res) => {
         await guestCart.save();
         res.json(guestCart.items);
       } else {
-        res.status(404).json({ message: "Cart item not found" });
+        res.status(404).json({ message: 'Cart item not found' });
       }
     }
   } catch (error) {
-    console.log("Error in updateQuantity controller", error.message);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.log('Error in updateQuantity controller', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
 export const mergeGuestCart = async (req, res) => {
   try {
-    const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
+    const sessionId = req.cookies.sessionId || req.headers['x-session-id'];
     if (!sessionId) {
-      return res.json({ message: "No guest cart to merge" });
+      return res.json({ message: 'No guest cart to merge' });
     }
 
     const guestCart = await GuestCart.findOne({ sessionId });
     if (!guestCart || guestCart.items.length === 0) {
-      return res.json({ message: "No guest cart items to merge" });
+      return res.json({ message: 'No guest cart items to merge' });
     }
 
     const user = req.user;
@@ -345,11 +361,11 @@ export const mergeGuestCart = async (req, res) => {
     await GuestCart.findOneAndDelete({ sessionId });
 
     res.json({
-      message: "Guest cart merged successfully",
+      message: 'Guest cart merged successfully',
       cartItems: user.cartItems,
     });
   } catch (error) {
-    console.log("Error in mergeGuestCart controller", error.message);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.log('Error in mergeGuestCart controller', error.message);
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
