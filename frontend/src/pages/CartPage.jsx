@@ -10,8 +10,7 @@ import { useEffect } from 'react';
 import LoadingSpinner from '../components/LoadingSpinner';
 
 const CartPage = () => {
-  const { cart, loading, initializeSession, getCartItems, mergeGuestCart } =
-    useCartStore();
+  const { cart, loading, initializeSession, getCartItems } = useCartStore();
 
   useEffect(() => {
     if (!loading) {

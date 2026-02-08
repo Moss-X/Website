@@ -51,18 +51,20 @@ const CartItem = ({ item }) => {
             <div className="flex items-center gap-2">
               <button
                 className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-darkGreen bg-primary hover:bg-darkGreen focus:outline-hidden focus:ring-2 focus:ring-darkGreen"
-                onClick={() =>
-                  updateQuantity(item._id, item.quantity - 1, item.type)
-                }
+                onClick={() => {
+                  console.log("Updating quantity for item:", item);
+                  updateQuantity(item._id, item.quantity - 1, item.type);
+                }}
               >
                 <Minus className="text-white" />
               </button>
               <p className="text-black font-semibold">{item.quantity}</p>
               <button
                 className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-darkGreen bg-primary hover:bg-darkGreen focus:outline-hidden focus:ring-2 focus:ring-darkGreen"
-                onClick={() =>
-                  updateQuantity(item._id, item.quantity + 1, item.type)
-                }
+                onClick={() => {
+                  console.log("Updating quantity for item:", item);
+                  updateQuantity(item._id, item.quantity + 1, item.type);
+                }}
               >
                 <Plus className="text-white" />
               </button>
@@ -74,7 +76,10 @@ const CartItem = ({ item }) => {
             </div>
             <button
               className="inline-flex items-center text-sm font-medium text-red-500 hover:text-red-400 hover:underline ml-auto"
-              onClick={() => removeFromCart(item._id, item.type)}
+              onClick={() => {
+                console.log("Removing item:", item);
+                removeFromCart(item._id, item.type);
+              }}
             >
               <Trash />
             </button>
@@ -103,18 +108,20 @@ const CartItem = ({ item }) => {
           <div className="flex items-center gap-2">
             <button
               className="inline-flex h-6 w-6 items-center justify-center rounded-full  bg-primary hover:bg-darkGreen focus:outline-hidden hover:ring-2 hover:ring-neutral"
-              onClick={() =>
-                updateQuantity(item._id, item.quantity - 1, item.type)
-              }
+              onClick={() => {
+                console.log("Updating quantity for product:", item);
+                updateQuantity(item._id, item.quantity - 1, item.type);
+              }}
             >
               <Minus className="text-white" />
             </button>
             <p className="text-black font-semibold">{item.quantity}</p>
             <button
               className="inline-flex h-6 w-6 items-center justify-center rounded-full  bg-primary hover:bg-darkGreen focus:outline-hidden hover:ring-2 hover:ring-neutral"
-              onClick={() =>
-                updateQuantity(item._id, item.quantity + 1, item.type)
-              }
+              onClick={() => {
+                console.log("Updating quantity for product:", item);
+                updateQuantity(item._id, item.quantity + 1, item.type);
+              }}
             >
               <Plus className="text-white" />
             </button>
@@ -124,7 +131,10 @@ const CartItem = ({ item }) => {
           </div>
           <button
             className="inline-flex items-center text-sm font-medium text-red-500 hover:text-red-400 hover:underline ml-auto"
-            onClick={() => removeFromCart(item._id, item.type)}
+            onClick={() => {
+              console.log("Removing product:", item);
+              removeFromCart(item._id, item.type);
+            }}
           >
             <Trash />
           </button>

@@ -38,6 +38,32 @@ export const protectRoute = async (req, res, next) => {
   }
 };
 
+export const optionalAuth = async (req, res, next) => {
+	try {
+		const accessToken = req.cookies.accessToken;
+
+		if (!accessToken) {
+			return next();
+		}
+
+		try {
+			const decoded = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
+			const user = await User.findById(decoded.userId).select("-password");
+
+			if (user) {
+				req.user = user;
+			}
+		} catch (error) {
+			// If token is invalid or expired, just proceed as guest
+			console.log("Optional auth failed (proceeding as guest):", error.message);
+		}
+		
+		next();
+	} catch (error) {
+		next();
+	}
+};
+
 export const adminRoute = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     next();

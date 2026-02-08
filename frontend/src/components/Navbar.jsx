@@ -89,7 +89,7 @@ const Navbar = () => {
     <>
       {showOverlay && (
         <div
-          className="sticky inset-0 bg-black/60 z-40 transition-opacity"
+          className="fixed inset-0 bg-black/60 z-40"
           onClick={() => setShowOverlay(false)}
         />
       )}
@@ -106,7 +106,8 @@ const Navbar = () => {
                 <img
                   src="/icon.avif"
                   alt="Moss-x logo"
-                  className="w-10 h-10 object-contain"
+                  className="w-8 h-8 md:w-10 md:h-10 object-contain"
+
                 />
               </div>
             </Link>
@@ -127,13 +128,27 @@ const Navbar = () => {
                     onFocus={handleInputFocus}
                     onBlur={handleInputBlur}
                     onKeyDown={handleKeyDown}
-                    placeholder="Search plants..."
-                    className={`bg-transparent outline-hidden border-none ${location.pathname === '/' ? ' text-white' : 'text-black'} w-full py-2 placeholder-white placeholder-opacity-70
-                    aria-label="Search plants`}
+                    placeholder="Search plants"
+
+
+                    className={`bg-transparent outline-none border-none
+${location.pathname === "/"
+  ? "text-white placeholder-white/70"
+  : "text-black placeholder-gray-500"
+}
+w-full text-sm md:text-base py-1`}
+                    aria-label="Search plants"
                   />
                 </div>
                 {showOverlay && search && (
-                  <div className="absolute left-0 right-0 mt-2 bg-secondary rounded-lg shadow-lg  border-[var(--color-gray)] border-2 z-50 max-h-72 overflow-y-auto">
+<div className="
+  absolute left-0 right-0 mt-2
+  bg-secondary rounded-lg shadow-lg border border-gray
+  z-50
+  max-h-60 md:max-h-72
+  overflow-y-auto
+">
+
                     {/* issue */}
 
                     {loading ? (
@@ -148,9 +163,8 @@ const Navbar = () => {
                       suggestions.map((s, i) => (
                         <div
                           key={s._id}
-                          className={`flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100
-                            i === activeIndex ? "bg-gray-800" : ""
-                          }`}
+                          className={`flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-gray-100 ${i === activeIndex ? 'bg-gray-100' : ''}
+`}
                           onMouseDown={() => handleSuggestionClick(s._id)}
                           tabIndex={0}
                         >
@@ -162,9 +176,9 @@ const Navbar = () => {
                           <span className="text-gray-900 font-medium line-clamp-1">
                             {s.name}
                           </span>
-                          <span className="text-xs text-darkGreen  ml-auto">
+                          {/* <span className="text-xs text-darkGreen  ml-auto">
                             ${s.price}
-                          </span>
+                          </span> */}
                         </div>
                       ))
                     )}
@@ -172,12 +186,14 @@ const Navbar = () => {
                 )}
               </div>
             </div>
-            <nav className="flex flex-wrap items-center gap-4">
+            <nav className="flex items-center gap-3 md:gap-4">
+
               <Link
                 to={'/'}
                 className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out`}
               >
-                Home
+                <span className="hidden md:inline">Home</span>
+
               </Link>
               <Link
                 to={'/cart'}
@@ -199,12 +215,12 @@ const Navbar = () => {
               </Link>
               {isAdmin && (
                 <Link
-                  className="bg-[var(--color-darkGreen)] hover:bg-primary text-white px-3 py-1 rounded-md font-medium
+                  className="bg-darkGreen hover:bg-primary text-white px-3 py-1 rounded-md font-medium
                    transition duration-300 ease-in-out flex items-center"
                   to={'/secret-dashboard'}
                 >
                   <Lock className="inline-block mr-1" size={18} />
-                  <span className="hidden sm:inline">Dashboard</span>
+                  <span className="hidden md:inline">Dashboard</span>
                 </Link>
               )}
               {!user && (
@@ -214,14 +230,15 @@ const Navbar = () => {
                     className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out flex items-center`}
                   >
                     <UserPlus className="inline-block mr-1" size={20} />
-                    <span className="hidden sm:inline">Sign Up</span>
+                    <span className="hidden md:inline">Sign Up</span>
+
                   </Link>
                   <Link
                     to="/login"
                     className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-emerald-300 transition duration-300 ease-in-out flex items-center`}
                   >
                     <LogIn className="inline-block mr-1" size={20} />
-                    <span className="hidden sm:inline">Login</span>
+                    <span className="hidden md:inline">Login</span>
                   </Link>
                 </>
               )}
@@ -231,7 +248,7 @@ const Navbar = () => {
                   className={`${location.pathname === '/' ? 'text-primary lg:text-secondary' : 'text-secondary'} hover:text-red-400 transition duration-300 ease-in-out flex items-center`}
                 >
                   <LogOut className="inline-block mr-1" size={20} />
-                  <span className="hidden sm:inline">Logout</span>
+                  <span className="hidden md:inline">Logout</span>
                 </button>
               )}
             </nav>

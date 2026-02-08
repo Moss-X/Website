@@ -38,9 +38,15 @@ const getCartItems = async (user, sessionId) => {
     const cartItems = await Promise.all(
       user.cartItems.map(async (item) => {
         const Model = MODEL_MAP[item.type];
-        if (!Model) return null;
+        if (!Model) {
+            console.warn(`Unknown model type: ${item.type} for item ${item.ref}`);
+            return null;
+        }
         const doc = await Model.findById(item.ref);
-        if (!doc) return null;
+        if (!doc) {
+            console.warn(`Referenced item not found: Type=${item.type}, ID=${item.ref}`);
+            return null;
+        }
         return {
           ...doc.toJSON(),
           quantity: item.quantity,
@@ -62,9 +68,15 @@ const getCartItems = async (user, sessionId) => {
     const cartItems = await Promise.all(
       guestCart.items.map(async (item) => {
         const Model = MODEL_MAP[item.type];
-        if (!Model) return null;
+        if (!Model) {
+             console.warn(`Unknown model type: ${item.type} for item ${item.ref}`);
+             return null;
+        }
         const doc = await Model.findById(item.ref);
-        if (!doc) return null;
+        if (!doc) {
+            console.warn(`Referenced item not found: Type=${item.type}, ID=${item.ref}`);
+            return null;
+        }
         return {
           ...doc.toJSON(),
           quantity: item.quantity,
@@ -150,11 +162,19 @@ export const addToCart = async (req, res) => {
         .status(400)
         .json({ message: 'Invalid cart item type or refId' });
     }
+    
+    // Validate existence
+    const Model = MODEL_MAP[type];
+    const doc = await Model.findById(refId);
+    if (!doc) {
+        console.warn(`Attempt to add non-existent item to cart: Type=${type}, ID=${refId}`);
+        return res.status(404).json({ message: "Item not found" });
+    }
 
     if (req.user) {
       const user = req.user;
       const existingItem = user.cartItems.find(
-        (item) => item.ref.equals(refId) && item.type === type
+        (item) => item.ref.toString() === refId && item.type === type
       );
       if (existingItem) {
         existingItem.quantity += 1;
@@ -172,7 +192,7 @@ export const addToCart = async (req, res) => {
 
       const guestCart = await getOrCreateGuestCart(sessionId);
       const existingItem = guestCart.items.find(
-        (item) => item.ref.equals(refId) && item.type === type
+        (item) => item.ref.toString() === refId && item.type === type
       );
 
       if (existingItem) {
@@ -200,9 +220,11 @@ export const removeAllFromCart = async (req, res) => {
       if (!refId || !type) {
         user.cartItems = [];
       } else {
+        const initialLength = user.cartItems.length;
         user.cartItems = user.cartItems.filter(
-          (item) => !(item.ref.equals(refId) && item.type === type)
+          (item) => !(item.ref.toString() === refId && item.type === type)
         );
+        console.log(`User cart item removed. Before: ${initialLength}, After: ${user.cartItems.length}`);
       }
       await user.save();
       res.json(user.cartItems);
@@ -222,7 +244,7 @@ export const removeAllFromCart = async (req, res) => {
         guestCart.items = [];
       } else {
         guestCart.items = guestCart.items.filter(
-          (item) => !(item.ref.equals(refId) && item.type === type)
+          (item) => !(item.ref.toString() === refId && item.type === type)
         );
       }
 
@@ -239,15 +261,26 @@ export const updateQuantity = async (req, res) => {
     const { refId, type, quantity } = req.body;
     const sessionId = req.cookies.sessionId || req.headers['x-session-id'];
 
+    console.log("updateQuantity called:", { 
+      userId: req.user?._id, 
+      sessionId, 
+      refId, 
+      type, 
+      quantity 
+    });
+
     if (req.user) {
       const user = req.user;
       const existingItem = user.cartItems.find(
-        (item) => item.ref.equals(refId) && item.type === type
+        (item) => item.ref.toString() === refId && item.type === type
       );
+      
+      console.log("User item found:", !!existingItem);
+
       if (existingItem) {
         if (quantity === 0) {
           user.cartItems = user.cartItems.filter(
-            (item) => !(item.ref.equals(refId) && item.type === type)
+            (item) => !(item.ref.toString() === refId && item.type === type)
           );
           await user.save();
           return res.json(user.cartItems);
@@ -271,12 +304,12 @@ export const updateQuantity = async (req, res) => {
       }
 
       const existingItem = guestCart.items.find(
-        (item) => item.ref.equals(refId) && item.type === type
+        (item) => item.ref.toString() === refId && item.type === type
       );
       if (existingItem) {
         if (quantity === 0) {
           guestCart.items = guestCart.items.filter(
-            (item) => !(item.ref.equals(refId) && item.type === type)
+            (item) => !(item.ref.toString() === refId && item.type === type)
           );
           await guestCart.save();
           return res.json(guestCart.items);

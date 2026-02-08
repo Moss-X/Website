@@ -114,6 +114,16 @@ function SearchResultsPage() {
 
   return (
     <div className=" text-white pt-18 pb-12">
+      {/* Mobile Filters Button */}
+<div className="md:hidden p-4">
+  <button aria-label="Open filters"
+    onClick={() => setFiltersOpen(true)}
+    className="bg-primary text-white px-4 py-2 rounded-md font-semibold"
+  >
+    Filters
+  </button>
+</div>
+
       <div className="flex">
         {/* Filter Bar */}
         <form
