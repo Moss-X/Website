@@ -1,14 +1,14 @@
-import Coupon from '../models/coupon.model.js';
-import Order from '../models/order.model.js';
-import { razorpay } from '../lib/razorpay.js';
-import crypto from 'crypto';
+import Coupon from "../models/coupon.model.js";
+import Order from "../models/order.model.js";
+import { razorpay } from "../lib/razorpay.js";
+import crypto from "crypto";
 
 export const createRazorpayOrder = async (req, res) => {
   try {
     const { products, couponCode, shippingAddress } = req.body;
 
     if (!Array.isArray(products) || products.length === 0) {
-      return res.status(400).json({ error: 'Invalid or empty products array' });
+      return res.status(400).json({ error: "Invalid or empty products array" });
     }
 
     // Validate shipping address
@@ -23,7 +23,7 @@ export const createRazorpayOrder = async (req, res) => {
     ) {
       return res
         .status(400)
-        .json({ error: 'Complete shipping address is required' });
+        .json({ error: "Complete shipping address is required" });
     }
 
     let totalAmount = 0;
@@ -53,22 +53,22 @@ export const createRazorpayOrder = async (req, res) => {
     const amountInPaise = Math.round(Number(totalAmount) * 100);
 
     if (!amountInPaise || amountInPaise <= 0) {
-      return res.status(400).json({ error: 'Invalid amount calculated' });
+      return res.status(400).json({ error: "Invalid amount calculated" });
     }
 
     const options = {
       amount: amountInPaise,
-      currency: 'INR',
+      currency: "INR",
       receipt: `order_${Date.now()}`,
       notes: {
         userId: req.user._id.toString(),
-        couponCode: couponCode || '',
+        couponCode: couponCode || "",
         products: JSON.stringify(
           products.map((p) => ({
             id: p._id,
             quantity: p.quantity,
             price: p.price,
-          }))
+          })),
         ),
         discountAmount: discountAmount.toString(),
         shippingAddress: JSON.stringify(shippingAddress),
@@ -90,10 +90,10 @@ export const createRazorpayOrder = async (req, res) => {
       discountAmount: discountAmount,
     });
   } catch (error) {
-    console.error('Error creating Razorpay order:', error);
+    console.error("Error creating Razorpay order:", error);
     res
       .status(500)
-      .json({ message: 'Error creating Razorpay order', error: error.message });
+      .json({ message: "Error creating Razorpay order", error: error.message });
   }
 };
 
@@ -103,20 +103,20 @@ export const verifyRazorpayPayment = async (req, res) => {
       req.body;
 
     // Verify the payment signature
-    const body = razorpay_order_id + '|' + razorpay_payment_id;
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(body.toString())
-      .digest('hex');
+      .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      return res.status(400).json({ error: 'Invalid payment signature' });
+      return res.status(400).json({ error: "Invalid payment signature" });
     }
 
     // Fetch the order details from Razorpay
     const razorpayOrder = await razorpay.orders.fetch(razorpay_order_id);
 
-    if (razorpayOrder.status === 'paid') {
+    if (razorpayOrder.status === "paid") {
       // Deactivate coupon if used
       if (razorpayOrder.notes.couponCode) {
         await Coupon.findOneAndUpdate(
@@ -126,7 +126,7 @@ export const verifyRazorpayPayment = async (req, res) => {
           },
           {
             isActive: false,
-          }
+          },
         );
       }
 
@@ -152,17 +152,17 @@ export const verifyRazorpayPayment = async (req, res) => {
       res.status(200).json({
         success: true,
         message:
-          'Payment verified successfully, order created, and coupon deactivated if used.',
+          "Payment verified successfully, order created, and coupon deactivated if used.",
         orderId: newOrder._id,
       });
     } else {
-      res.status(400).json({ error: 'Payment not completed' });
+      res.status(400).json({ error: "Payment not completed" });
     }
   } catch (error) {
-    console.error('Error verifying Razorpay payment:', error);
+    console.error("Error verifying Razorpay payment:", error);
     res
       .status(500)
-      .json({ message: 'Error verifying payment', error: error.message });
+      .json({ message: "Error verifying payment", error: error.message });
   }
 };
 
@@ -172,10 +172,10 @@ export const getRazorpayKey = async (req, res) => {
       key: process.env.RAZORPAY_KEY_ID,
     });
   } catch (error) {
-    console.error('Error fetching Razorpay key:', error);
+    console.error("Error fetching Razorpay key:", error);
     res
       .status(500)
-      .json({ message: 'Error fetching Razorpay key', error: error.message });
+      .json({ message: "Error fetching Razorpay key", error: error.message });
   }
 };
 
@@ -183,7 +183,7 @@ async function createNewCoupon(userId) {
   await Coupon.findOneAndDelete({ userId });
 
   const newCoupon = new Coupon({
-    code: 'GIFT' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+    code: "GIFT" + Math.random().toString(36).substring(2, 8).toUpperCase(),
     discountPercentage: 10,
     expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
     userId: userId,

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose"
 
 const bundleSchema = new mongoose.Schema(
   {
@@ -14,12 +14,12 @@ const bundleSchema = new mongoose.Schema(
     },
     image: {
       type: String,
-      required: [true, 'Image is required'],
+      required: [true, "Image is required"],
     },
     products: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
+        ref: "Product",
         required: true,
       },
     ],
@@ -35,8 +35,8 @@ const bundleSchema = new mongoose.Schema(
     },
   },
   { timestamps: true }
-);
+)
 
-const Bundle = mongoose.model('Bundle', bundleSchema);
+const Bundle = mongoose.model("Bundle", bundleSchema)
 
-export default Bundle;
+export default Bundle 

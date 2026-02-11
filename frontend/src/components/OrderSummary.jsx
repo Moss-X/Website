@@ -1,12 +1,12 @@
-import { motion } from 'framer-motion';
-import { useCartStore } from '../stores/useCartStore';
-import { useUserStore } from '../stores/useUserStore';
-import { Link } from 'react-router-dom';
-import { MoveRight, MapPin, User } from 'lucide-react';
-import axios from '../lib/axios';
-import { useState, useEffect } from 'react';
-import ShippingAddressForm from './ShippingAddressForm';
-import { toast } from 'react-hot-toast';
+import { motion } from "framer-motion";
+import { useCartStore } from "../stores/useCartStore";
+import { useUserStore } from "../stores/useUserStore";
+import { Link } from "react-router-dom";
+import { MoveRight, MapPin, User } from "lucide-react";
+import axios from "../lib/axios";
+import { useState, useEffect } from "react";
+import ShippingAddressForm from "./ShippingAddressForm";
+import { toast } from "react-hot-toast";
 
 const OrderSummary = () => {
   const {
@@ -19,10 +19,10 @@ const OrderSummary = () => {
     setShippingAddress,
   } = useCartStore();
   const { user } = useUserStore();
-  const [razorpayKey, setRazorpayKey] = useState('');
+  const [razorpayKey, setRazorpayKey] = useState("");
   const [loading, setLoading] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
-  const [checkoutStep, setCheckoutStep] = useState('address');
+  const [checkoutStep, setCheckoutStep] = useState("address");
   const savings = subtotal - total;
   const formattedSubtotal = subtotal.toFixed(2);
   const formattedTotal = total.toFixed(2);
@@ -31,10 +31,10 @@ const OrderSummary = () => {
   useEffect(() => {
     const fetchRazorpayKey = async () => {
       try {
-        const response = await axios.get('/payments/razorpay-key');
+        const response = await axios.get("/payments/razorpay-key");
         setRazorpayKey(response.data.key);
       } catch (error) {
-        console.error('Error fetching Razorpay key:', error);
+        console.error("Error fetching Razorpay key:", error);
       }
     };
     fetchRazorpayKey();
@@ -49,38 +49,38 @@ const OrderSummary = () => {
   const handleAddressSubmit = (address) => {
     setShippingAddress(address);
     setShowAddressForm(false);
-    setCheckoutStep('payment');
+    setCheckoutStep("payment");
   };
 
   const handlePayment = async () => {
     if (!razorpayKey) {
-      console.error('Razorpay key not loaded');
+      console.error("Razorpay key not loaded");
       return;
     }
 
     if (!user) {
-      toast.error('Please login to proceed with checkout');
+      toast.error("Please login to proceed with checkout");
       return;
     }
 
     if (!shippingAddress) {
       setShowAddressForm(true);
-      setCheckoutStep('address');
+      setCheckoutStep("address");
       return;
     }
 
     setLoading(true);
     try {
       const transformed = cart.map((item) => {
-        if (item.type === 'bundle')
+        if (item.type === "bundle")
           return { ...item, price: item.discountedPrice };
-        if (item.type === 'collection')
+        if (item.type === "collection")
           return { ...item, price: item.totalPrice };
         return item;
       });
 
       const orderResponse = await axios.post(
-        '/payments/create-razorpay-order',
+        "/payments/create-razorpay-order",
         {
           products: transformed,
           couponCode: coupon ? coupon.code : null,
@@ -90,20 +90,20 @@ const OrderSummary = () => {
 
       const { orderId, amount, currency } = orderResponse.data;
 
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
       script.onload = () => {
         const options = {
           key: razorpayKey,
           amount: amount,
           currency: currency,
-          name: 'Moss X Store',
-          description: 'Purchase from Moss X',
+          name: "Moss X Store",
+          description: "Purchase from Moss X",
           order_id: orderId,
           handler: async (response) => {
             try {
               const verifyResponse = await axios.post(
-                '/payments/verify-razorpay-payment',
+                "/payments/verify-razorpay-payment",
                 {
                   razorpay_order_id: response.razorpay_order_id,
                   razorpay_payment_id: response.razorpay_payment_id,
@@ -115,20 +115,20 @@ const OrderSummary = () => {
                 window.location.href = `/purchase-success?order_id=${verifyResponse.data.orderId}`;
               } else {
                 window.location.href =
-                  '/purchase-cancel?reason=verification_failed';
+                  "/purchase-cancel?reason=verification_failed";
               }
             } catch (error) {
-              console.error('Error verifying payment:', error);
-              window.location.href = '/purchase-cancel?reason=verify_error';
+              console.error("Error verifying payment:", error);
+              window.location.href = "/purchase-cancel?reason=verify_error";
             }
           },
           prefill: {
             name: shippingAddress.fullName,
-            email: user.email || 'customer@example.com',
+            email: user.email || "customer@example.com",
             contact: shippingAddress.phone,
           },
           theme: {
-            color: '#10b981',
+            color: "#10b981",
           },
           modal: {
             ondismiss: () => {
@@ -142,7 +142,7 @@ const OrderSummary = () => {
       };
       document.head.appendChild(script);
     } catch (error) {
-      console.error('Error creating order:', error);
+      console.error("Error creating order:", error);
       setLoading(false);
     }
   };
@@ -179,7 +179,7 @@ const OrderSummary = () => {
         onClick={handlePayment}
         disabled={loading || !razorpayKey}
       >
-        {loading ? 'Processing...' : 'Proceed to Checkout'}
+        {loading ? "Processing..." : "Proceed to Checkout"}
       </motion.button>
     );
   };
@@ -198,13 +198,15 @@ const OrderSummary = () => {
           <div className="flex items-start gap-2">
             <MapPin className="w-4 h-4 text-black mt-0.5 flex-shrink-0" />
             <div className="text-sm text-black">
-              <p className="font-medium ">{shippingAddress.fullName}</p>
+              <p className="font-medium ">
+                {shippingAddress.fullName}
+              </p>
               <p>{shippingAddress.addressLine1}</p>
               {shippingAddress.addressLine2 && (
                 <p>{shippingAddress.addressLine2}</p>
               )}
               <p>
-                {shippingAddress.city}, {shippingAddress.state}{' '}
+                {shippingAddress.city}, {shippingAddress.state}{" "}
                 {shippingAddress.postalCode}
               </p>
               <p>{shippingAddress.country}</p>

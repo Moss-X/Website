@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import axios from '../lib/axios';
-import { toast } from 'react-hot-toast';
+import { create } from "zustand";
+import axios from "../lib/axios";
+import { toast } from "react-hot-toast";
 
 export const useUserStore = create((set, get) => ({
   user: null,
@@ -12,55 +12,55 @@ export const useUserStore = create((set, get) => ({
 
     if (password !== confirmPassword) {
       set({ loading: false });
-      return toast.error('Passwords do not match');
+      return toast.error("Passwords do not match");
     }
 
     try {
-      const res = await axios.post('/auth/signup', { name, email, password });
+      const res = await axios.post("/auth/signup", { name, email, password });
       set({ user: res.data, loading: false });
       // Merge guest cart after signup
       await get().mergeGuestCart();
       // Refresh cart items to reflect merged state
       try {
-        const { useCartStore } = await import('./useCartStore');
+        const { useCartStore } = await import("./useCartStore");
         await useCartStore.getState().getCartItems();
       } catch {
         /* noop */
       }
     } catch (error) {
       set({ loading: false });
-      toast.error(error.response?.data?.message || 'An error occurred');
+      toast.error(error.response?.data?.message || "An error occurred");
     }
   },
   login: async (email, password) => {
     set({ loading: true });
 
     try {
-      const res = await axios.post('/auth/login', { email, password });
+      const res = await axios.post("/auth/login", { email, password });
 
       set({ user: res.data, loading: false });
       // Merge guest cart after login
       await get().mergeGuestCart();
       // Refresh cart items to reflect merged state
       try {
-        const { useCartStore } = await import('./useCartStore');
+        const { useCartStore } = await import("./useCartStore");
         await useCartStore.getState().getCartItems();
       } catch {
         /* noop */
       }
     } catch (error) {
       set({ loading: false });
-      toast.error(error.response?.data?.message || 'An error occurred');
+      toast.error(error.response?.data?.message || "An error occurred");
     }
   },
 
   logout: async () => {
     try {
-      await axios.post('/auth/logout');
+      await axios.post("/auth/logout");
       set({ user: null });
     } catch (error) {
       toast.error(
-        error.response?.data?.message || 'An error occurred during logout'
+        error.response?.data?.message || "An error occurred during logout",
       );
     }
   },
@@ -68,13 +68,13 @@ export const useUserStore = create((set, get) => ({
   checkAuth: async () => {
     set({ checkingAuth: true });
     try {
-      console.log('in auth check');
+      console.log("in auth check");
 
-      const response = await axios.get('/auth/profile');
+      const response = await axios.get("/auth/profile");
       console.log(response);
       set({ user: response.data, checkingAuth: false });
     } catch (error) {
-      console.log('error check auth ', error);
+      console.log("error check auth ", error);
       set({ checkingAuth: false, user: null });
     }
   },
@@ -83,7 +83,7 @@ export const useUserStore = create((set, get) => ({
     // Prevent multiple simultaneous refresh attempts
     set({ checkingAuth: true });
     try {
-      const response = await axios.post('/auth/refresh-token');
+      const response = await axios.post("/auth/refresh-token");
       set({ checkingAuth: false });
       return response.data;
     } catch (error) {
@@ -95,10 +95,10 @@ export const useUserStore = create((set, get) => ({
   // Merge guest cart with user cart after login
   mergeGuestCart: async () => {
     try {
-      const { useCartStore } = await import('./useCartStore');
+      const { useCartStore } = await import("./useCartStore");
       await useCartStore.getState().mergeGuestCart();
     } catch (error) {
-      console.error('Error merging guest cart:', error);
+      console.error("Error merging guest cart:", error);
     }
   },
 }));
@@ -117,11 +117,8 @@ axios.interceptors.response.use(
 
       try {
         // If the failed request is the refresh token request itself, don't retry
-        if (
-          originalRequest.url &&
-          originalRequest.url.includes('refresh-token')
-        ) {
-          throw new Error('Refresh token expired');
+        if (originalRequest.url && originalRequest.url.includes("refresh-token")) {
+          throw new Error("Refresh token expired");
         }
 
         // If a refresh is already in progress, wait for it to complete
@@ -143,5 +140,5 @@ axios.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
