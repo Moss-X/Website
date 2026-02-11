@@ -1,6 +1,6 @@
-import { Plus, ShoppingCart, Zap } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useCartStore } from '../stores/useCartStore';
+import { Plus, ShoppingCart, Zap } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { useCartStore } from "../stores/useCartStore";
 
 function BundleCard({ bundle }) {
   // console.log("Length:", bundle.products);
@@ -14,7 +14,7 @@ function BundleCard({ bundle }) {
   function handleBuyNow(e, bundle) {
     e.stopPropagation();
     addBundleToCart(bundle);
-    navigate('/cart');
+    navigate("/cart");
   }
   const savings = Math.max(0, bundle.totalPrice - bundle.discountedPrice);
 
@@ -27,7 +27,7 @@ function BundleCard({ bundle }) {
       role="button"
       aria-label={`View bundle ${bundle.title}`}
       onKeyDown={(e) => {
-        if (e.key === 'Enter') navigate(`/bundle/${bundle._id}`);
+        if (e.key === "Enter") navigate(`/bundle/${bundle._id}`);
       }}
     >
       <div className="relative bg-gray flex items-center justify-center w-full h-[75%] aspect-square basis-1/2 md:basis-auto">

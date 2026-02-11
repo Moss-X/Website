@@ -1,25 +1,25 @@
-import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 
-import HomePage from './pages/HomePage';
-import SignUpPage from './pages/SignUpPage';
-import LoginPage from './pages/LoginPage';
-import AdminPage from './pages/AdminPage';
-import CategoryPage from './pages/CategoryPage';
-import BundlePage from './pages/BundlePage';
-import ProductPage from './pages/ProductPage';
-import CollectionPage from './pages/CollectionPage';
-import SearchResultsPage from './pages/SearchResultsPage';
+import HomePage from "./pages/HomePage";
+import SignUpPage from "./pages/SignUpPage";
+import LoginPage from "./pages/LoginPage";
+import AdminPage from "./pages/AdminPage";
+import CategoryPage from "./pages/CategoryPage";
+import BundlePage from "./pages/BundlePage";
+import ProductPage from "./pages/ProductPage";
+import CollectionPage from "./pages/CollectionPage";
+import SearchResultsPage from "./pages/SearchResultsPage";
 
-import Navbar from './components/Navbar';
-import { Toaster } from 'react-hot-toast';
-import { useUserStore } from './stores/useUserStore';
-import { useEffect } from 'react';
-import CartPage from './pages/CartPage';
-import { useCartStore } from './stores/useCartStore';
-import PurchaseSuccessPage from './pages/PurchaseSuccessPage';
-import PurchaseCancelPage from './pages/PurchaseCancelPage';
-import DisclaimerModal from './components/DisclaimerModal';
-import LoadingSpinner from './components/LoadingSpinner';
+import Navbar from "./components/Navbar";
+import { Toaster } from "react-hot-toast";
+import { useUserStore } from "./stores/useUserStore";
+import { useEffect } from "react";
+import CartPage from "./pages/CartPage";
+import { useCartStore } from "./stores/useCartStore";
+import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
+import PurchaseCancelPage from "./pages/PurchaseCancelPage";
+import DisclaimerModal from "./components/DisclaimerModal";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 function App() {
   const { user, checkAuth, checkingAuth } = useUserStore();
@@ -40,7 +40,7 @@ function App() {
     }
   }, [user]); // Only depend on user changes
 
-  console.log('App checkingAuth:', checkingAuth);
+  console.log("App checkingAuth:", checkingAuth);
   if (checkingAuth) return <LoadingSpinner />;
 
   return (
@@ -49,7 +49,7 @@ function App() {
 
       <div className="relative z-50">
         <DisclaimerModal />
-        {location.pathname !== '/login' && location.pathname !== '/signup' && (
+        {location.pathname !== "/login" && location.pathname !== "/signup" && (
           <Navbar />
         )}
         <Routes>
@@ -65,7 +65,7 @@ function App() {
           <Route
             path="/secret-dashboard"
             element={
-              user?.role === 'admin' ? <AdminPage /> : <Navigate to="/login" />
+              user?.role === "admin" ? <AdminPage /> : <Navigate to="/login" />
             }
           />
           <Route path="/category/:category" element={<CategoryPage />} />

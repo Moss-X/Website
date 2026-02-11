@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose"
 
 const collectionSchema = new mongoose.Schema(
   {
@@ -15,7 +15,7 @@ const collectionSchema = new mongoose.Schema(
     products: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
+        ref: "Product",
         required: true,
       },
     ],
@@ -26,12 +26,12 @@ const collectionSchema = new mongoose.Schema(
     },
     image: {
       type: String,
-      required: [true, 'Image is required'],
+      required: [true, "Image is required"],
     },
   },
   { timestamps: true }
-);
+)
 
-const Collection = mongoose.model('Collection', collectionSchema);
+const Collection = mongoose.model("Collection", collectionSchema)
 
-export default Collection;
+export default Collection 
