@@ -1,355 +1,326 @@
-import Product from "../models/product.model.js";
-import Bundle from "../models/bundle.model.js";
-import Collection from "../models/collection.model.js";
-import User from "../models/user.model.js";
-import jwt from "jsonwebtoken";
-import GuestCart from "../models/guestCart.model.js";
-import { redis } from "../lib/redis.js";
-import { v4 as uuidv4 } from "uuid";
+import Product from '../models/product.model.js'
+import Bundle from '../models/bundle.model.js'
+import Collection from '../models/collection.model.js'
+import User from '../models/user.model.js'
+import jwt from 'jsonwebtoken'
+import GuestCart from '../models/guestCart.model.js'
+import { redis } from '../lib/redis.js'
+import { v4 as uuidv4 } from 'uuid'
 
 const MODEL_MAP = {
   product: Product,
   bundle: Bundle,
-  collection: Collection,
-};
+  collection: Collection
+}
 
 const getOrCreateGuestCart = async (sessionId) => {
-  console.log("getOrCreateGuestCart called with sessionId:", sessionId);
-  let guestCart = await GuestCart.findOne({ sessionId });
+  console.log('getOrCreateGuestCart called with sessionId:', sessionId)
+  let guestCart = await GuestCart.findOne({ sessionId })
   if (!guestCart) {
-    console.log("Creating new guest cart for sessionId:", sessionId);
-    guestCart = new GuestCart({ sessionId });
-    await guestCart.save();
+    console.log('Creating new guest cart for sessionId:', sessionId)
+    guestCart = new GuestCart({ sessionId })
+    await guestCart.save()
   } else {
-    console.log(
-      "Found existing guest cart with items:",
-      guestCart.items.length
-    );
+    console.log('Found existing guest cart with items:', guestCart.items.length)
   }
-  return guestCart;
-};
+  return guestCart
+}
 
 const getCartItems = async (user, sessionId) => {
-  console.log("getCartItems called with:", {
-    user: user ? user._id : "guest",
-    sessionId,
-  });
+  console.log('getCartItems called with:', {
+    user: user ? user._id : 'guest',
+    sessionId
+  })
 
   if (user) {
-    console.log("Getting cart items for authenticated user");
+    console.log('Getting cart items for authenticated user')
     const cartItems = await Promise.all(
       user.cartItems.map(async (item) => {
-        const Model = MODEL_MAP[item.type];
+        const Model = MODEL_MAP[item.type]
         if (!Model) {
-            console.warn(`Unknown model type: ${item.type} for item ${item.ref}`);
-            return null;
+          console.warn(`Unknown model type: ${item.type} for item ${item.ref}`)
+          return null
         }
-        const doc = await Model.findById(item.ref);
+        const doc = await Model.findById(item.ref)
         if (!doc) {
-            console.warn(`Referenced item not found: Type=${item.type}, ID=${item.ref}`);
-            return null;
+          console.warn(`Referenced item not found: Type=${item.type}, ID=${item.ref}`)
+          return null
         }
         return {
           ...doc.toJSON(),
           quantity: item.quantity,
-          type: item.type,
-        };
+          type: item.type
+        }
       })
-    );
-    const filteredItems = cartItems.filter(Boolean);
-    console.log(`User cart items: ${filteredItems.length} (original: ${user.cartItems.length})`);
-    return filteredItems;
+    )
+    const filteredItems = cartItems.filter(Boolean)
+    console.log(`User cart items: ${filteredItems.length} (original: ${user.cartItems.length})`)
+    return filteredItems
   } else {
-    console.log("Getting cart items for guest user");
-    const guestCart = await GuestCart.findOne({ sessionId });
+    console.log('Getting cart items for guest user')
+    const guestCart = await GuestCart.findOne({ sessionId })
     if (!guestCart) {
-      console.log("No guest cart found, returning empty array");
-      return [];
+      console.log('No guest cart found, returning empty array')
+      return []
     }
 
     const cartItems = await Promise.all(
       guestCart.items.map(async (item) => {
-        const Model = MODEL_MAP[item.type];
+        const Model = MODEL_MAP[item.type]
         if (!Model) {
-             console.warn(`Unknown model type: ${item.type} for item ${item.ref}`);
-             return null;
+          console.warn(`Unknown model type: ${item.type} for item ${item.ref}`)
+          return null
         }
-        const doc = await Model.findById(item.ref);
+        const doc = await Model.findById(item.ref)
         if (!doc) {
-            console.warn(`Referenced item not found: Type=${item.type}, ID=${item.ref}`);
-            return null;
+          console.warn(`Referenced item not found: Type=${item.type}, ID=${item.ref}`)
+          return null
         }
         return {
           ...doc.toJSON(),
           quantity: item.quantity,
-          type: item.type,
-        };
+          type: item.type
+        }
       })
-    );
-    const filteredItems = cartItems.filter(Boolean);
-    console.log(`Guest cart items: ${filteredItems.length} (original: ${guestCart.items.length})`);
-    return filteredItems;
+    )
+    const filteredItems = cartItems.filter(Boolean)
+    console.log(`Guest cart items: ${filteredItems.length} (original: ${guestCart.items.length})`)
+    return filteredItems
   }
-};
+}
 
 export const getCartProducts = async (req, res) => {
-  console.log("getCartProducts called. Auth user:", req.user ? req.user._id : "none");
-  console.log("Headers x-session-id:", req.headers["x-session-id"]);
-  console.log("Cookies sessionId:", req.cookies.sessionId);
+  console.log('getCartProducts called. Auth user:', req.user ? req.user._id : 'none')
+  console.log('Headers x-session-id:', req.headers['x-session-id'])
+  console.log('Cookies sessionId:', req.cookies.sessionId)
 
   try {
-    let cartItems = [];
+    let cartItems = []
     if (req.user) {
-      const dbUser = await User.findById(req.user._id);
-      console.log("Authenticated User found in DB:", dbUser ? dbUser._id : "not found");
+      const dbUser = await User.findById(req.user._id)
+      console.log('Authenticated User found in DB:', dbUser ? dbUser._id : 'not found')
       if (dbUser) {
-        console.log("Raw cart items in DB:", JSON.stringify(dbUser.cartItems));
+        console.log('Raw cart items in DB:', JSON.stringify(dbUser.cartItems))
       }
-      
-      cartItems = await getCartItems(dbUser, null);
-    } else {
-      const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
-      console.log("Guest request. Using session ID:", sessionId);
-      if (!sessionId) {
-        console.warn("WARNING: No user and no session ID provided to getCartProducts");
-      }
-      cartItems = await getCartItems(null, sessionId);
-    }
-    console.log("Final Cart items retrieved:", cartItems.length);
 
-    res.set("Cache-Control", "no-store");
-    res.set("Pragma", "no-cache");
-    res.set("Expires", "0");
-    res.json(cartItems);
+      cartItems = await getCartItems(dbUser, null)
+    } else {
+      const sessionId = req.cookies.sessionId || req.headers['x-session-id']
+      console.log('Guest request. Using session ID:', sessionId)
+      if (!sessionId) {
+        console.warn('WARNING: No user and no session ID provided to getCartProducts')
+      }
+      cartItems = await getCartItems(null, sessionId)
+    }
+    console.log('Final Cart items retrieved:', cartItems.length)
+
+    res.set('Cache-Control', 'no-store')
+    res.set('Pragma', 'no-cache')
+    res.set('Expires', '0')
+    res.json(cartItems)
   } catch (error) {
-    console.log("Error in getCartProducts controller", error.message);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.log('Error in getCartProducts controller', error.message)
+    res.status(500).json({ message: 'Server error', error: error.message })
   }
-};
+}
 
 export const addToCart = async (req, res) => {
   try {
-    const { refId, type } = req.body;
-    const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
+    const { refId, type } = req.body
+    const sessionId = req.cookies.sessionId || req.headers['x-session-id']
 
     if (!refId || !type || !MODEL_MAP[type]) {
-      return res
-        .status(400)
-        .json({ message: "Invalid cart item type or refId" });
+      return res.status(400).json({ message: 'Invalid cart item type or refId' })
     }
-    
+
     // Validate existence
-    const Model = MODEL_MAP[type];
-    const doc = await Model.findById(refId);
+    const Model = MODEL_MAP[type]
+    const doc = await Model.findById(refId)
     if (!doc) {
-        console.warn(`Attempt to add non-existent item to cart: Type=${type}, ID=${refId}`);
-        return res.status(404).json({ message: "Item not found" });
+      console.warn(`Attempt to add non-existent item to cart: Type=${type}, ID=${refId}`)
+      return res.status(404).json({ message: 'Item not found' })
     }
 
     if (req.user) {
-      const user = req.user;
-      const existingItem = user.cartItems.find(
-        (item) => item.ref.toString() === refId && item.type === type
-      );
+      const user = req.user
+      const existingItem = user.cartItems.find((item) => item.ref.toString() === refId && item.type === type)
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += 1
       } else {
-        user.cartItems.push({ ref: refId, type, quantity: 1 });
+        user.cartItems.push({ ref: refId, type, quantity: 1 })
       }
-      await user.save();
-      res.json(user.cartItems);
+      await user.save()
+      res.json(user.cartItems)
     } else {
       if (!sessionId) {
-        return res
-          .status(400)
-          .json({ message: "Session ID required for guest cart" });
+        return res.status(400).json({ message: 'Session ID required for guest cart' })
       }
 
-      const guestCart = await getOrCreateGuestCart(sessionId);
-      const existingItem = guestCart.items.find(
-        (item) => item.ref.toString() === refId && item.type === type
-      );
+      const guestCart = await getOrCreateGuestCart(sessionId)
+      const existingItem = guestCart.items.find((item) => item.ref.toString() === refId && item.type === type)
 
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += 1
       } else {
-        guestCart.items.push({ ref: refId, type, quantity: 1 });
+        guestCart.items.push({ ref: refId, type, quantity: 1 })
       }
 
-      await guestCart.save();
-      res.json(guestCart.items);
+      await guestCart.save()
+      res.json(guestCart.items)
     }
   } catch (error) {
-    console.log("Error in addToCart controller", error.message);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.log('Error in addToCart controller', error.message)
+    res.status(500).json({ message: 'Server error', error: error.message })
   }
-};
+}
 
 export const removeAllFromCart = async (req, res) => {
   try {
-    const { refId, type } = req.body;
-    const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
-    
-    console.log("removeAllFromCart called:", { 
-      userId: req.user?._id, 
-      sessionId, 
-      refId, 
-      type 
-    });
+    const { refId, type } = req.body
+    const sessionId = req.cookies.sessionId || req.headers['x-session-id']
+
+    console.log('removeAllFromCart called:', {
+      userId: req.user?._id,
+      sessionId,
+      refId,
+      type
+    })
 
     if (req.user) {
-      const user = req.user;
+      const user = req.user
       if (!refId || !type) {
-        user.cartItems = [];
+        user.cartItems = []
       } else {
-        const initialLength = user.cartItems.length;
-        user.cartItems = user.cartItems.filter(
-          (item) => !(item.ref.toString() === refId && item.type === type)
-        );
-        console.log(`User cart item removed. Before: ${initialLength}, After: ${user.cartItems.length}`);
+        const initialLength = user.cartItems.length
+        user.cartItems = user.cartItems.filter((item) => !(item.ref.toString() === refId && item.type === type))
+        console.log(`User cart item removed. Before: ${initialLength}, After: ${user.cartItems.length}`)
       }
-      await user.save();
-      res.json(user.cartItems);
+      await user.save()
+      res.json(user.cartItems)
     } else {
       if (!sessionId) {
-        return res
-          .status(400)
-          .json({ message: "Session ID required for guest cart" });
+        return res.status(400).json({ message: 'Session ID required for guest cart' })
       }
 
-      const guestCart = await GuestCart.findOne({ sessionId });
+      const guestCart = await GuestCart.findOne({ sessionId })
       if (!guestCart) {
-        return res.json([]);
+        return res.json([])
       }
 
       if (!refId || !type) {
-        guestCart.items = [];
+        guestCart.items = []
       } else {
-        guestCart.items = guestCart.items.filter(
-          (item) => !(item.ref.toString() === refId && item.type === type)
-        );
+        guestCart.items = guestCart.items.filter((item) => !(item.ref.toString() === refId && item.type === type))
       }
 
-      await guestCart.save();
-      res.json(guestCart.items);
+      await guestCart.save()
+      res.json(guestCart.items)
     }
   } catch (error) {
-    console.error("Error in removeAllFromCart:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.error('Error in removeAllFromCart:', error)
+    res.status(500).json({ message: 'Server error', error: error.message })
   }
-};
+}
 
 export const updateQuantity = async (req, res) => {
   try {
-    const { refId, type, quantity } = req.body;
-    const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
+    const { refId, type, quantity } = req.body
+    const sessionId = req.cookies.sessionId || req.headers['x-session-id']
 
-    console.log("updateQuantity called:", { 
-      userId: req.user?._id, 
-      sessionId, 
-      refId, 
-      type, 
-      quantity 
-    });
+    console.log('updateQuantity called:', {
+      userId: req.user?._id,
+      sessionId,
+      refId,
+      type,
+      quantity
+    })
 
     if (req.user) {
-      const user = req.user;
-      const existingItem = user.cartItems.find(
-        (item) => item.ref.toString() === refId && item.type === type
-      );
-      
-      console.log("User item found:", !!existingItem);
+      const user = req.user
+      const existingItem = user.cartItems.find((item) => item.ref.toString() === refId && item.type === type)
+
+      console.log('User item found:', !!existingItem)
 
       if (existingItem) {
         if (quantity === 0) {
-          user.cartItems = user.cartItems.filter(
-            (item) => !(item.ref.toString() === refId && item.type === type)
-          );
-          await user.save();
-          return res.json(user.cartItems);
+          user.cartItems = user.cartItems.filter((item) => !(item.ref.toString() === refId && item.type === type))
+          await user.save()
+          return res.json(user.cartItems)
         }
-        existingItem.quantity = quantity;
-        await user.save();
-        res.json(user.cartItems);
+        existingItem.quantity = quantity
+        await user.save()
+        res.json(user.cartItems)
       } else {
-        console.log("Item not found in user cart");
-        res.status(404).json({ message: "Cart item not found" });
+        console.log('Item not found in user cart')
+        res.status(404).json({ message: 'Cart item not found' })
       }
     } else {
       if (!sessionId) {
-        return res
-          .status(400)
-          .json({ message: "Session ID required for guest cart" });
+        return res.status(400).json({ message: 'Session ID required for guest cart' })
       }
 
-      const guestCart = await GuestCart.findOne({ sessionId });
+      const guestCart = await GuestCart.findOne({ sessionId })
       if (!guestCart) {
-        return res.status(404).json({ message: "Guest cart not found" });
+        return res.status(404).json({ message: 'Guest cart not found' })
       }
 
-      const existingItem = guestCart.items.find(
-        (item) => item.ref.toString() === refId && item.type === type
-      );
+      const existingItem = guestCart.items.find((item) => item.ref.toString() === refId && item.type === type)
       if (existingItem) {
         if (quantity === 0) {
-          guestCart.items = guestCart.items.filter(
-            (item) => !(item.ref.toString() === refId && item.type === type)
-          );
-          await guestCart.save();
-          return res.json(guestCart.items);
+          guestCart.items = guestCart.items.filter((item) => !(item.ref.toString() === refId && item.type === type))
+          await guestCart.save()
+          return res.json(guestCart.items)
         }
-        existingItem.quantity = quantity;
-        await guestCart.save();
-        res.json(guestCart.items);
+        existingItem.quantity = quantity
+        await guestCart.save()
+        res.json(guestCart.items)
       } else {
-        res.status(404).json({ message: "Cart item not found" });
+        res.status(404).json({ message: 'Cart item not found' })
       }
     }
   } catch (error) {
-    console.log("Error in updateQuantity controller", error.message);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.log('Error in updateQuantity controller', error.message)
+    res.status(500).json({ message: 'Server error', error: error.message })
   }
-};
+}
 
 export const mergeGuestCart = async (req, res) => {
   try {
-    const sessionId = req.cookies.sessionId || req.headers["x-session-id"];
+    const sessionId = req.cookies.sessionId || req.headers['x-session-id']
     if (!sessionId) {
-      return res.json({ message: "No guest cart to merge" });
+      return res.json({ message: 'No guest cart to merge' })
     }
 
-    const guestCart = await GuestCart.findOne({ sessionId });
+    const guestCart = await GuestCart.findOne({ sessionId })
     if (!guestCart || guestCart.items.length === 0) {
-      return res.json({ message: "No guest cart items to merge" });
+      return res.json({ message: 'No guest cart items to merge' })
     }
 
-    const user = req.user;
+    const user = req.user
 
     for (const guestItem of guestCart.items) {
-      const existingItem = user.cartItems.find(
-        (item) => item.ref.equals(guestItem.ref) && item.type === guestItem.type
-      );
+      const existingItem = user.cartItems.find((item) => item.ref.equals(guestItem.ref) && item.type === guestItem.type)
       if (existingItem) {
-        existingItem.quantity += guestItem.quantity;
+        existingItem.quantity += guestItem.quantity
       } else {
         user.cartItems.push({
           ref: guestItem.ref,
           type: guestItem.type,
-          quantity: guestItem.quantity,
-        });
+          quantity: guestItem.quantity
+        })
       }
     }
 
-    await user.save();
+    await user.save()
 
-    await GuestCart.findOneAndDelete({ sessionId });
+    await GuestCart.findOneAndDelete({ sessionId })
 
     res.json({
-      message: "Guest cart merged successfully",
-      cartItems: user.cartItems,
-    });
+      message: 'Guest cart merged successfully',
+      cartItems: user.cartItems
+    })
   } catch (error) {
-    console.log("Error in mergeGuestCart controller", error.message);
-    res.status(500).json({ message: "Server error", error: error.message });
+    console.log('Error in mergeGuestCart controller', error.message)
+    res.status(500).json({ message: 'Server error', error: error.message })
   }
-};
+}

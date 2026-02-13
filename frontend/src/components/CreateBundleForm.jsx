@@ -1,17 +1,20 @@
-import { useState, useEffect } from "react"
-import { useBundleStore } from "../stores/useBundleStore"
-import axios from "../lib/axios"
+import { useState, useEffect } from 'react'
+import { useBundleStore } from '../stores/useBundleStore'
+import axios from '../lib/axios'
 
 function CreateBundleForm() {
-  const [form, setForm] = useState({ title: "", description: "", products: [], discountedPrice: "" })
+  const [form, setForm] = useState({ title: '', description: '', products: [], discountedPrice: '' })
   const [products, setProducts] = useState([])
-  const [success, setSuccess] = useState("")
-  const [error, setError] = useState("")
-  const [image, setImage] = useState("")
+  const [success, setSuccess] = useState('')
+  const [error, setError] = useState('')
+  const [image, setImage] = useState('')
   const { createBundle, loading } = useBundleStore()
 
   useEffect(() => {
-    axios.get("/products").then(res => setProducts(res.data.products)).catch(() => setProducts([]))
+    axios
+      .get('/products')
+      .then((res) => setProducts(res.data.products))
+      .catch(() => setProducts([]))
   }, [])
 
   function handleChange(e) {
@@ -19,11 +22,9 @@ function CreateBundleForm() {
   }
 
   function handleProductSelect(id) {
-    setForm(f => ({
+    setForm((f) => ({
       ...f,
-      products: f.products.includes(id)
-        ? f.products.filter(pid => pid !== id)
-        : [...f.products, id]
+      products: f.products.includes(id) ? f.products.filter((pid) => pid !== id) : [...f.products, id]
     }))
   }
 
@@ -38,19 +39,19 @@ function CreateBundleForm() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setSuccess("")
-    setError("")
+    setSuccess('')
+    setError('')
     const res = await createBundle({
       ...form,
       discountedPrice: Number(form.discountedPrice),
       image
     })
     if (res.success) {
-      setSuccess("Bundle created successfully!")
-      setForm({ title: "", description: "", products: [], discountedPrice: "" })
-      setImage("")
+      setSuccess('Bundle created successfully!')
+      setForm({ title: '', description: '', products: [], discountedPrice: '' })
+      setImage('')
     } else {
-      setError(res.error || "Failed to create bundle")
+      setError(res.error || 'Failed to create bundle')
     }
   }
 
@@ -88,14 +89,20 @@ function CreateBundleForm() {
       />
       <div>
         <label className="block text-gray-300 font-medium mb-1">Bundle Image</label>
-        <input type="file" accept="image/*" onChange={handleImageChange} className="block w-full text-sm text-gray-400" required />
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="block w-full text-sm text-gray-400"
+          required
+        />
         <p className="text-xs text-gray-400 mt-1">For best results, use a 1:1 aspect ratio image.</p>
         {image && <img src={image} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded-sm" />}
       </div>
       <div>
         <div className="mb-1 text-gray-300 font-medium">Select Products</div>
         <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto">
-          {products.map(p => (
+          {products.map((p) => (
             <label key={p._id} className="flex items-center gap-2 text-gray-200">
               <input
                 type="checkbox"
@@ -113,10 +120,10 @@ function CreateBundleForm() {
         disabled={loading}
         className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-sm transition-colors disabled:opacity-50"
       >
-        {loading ? "Creating..." : "Create Bundle"}
+        {loading ? 'Creating...' : 'Create Bundle'}
       </button>
     </form>
   )
 }
 
-export default CreateBundleForm 
+export default CreateBundleForm

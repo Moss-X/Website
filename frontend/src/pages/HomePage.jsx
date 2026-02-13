@@ -1,17 +1,17 @@
-import { useEffect } from "react";
-import { useProductStore } from "../stores/useProductStore";
-import FeaturedProducts from "../components/FeaturedProducts";
-import HeroCarousel from "../components/HeroCarousel";
-import BundlesPreview from "../components/BundlesPreview";
-import CollectionsPreview from "../components/CollectionsPreview";
-import Footer from "../components/Footer";
+import { useEffect } from 'react'
+import { useProductStore } from '../stores/useProductStore'
+import FeaturedProducts from '../components/FeaturedProducts'
+import HeroCarousel from '../components/HeroCarousel'
+import BundlesPreview from '../components/BundlesPreview'
+import CollectionsPreview from '../components/CollectionsPreview'
+import Footer from '../components/Footer'
 
 function HomePage() {
-  const { fetchFeaturedProducts, products, isLoading } = useProductStore();
+  const { fetchFeaturedProducts, products, isLoading } = useProductStore()
 
   useEffect(() => {
-    fetchFeaturedProducts();
-  }, [fetchFeaturedProducts]);
+    fetchFeaturedProducts()
+  }, [fetchFeaturedProducts])
 
   return (
     <div className="relative min-h-screen text-textGreen overflow-hidden">
@@ -24,9 +24,7 @@ function HomePage() {
         )}
         {/* Existing Featured Products section moved below categories */}
         <section id="best-seller-section">
-          {!isLoading && products.length > 0 && (
-            <FeaturedProducts featuredProducts={products} />
-          )}
+          {!isLoading && products.length > 0 && <FeaturedProducts featuredProducts={products} />}
         </section>
         {/* Bundles Section */}
         <BundlesPreview />
@@ -35,6 +33,6 @@ function HomePage() {
       </div>
       <Footer />
     </div>
-  );
+  )
 }
-export default HomePage;
+export default HomePage

@@ -1,151 +1,134 @@
-import { motion } from "framer-motion";
-import { useCartStore } from "../stores/useCartStore";
-import { useUserStore } from "../stores/useUserStore";
-import { Link } from "react-router-dom";
-import { MoveRight, MapPin, User } from "lucide-react";
-import axios from "../lib/axios";
-import { useState, useEffect } from "react";
-import ShippingAddressForm from "./ShippingAddressForm";
-import { toast } from "react-hot-toast";
+import { motion } from 'framer-motion'
+import { useCartStore } from '../stores/useCartStore'
+import { useUserStore } from '../stores/useUserStore'
+import { Link } from 'react-router-dom'
+import { MoveRight, MapPin, User } from 'lucide-react'
+import axios from '../lib/axios'
+import { useState, useEffect } from 'react'
+import ShippingAddressForm from './ShippingAddressForm'
+import { toast } from 'react-hot-toast'
 
 const OrderSummary = () => {
-  const {
-    total,
-    subtotal,
-    coupon,
-    isCouponApplied,
-    cart,
-    shippingAddress,
-    setShippingAddress,
-  } = useCartStore();
-  const { user } = useUserStore();
-  const [razorpayKey, setRazorpayKey] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showAddressForm, setShowAddressForm] = useState(false);
-  const [checkoutStep, setCheckoutStep] = useState("address");
-  const savings = subtotal - total;
-  const formattedSubtotal = subtotal.toFixed(2);
-  const formattedTotal = total.toFixed(2);
-  const formattedSavings = savings.toFixed(2);
+  const { total, subtotal, coupon, isCouponApplied, cart, shippingAddress, setShippingAddress } = useCartStore()
+  const { user } = useUserStore()
+  const [razorpayKey, setRazorpayKey] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [showAddressForm, setShowAddressForm] = useState(false)
+  const [checkoutStep, setCheckoutStep] = useState('address')
+  const savings = subtotal - total
+  const formattedSubtotal = subtotal.toFixed(2)
+  const formattedTotal = total.toFixed(2)
+  const formattedSavings = savings.toFixed(2)
 
   useEffect(() => {
     const fetchRazorpayKey = async () => {
       try {
-        const response = await axios.get("/payments/razorpay-key");
-        setRazorpayKey(response.data.key);
+        const response = await axios.get('/payments/razorpay-key')
+        setRazorpayKey(response.data.key)
       } catch (error) {
-        console.error("Error fetching Razorpay key:", error);
+        console.error('Error fetching Razorpay key:', error)
       }
-    };
-    fetchRazorpayKey();
-  }, []);
+    }
+    fetchRazorpayKey()
+  }, [])
 
   const canProceedToCheckout = () => {
-    if (!user) return false;
-    if (!shippingAddress) return false;
-    return true;
-  };
+    if (!user) return false
+    if (!shippingAddress) return false
+    return true
+  }
 
   const handleAddressSubmit = (address) => {
-    setShippingAddress(address);
-    setShowAddressForm(false);
-    setCheckoutStep("payment");
-  };
+    setShippingAddress(address)
+    setShowAddressForm(false)
+    setCheckoutStep('payment')
+  }
 
   const handlePayment = async () => {
     if (!razorpayKey) {
-      console.error("Razorpay key not loaded");
-      return;
+      console.error('Razorpay key not loaded')
+      return
     }
 
     if (!user) {
-      toast.error("Please login to proceed with checkout");
-      return;
+      toast.error('Please login to proceed with checkout')
+      return
     }
 
     if (!shippingAddress) {
-      setShowAddressForm(true);
-      setCheckoutStep("address");
-      return;
+      setShowAddressForm(true)
+      setCheckoutStep('address')
+      return
     }
 
-    setLoading(true);
+    setLoading(true)
     try {
       const transformed = cart.map((item) => {
-        if (item.type === "bundle")
-          return { ...item, price: item.discountedPrice };
-        if (item.type === "collection")
-          return { ...item, price: item.totalPrice };
-        return item;
-      });
+        if (item.type === 'bundle') return { ...item, price: item.discountedPrice }
+        if (item.type === 'collection') return { ...item, price: item.totalPrice }
+        return item
+      })
 
-      const orderResponse = await axios.post(
-        "/payments/create-razorpay-order",
-        {
-          products: transformed,
-          couponCode: coupon ? coupon.code : null,
-          shippingAddress: shippingAddress,
-        }
-      );
+      const orderResponse = await axios.post('/payments/create-razorpay-order', {
+        products: transformed,
+        couponCode: coupon ? coupon.code : null,
+        shippingAddress: shippingAddress
+      })
 
-      const { orderId, amount, currency } = orderResponse.data;
+      const { orderId, amount, currency } = orderResponse.data
 
-      const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      const script = document.createElement('script')
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
       script.onload = () => {
         const options = {
           key: razorpayKey,
           amount: amount,
           currency: currency,
-          name: "Moss X Store",
-          description: "Purchase from Moss X",
+          name: 'Moss X Store',
+          description: 'Purchase from Moss X',
           order_id: orderId,
           handler: async (response) => {
             try {
-              const verifyResponse = await axios.post(
-                "/payments/verify-razorpay-payment",
-                {
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                }
-              );
+              const verifyResponse = await axios.post('/payments/verify-razorpay-payment', {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              })
 
               if (verifyResponse.data.success) {
-                window.location.href = `/purchase-success?order_id=${verifyResponse.data.orderId}`;
+                window.location.href = `/purchase-success?order_id=${verifyResponse.data.orderId}`
               } else {
-                window.location.href =
-                  "/purchase-cancel?reason=verification_failed";
+                window.location.href = '/purchase-cancel?reason=verification_failed'
               }
             } catch (error) {
-              console.error("Error verifying payment:", error);
-              window.location.href = "/purchase-cancel?reason=verify_error";
+              console.error('Error verifying payment:', error)
+              window.location.href = '/purchase-cancel?reason=verify_error'
             }
           },
           prefill: {
             name: shippingAddress.fullName,
-            email: user.email || "customer@example.com",
-            contact: shippingAddress.phone,
+            email: user.email || 'customer@example.com',
+            contact: shippingAddress.phone
           },
           theme: {
-            color: "#10b981",
+            color: '#10b981'
           },
           modal: {
             ondismiss: () => {
-              setLoading(false);
-            },
-          },
-        };
+              setLoading(false)
+            }
+          }
+        }
 
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      };
-      document.head.appendChild(script);
+        const rzp = new window.Razorpay(options)
+        rzp.open()
+      }
+      document.head.appendChild(script)
     } catch (error) {
-      console.error("Error creating order:", error);
-      setLoading(false);
+      console.error('Error creating order:', error)
+      setLoading(false)
     }
-  };
+  }
 
   const renderCheckoutButton = () => {
     if (!user) {
@@ -157,7 +140,7 @@ const OrderSummary = () => {
           <User className="w-4 h-4 mr-2" />
           Login to Checkout
         </Link>
-      );
+      )
     }
 
     if (!shippingAddress) {
@@ -169,7 +152,7 @@ const OrderSummary = () => {
           <MapPin className="w-4 h-4 mr-2" />
           Add Shipping Address
         </button>
-      );
+      )
     }
 
     return (
@@ -179,10 +162,10 @@ const OrderSummary = () => {
         onClick={handlePayment}
         disabled={loading || !razorpayKey}
       >
-        {loading ? "Processing..." : "Proceed to Checkout"}
+        {loading ? 'Processing...' : 'Proceed to Checkout'}
       </motion.button>
-    );
-  };
+    )
+  }
 
   return (
     <motion.div
@@ -198,16 +181,11 @@ const OrderSummary = () => {
           <div className="flex items-start gap-2">
             <MapPin className="w-4 h-4 text-black mt-0.5 flex-shrink-0" />
             <div className="text-sm text-black">
-              <p className="font-medium ">
-                {shippingAddress.fullName}
-              </p>
+              <p className="font-medium ">{shippingAddress.fullName}</p>
               <p>{shippingAddress.addressLine1}</p>
-              {shippingAddress.addressLine2 && (
-                <p>{shippingAddress.addressLine2}</p>
-              )}
+              {shippingAddress.addressLine2 && <p>{shippingAddress.addressLine2}</p>}
               <p>
-                {shippingAddress.city}, {shippingAddress.state}{" "}
-                {shippingAddress.postalCode}
+                {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
               </p>
               <p>{shippingAddress.country}</p>
               <p className="text-black">{shippingAddress.phone}</p>
@@ -219,38 +197,26 @@ const OrderSummary = () => {
       <div className="space-y-4">
         <div className="space-y-2">
           <dl className="flex items-center justify-between gap-4">
-            <dt className="text-base font-normal text-gray-600">
-              Original price
-            </dt>
-            <dd className="text-base font-medium text-black">
-              ₹{formattedSubtotal}
-            </dd>
+            <dt className="text-base font-normal text-gray-600">Original price</dt>
+            <dd className="text-base font-medium text-black">₹{formattedSubtotal}</dd>
           </dl>
 
           {savings > 0 && (
             <dl className="flex items-center justify-between gap-4">
               <dt className="text-base font-normal text-gray-600  ">Savings</dt>
-              <dd className="text-base font-medium text-black">
-                -₹{formattedSavings}
-              </dd>
+              <dd className="text-base font-medium text-black">-₹{formattedSavings}</dd>
             </dl>
           )}
 
           {coupon && isCouponApplied && (
             <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-black">
-                Coupon ({coupon.code})
-              </dt>
-              <dd className="text-base font-medium text-black">
-                -{coupon.discountPercentage}%
-              </dd>
+              <dt className="text-base font-normal text-black">Coupon ({coupon.code})</dt>
+              <dd className="text-base font-medium text-black">-{coupon.discountPercentage}%</dd>
             </dl>
           )}
           <dl className="flex items-center justify-between gap-4 border-t border-gray-600 pt-2">
             <dt className="text-base font-bold text-gray-600">Total</dt>
-            <dd className="text-base font-bold text-black">
-              ₹{formattedTotal}
-            </dd>
+            <dd className="text-base font-bold text-black">₹{formattedTotal}</dd>
           </dl>
         </div>
 
@@ -272,26 +238,18 @@ const OrderSummary = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-4 border-b border-gray-700 flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-white">
-                Shipping Address
-              </h3>
-              <button
-                onClick={() => setShowAddressForm(false)}
-                className="text-gray-400 hover:text-white text-2xl"
-              >
+              <h3 className="text-lg font-semibold text-white">Shipping Address</h3>
+              <button onClick={() => setShowAddressForm(false)} className="text-gray-400 hover:text-white text-2xl">
                 &times;
               </button>
             </div>
             <div className="p-4">
-              <ShippingAddressForm
-                onAddressSubmit={handleAddressSubmit}
-                isCheckout={true}
-              />
+              <ShippingAddressForm onAddressSubmit={handleAddressSubmit} isCheckout={true} />
             </div>
           </div>
         </div>
       )}
     </motion.div>
-  );
-};
-export default OrderSummary;
+  )
+}
+export default OrderSummary

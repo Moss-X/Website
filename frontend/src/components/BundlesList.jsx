@@ -1,9 +1,11 @@
-import { useEffect } from "react"
-import { useBundleStore } from "../stores/useBundleStore"
+import { useEffect } from 'react'
+import { useBundleStore } from '../stores/useBundleStore'
 
 function BundlesList() {
   const { bundles, fetchBundles, deleteBundle, loading, error } = useBundleStore()
-  useEffect(() => { fetchBundles() }, [fetchBundles])
+  useEffect(() => {
+    fetchBundles()
+  }, [fetchBundles])
 
   if (loading) return <div>Loading bundles...</div>
   if (error) return <div className="text-red-400">{error}</div>
@@ -11,7 +13,7 @@ function BundlesList() {
 
   return (
     <div className="space-y-6">
-      {bundles.map(bundle => (
+      {bundles.map((bundle) => (
         <div key={bundle._id} className="bg-gray-800 rounded-lg p-6 flex flex-col gap-2">
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-bold text-emerald-300">{bundle.title}</h3>
@@ -24,9 +26,10 @@ function BundlesList() {
           </div>
           <div className="text-gray-200 mb-1">{bundle.description}</div>
           <div className="text-emerald-400 font-semibold mb-1">Discounted Price: ${bundle.discountedPrice}</div>
-          <div className="text-gray-400 text-sm">Includes:
+          <div className="text-gray-400 text-sm">
+            Includes:
             <ul className="list-disc ml-6">
-              {bundle.products.map(p => (
+              {bundle.products.map((p) => (
                 <li key={p._id}>{p.name}</li>
               ))}
             </ul>
@@ -37,4 +40,4 @@ function BundlesList() {
   )
 }
 
-export default BundlesList 
+export default BundlesList

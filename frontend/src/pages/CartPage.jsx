@@ -1,29 +1,29 @@
-import { Link } from "react-router-dom";
-import { useCartStore } from "../stores/useCartStore";
-import { motion } from "framer-motion";
-import { ShoppingCart } from "lucide-react";
-import CartItem from "../components/CartItem";
-import PeopleAlsoBought from "../components/PeopleAlsoBought";
-import OrderSummary from "../components/OrderSummary";
-import GiftCouponCard from "../components/GiftCouponCard";
-import { useEffect } from "react";
-import LoadingSpinner from "../components/LoadingSpinner";
+import { Link } from 'react-router-dom'
+import { useCartStore } from '../stores/useCartStore'
+import { motion } from 'framer-motion'
+import { ShoppingCart } from 'lucide-react'
+import CartItem from '../components/CartItem'
+import PeopleAlsoBought from '../components/PeopleAlsoBought'
+import OrderSummary from '../components/OrderSummary'
+import GiftCouponCard from '../components/GiftCouponCard'
+import { useEffect } from 'react'
+import LoadingSpinner from '../components/LoadingSpinner'
 
 const CartPage = () => {
-  const { cart, loading, initializeSession, getCartItems } = useCartStore();
+  const { cart, loading, initializeSession, getCartItems } = useCartStore()
 
   useEffect(() => {
     if (!loading) {
-      initializeSession();
-      getCartItems();
+      initializeSession()
+      getCartItems()
     }
-  }, []);
+  }, [])
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />
       </div>
-    );
+    )
   }
 
   return (
@@ -62,9 +62,9 @@ const CartPage = () => {
         </div>
       </div>
     </div>
-  );
-};
-export default CartPage;
+  )
+}
+export default CartPage
 
 const EmptyCartUI = () => (
   <motion.div
@@ -75,14 +75,9 @@ const EmptyCartUI = () => (
   >
     <ShoppingCart className="h-24 w-24 text-gray-300" />
     <h3 className="text-2xl font-semibold ">Your cart is empty</h3>
-    <p className="text-gray-400">
-      Looks like you {"haven't"} added anything to your cart yet.
-    </p>
-    <Link
-      className="mt-4 px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition"
-      to="/"
-    >
+    <p className="text-gray-400">Looks like you {"haven't"} added anything to your cart yet.</p>
+    <Link className="mt-4 px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition" to="/">
       Start Shopping
     </Link>
   </motion.div>
-);
+)

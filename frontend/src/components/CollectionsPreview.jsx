@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react"
-import { ShoppingCart, Zap } from "lucide-react"
-import { useCollectionStore } from "../stores/useCollectionStore"
-import { useNavigate, Link } from "react-router-dom"
-import { useCartStore } from "../stores/useCartStore"
-import CollectionCard from "./CollectionCard"
+import { useEffect, useState } from 'react'
+import { ShoppingCart, Zap } from 'lucide-react'
+import { useCollectionStore } from '../stores/useCollectionStore'
+import { useNavigate, Link } from 'react-router-dom'
+import { useCartStore } from '../stores/useCartStore'
+import CollectionCard from './CollectionCard'
 
 function CollectionsPreview() {
   const [visibleCount, setVisibleCount] = useState(6)
@@ -12,7 +12,9 @@ function CollectionsPreview() {
   const { addCollectionToCart } = useCartStore()
   const navigate = useNavigate()
   // fetch collections
-  useEffect(() => { fetchCollections() }, [fetchCollections])
+  useEffect(() => {
+    fetchCollections()
+  }, [fetchCollections])
   // responsive visible count
   useEffect(() => {
     function updateCount() {
@@ -33,19 +35,18 @@ function CollectionsPreview() {
   function handleBuyNow(e, collection) {
     e.stopPropagation()
     addCollectionToCart(collection)
-    navigate("/cart")
+    navigate('/cart')
   }
 
   return (
     <section className="flex flex-col gap-8 my-16 ">
-      {collections.map((collection, index)=>(
+      {collections.map((collection, index) => (
         <>
-        <CollectionCard collection={collection} odd={index % 2 === 0}/>
-        <CollectionCard collection={collection} odd={index % 2 === 1}/>
+          <CollectionCard collection={collection} odd={index % 2 === 0} />
+          <CollectionCard collection={collection} odd={index % 2 === 1} />
         </>
-        
       ))}
-      </section>
+    </section>
   )
 }
 

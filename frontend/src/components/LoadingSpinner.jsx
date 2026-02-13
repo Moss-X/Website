@@ -7,7 +7,7 @@ const LoadingSpinner = () => {
         <div className="sr-only">Loading</div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default LoadingSpinner;
+export default LoadingSpinner

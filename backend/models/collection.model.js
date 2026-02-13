@@ -1,4 +1,4 @@
-import mongoose from "mongoose"
+import mongoose from 'mongoose'
 
 const collectionSchema = new mongoose.Schema(
   {
@@ -6,32 +6,32 @@ const collectionSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      trim: true,
+      trim: true
     },
     description: {
       type: String,
-      required: true,
+      required: true
     },
     products: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true,
-      },
+        ref: 'Product',
+        required: true
+      }
     ],
     totalPrice: {
       type: Number,
       required: true,
-      min: 0,
+      min: 0
     },
     image: {
       type: String,
-      required: [true, "Image is required"],
-    },
+      required: [true, 'Image is required']
+    }
   },
   { timestamps: true }
 )
 
-const Collection = mongoose.model("Collection", collectionSchema)
+const Collection = mongoose.model('Collection', collectionSchema)
 
-export default Collection 
+export default Collection

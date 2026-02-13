@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react'
 
 const PriceRangeSlider = ({
   min = 0,
@@ -8,39 +8,38 @@ const PriceRangeSlider = ({
   minVal,
   maxVal,
   setMinVal,
-  setMaxVal,
+  setMaxVal
 }) => {
   const handleMinInput = (e) => {
-    let value = parseInt(e.target.value);
+    let value = parseInt(e.target.value)
     if (maxVal - value >= gap && value >= min) {
-      setMinVal(value);
+      setMinVal(value)
     }
-  };
+  }
 
   const handleMaxInput = (e) => {
-    let value = parseInt(e.target.value);
+    let value = parseInt(e.target.value)
     if (value - minVal >= gap && value <= max) {
-      setMaxVal(value);
+      setMaxVal(value)
     }
-  };
+  }
 
   const handleRangeMin = (e) => {
-    let value = parseInt(e.target.value);
+    let value = parseInt(e.target.value)
     if (maxVal - value >= gap) {
-      setMinVal(value);
+      setMinVal(value)
     }
-  };
+  }
 
   const handleRangeMax = (e) => {
-    let value = parseInt(e.target.value);
+    let value = parseInt(e.target.value)
     if (value - minVal >= gap) {
-      setMaxVal(value);
+      setMaxVal(value)
     }
-  };
+  }
 
   return (
     <div className="w-full max-w-md bg-secondary rounded-lg shadow-xs px-2 space-y-6">
-
       {/* Price Inputs */}
       <div className="flex items-center gap-4">
         <div className="flex flex-row gap-2 items-center flex-1">
@@ -60,8 +59,7 @@ const PriceRangeSlider = ({
             onChange={handleMaxInput}
             className="border border-darkGray rounded-md text-center text-sm p-2 w-10 focus:outline-hidden focus:ring-2 focus:ring-primary bg-white text-black"
           />
-                      <label className="text-sm text-black mb-1">Max</label>
-
+          <label className="text-sm text-black mb-1">Max</label>
         </div>
       </div>
 
@@ -72,7 +70,7 @@ const PriceRangeSlider = ({
           className="absolute h-2 bg-primary rounded"
           style={{
             left: `${(minVal / max) * 100}%`,
-            right: `${100 - (maxVal / max) * 100}%`,
+            right: `${100 - (maxVal / max) * 100}%`
           }}
         ></div>
 
@@ -97,7 +95,7 @@ const PriceRangeSlider = ({
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default PriceRangeSlider;
+export default PriceRangeSlider

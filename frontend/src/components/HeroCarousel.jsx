@@ -1,20 +1,20 @@
 function HeroCarousel() {
   // Scroll to Best Seller section
   const handleShopNowClick = () => {
-    const el = document.getElementById("best-seller-section");
+    const el = document.getElementById('best-seller-section')
     if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
+      el.scrollIntoView({ behavior: 'smooth' })
     }
-  };
+  }
 
   return (
     <section
       className="w-screen max-w-none flex flex-col md:flex-row items-center justify-center md:justify-between bg-secondary rounded-none shadow-lg overflow-hidden  md:min-h-[700px] relative -mx-[50vw] md:-mx-[50vw] md:left-1/2 md:right-1/2 h-[500px] pt-12 md:pt-0"
       style={{
-        left: "50%",
-        right: "50%",
-        marginLeft: "-50vw",
-        marginRight: "-50vw",
+        left: '50%',
+        right: '50%',
+        marginLeft: '-50vw',
+        marginRight: '-50vw'
       }}
     >
       {/*Left */}
@@ -26,8 +26,7 @@ function HeroCarousel() {
             <span className="text-primary z-10">Plant Something</span>
           </h1>
           <p className="mt-4 text-lg text-heading/70 max-w-md z-10">
-            Find your dream plants for your home decorations with us, and we
-            will make it happen.
+            Find your dream plants for your home decorations with us, and we will make it happen.
           </p>
           <button
             className="mt-6 z-10 px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition"
@@ -52,7 +51,7 @@ function HeroCarousel() {
         />
       </div>
     </section>
-  );
+  )
 }
 
-export default HeroCarousel;
+export default HeroCarousel
