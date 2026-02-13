@@ -4,7 +4,6 @@ import FeaturedProducts from '../components/FeaturedProducts'
 import HeroCarousel from '../components/HeroCarousel'
 import BundlesPreview from '../components/BundlesPreview'
 import CollectionsPreview from '../components/CollectionsPreview'
-import Footer from '../components/Footer'
 
 function HomePage() {
   const { fetchFeaturedProducts, products, isLoading } = useProductStore()
@@ -31,7 +30,6 @@ function HomePage() {
         {/* Collections Section */}
         <CollectionsPreview />
       </div>
-      <Footer />
     </div>
   )
 }

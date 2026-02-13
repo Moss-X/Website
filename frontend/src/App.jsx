@@ -20,6 +20,7 @@ import PurchaseSuccessPage from './pages/PurchaseSuccessPage'
 import PurchaseCancelPage from './pages/PurchaseCancelPage'
 import DisclaimerModal from './components/DisclaimerModal'
 import LoadingSpinner from './components/LoadingSpinner'
+import Footer from './components/Footer'
 
 function App() {
   const { user, checkAuth, checkingAuth } = useUserStore()
@@ -44,10 +45,10 @@ function App() {
   if (checkingAuth) return <LoadingSpinner />
 
   return (
-    <div className="min-h-screen bg-white text-white relative overflow-hidden">
+    <div className="min-h-screen bg-white text-white relative overflow-hidden flex flex-col">
       {/* Background gradient */}
 
-      <div className="relative z-50">
+      <div className="relative z-50 flex-grow">
         <DisclaimerModal />
         {location.pathname !== '/login' && location.pathname !== '/signup' && <Navbar />}
         <Routes>
@@ -66,6 +67,7 @@ function App() {
           <Route path="/purchase-cancel" element={user ? <PurchaseCancelPage /> : <Navigate to="/login" />} />
         </Routes>
       </div>
+      {location.pathname !== '/login' && location.pathname !== '/signup' && <Footer />}
       <Toaster />
     </div>
   )
