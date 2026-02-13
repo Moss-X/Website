@@ -86,7 +86,7 @@ const Navbar = () => {
           <div className="flex w-full items-center gap-2 md:gap-4">
             <Link to="/" className="flex items-center mr-1 md:mr-2">
               <div className="flex items-center ">
-                <img src="/icon.png" alt="Moss-x logo" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
+                <img src="/icon.webp" alt="Moss-x logo" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
               </div>
             </Link>
             {/* Centered Search Bar */}
