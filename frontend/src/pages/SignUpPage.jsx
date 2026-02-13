@@ -1,6 +1,6 @@
-import SignUpHeader from '../components/sign/SignUpHeader'
-import SignUpForm from '../components/sign/SignUpForm'
-import SignUpRightImage from '../components/sign/SignUpRightImage'
+import SignUpHeader from '../components/signUp/SignUpHeader'
+import SignUpForm from '../components/signUp/SignUpForm'
+import SignUpRightImage from '../components/signUp/SignUpRightImage'
 const SignUpPage = () => {
   return (
     <div className="flex flex-col pt-28 justify-center py-12 sm:px-6 lg:px-8">
