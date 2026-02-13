@@ -24,7 +24,7 @@ function ProductCard({ product, variant = "default" }) {
 
   return (
     <div
-      className="w-full bg-gray p-0 cursor-pointer hover:scale-[1.01] transition transform flex flex-col aspect-4/5"
+      className="bg-gray p-0 cursor-pointer  hover:scale-[1.01] transition transform flex flex-col aspect-4/5"
       onClick={() => navigate(`/product/${product._id}`)}
       tabIndex={0}
       role="button"

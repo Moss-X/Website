@@ -139,109 +139,99 @@ function SearchResultsPage() {
     applyFilters(e);
     setFiltersOpen(false);
   }}
-  className={`
-    fixed md:sticky
-    top-13 md:top-0
+className={`
+  fixed md:sticky
+  top-16 md:top-0
+  left-0
+  h-[calc(100vh-64px)] md:h-auto
+  bg-secondary p-4
+  z-40
+  w-65 max-w-xs
+  transform transition-transform duration-300
+  ${filtersOpen ? "translate-x-0" : "-translate-x-full"}
+  md:translate-x-0
+  md:relative
+  rounded-md
+  flex flex-col gap-4
+  text-primary
+`}
 
-    left-0
-    h-screen md:h-auto
-    bg-secondary
-    z-50
-    w-65 max-w-xs
-    transform transition-transform duration-300
-    ${filtersOpen ? "translate-x-0" : "-translate-x-full"}
-    md:translate-x-0
-    md:relative
-    rounded-md
-    flex flex-col
-    text-primary
-  `}
 >
-  {/* Sticky Header */}
-  <div className="sticky top-0 bg-secondary z-10 flex justify-between items-center px-4 py-3 border-b md:hidden">
+
+  <div className="flex justify-between items-center md:hidden mb-2">
     <span className="font-semibold text-black">Filters</span>
     <button
       type="button"
       onClick={() => setFiltersOpen(false)}
-      aria-label="Close filters"
     >
       <X className="w-5 h-5 text-black" />
     </button>
   </div>
 
-  {/* Scrollable Content */}
-  <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-    {/* Category */}
-    <div className="flex items-center gap-2 w-full sm:w-auto">
-      <Tag className="w-3 h-3" />
-      <label className="text-sm font-medium mb-1">Category</label>
-    </div>
-    <div className="flex pl-2 flex-col gap-4">
-      {productCategories.map(cat => (
-        <label key={cat} className="flex text-xs gap-1 items-center text-black">
-          <input
-            type="checkbox"
-            value={cat}
-            checked={category.includes(cat)}
-            onChange={e => {
-              if (e.target.checked) {
-                setCategory(prev => [...prev, cat]);
-              } else {
-                setCategory(prev => prev.filter(c => c !== cat));
-              }
-            }}
-          />
-          <span>{cat}</span>
-        </label>
-      ))}
-    </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Tag className="w-3 h-3" />
+            <label className="text-sm font-medium mb-1">Category</label>
+            </div>
+            <div className="flex pl-2 flex-col gap-4">
+              {productCategories.map(cat => (
+                <label key={cat} className="flex text-xs gap-1 items-center text-black">
+                  <input
+                    type="checkbox"
+                    value={cat}
+                    checked={category.includes(cat)}
+                    onChange={e => {
+                      if (e.target.checked) {
+                        setCategory(prev => [...prev, cat]);
+                      } else {
+                        setCategory(prev => prev.filter(c => c !== cat));
+                      }
 
-    {/* Price */}
-    <div className="flex items-center gap-2 w-full sm:w-auto">
-      <IndianRupee className="w-3 h-3" />
-      <label className="text-sm font-medium mb-1">Price</label>
-    </div>
 
-    {/* Slider */}
-    <PriceRangeSlider
-      min={SLIDER_MIN}
-      max={SLIDER_MAX}
-      step={SLIDER_STEP}
-      minVal={minPrice}
-      maxVal={maxPrice}
-      setMinVal={setMinPrice}
-      setMaxVal={setMaxPrice}
-    />
+                    }}
+                  />
+                  <span>{cat}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <IndianRupee className="w-3 h-3 " />
+            <label className="text-sm font-medium mb-1">Price</label>
+            </div>
 
-    <div className="flex flex-col items-center gap-3 pt-2">
-      <button
-        type="submit"
-        className="w-48 bg-primary text-white font-semibold py-2 rounded-md transition-colors"
-      >
-        Apply Filters
-      </button>
+          <PriceRangeSlider
+          min={SLIDER_MIN}
+          max={SLIDER_MAX}
+          step={SLIDER_STEP}
+          minVal={minPrice}
+          maxVal={maxPrice}
+          setMinVal={setMinPrice}
+          setMaxVal={setMaxPrice}
+/>
+          <button
+            type="submit"
+            className="bg-primary text-white font-semibold px-4 py-2 rounded-sm cursor-pointer transition-colors"
+          >
+            {loading ? <span className="flex items-center gap-2"><svg className="animate-spin h-4 w-4 text-black" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" /></svg> Loading...</span> : "Apply Filters"}
+          </button>
+          <button
+  type="button"
+  onClick={() => {
+    resetFilters();
+    setFiltersOpen(false); // close on mobile
+  }}
+  className="bg-primary/80 text-white font-medium px-4 py-1.5 rounded-sm cursor-pointer transition-colors text-sm hover:bg-primary"
+>
+  Clear all filters
+</button>
 
-      <button
-        type="button"
-        onClick={() => {
-          resetFilters();
-          setFiltersOpen(false);
-        }}
-        className="w-48 bg-primary/80 text-white text-sm font-medium py-1.5 rounded-md hover:bg-primary transition-colors"
-      >
-        Clear all filters
-      </button>
-    </div>
-
-    <button
-      type="button"
-      onClick={resetFilters}
-      className="bg-pastelpink text-secondary cursor-pointer font-semibold px-4 py-2 rounded-sm transition-colors"
-    >
-      Reset
-    </button>
-  </div>
-</form>
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="bg-pastelpink text-secondary cursor-pointer font-semibold px-4 py-2 rounded-sm transition-colors"
+          >
+            Reset
+          </button>
+        </form>
         <div className="p-4 flex-1">
         <h1 className="text-3xl font-bold text-primary mb-6">{`Search Results for "${query}"`}</h1>
         {/* Active Filter Chips */}
@@ -265,20 +255,9 @@ function SearchResultsPage() {
         {products.length > 0 && (
           <>
             <h2 className="text-2xl font-semibold text-primary mb-4 mt-8">Products</h2>
-            <div
-              className="
-                grid
-                grid-cols-2
-                sm:grid-cols-2
-                md:grid-cols-3
-                lg:grid-cols-4
-                gap-4 sm:gap-6
-                mt-2
-                  
-              "
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-2">
               {products.map(product => (
-                <ProductCard key={product._1d} product={product} />
+                <ProductCard key={product._id} product={product} />
               ))}
             </div>
           </>
@@ -286,17 +265,7 @@ function SearchResultsPage() {
         {bundles.length > 0 && (
           <>
             <h2 className="text-2xl font-semibold text-primary mb-4 mt-8">Bundles</h2>
-            <div
-              className="
-                grid
-                grid-cols-2
-                sm:grid-cols-2
-                md:grid-cols-3
-                lg:grid-cols-4
-                gap-4 sm:gap-6
-                mt-2
-              "
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 mt-2">
               {bundles.map(bundle => (
                 <BundleCard key={bundle._id} bundle={bundle} onClick={() => handleBundleClick(bundle._id)} />
               ))}
