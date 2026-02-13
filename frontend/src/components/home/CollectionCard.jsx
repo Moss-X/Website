@@ -1,24 +1,10 @@
-import { useEffect, useState } from 'react'
-import { ShoppingCart, Zap } from 'lucide-react'
-import { useCollectionStore } from '../stores/useCollectionStore'
-import { useNavigate, Link } from 'react-router-dom'
-import { useCartStore } from '../stores/useCartStore'
+import { useNavigate } from 'react-router-dom'
 
 function CollectionCard({ collection, odd }) {
   const navigate = useNavigate()
-
-  function handleAddToCart(e, collection) {
-    e.stopPropagation()
-    addCollectionToCart(collection)
-  }
-  function handleBuyNow(e, collection) {
-    e.stopPropagation()
-    addCollectionToCart(collection)
-    navigate('/cart')
-  }
   if (!odd) {
     return (
-      <div className="relative flex flex-col md:flex-row w-full aspect-square     xs:aspect-video md:aspect-[2/1] overflow-hidden">
+      <div className="relative flex flex-col md:flex-row w-full aspect-square xs:aspect-video md:aspect-2/1 overflow-hidden">
         <div className="flex -z-10 md:hidden items-center justify-center absolute ">
           <img src={collection.image} alt="" />
         </div>
@@ -27,12 +13,12 @@ function CollectionCard({ collection, odd }) {
           <img
             src={collection.image}
             alt="Image Could Not Load"
-            className="absolute hidden md:block left-0 lg:w-[55%] lg:max-w-[400px] object-contain"
+            className="absolute hidden md:block left-0 lg:w-[55%] lg:max-w-100 object-contain"
           />
           <img
             src={collection.image}
             alt="Image Could Not Load"
-            className="hidden lg:block absolute right-[20%] bottom-0 w-[50%] md:w-[40%] md:max-w-[300px] object-contain"
+            className="hidden lg:block absolute right-[20%] bottom-0 w-[50%] md:w-[40%] md:max-w-75 object-contain"
           />
         </div>
         {/* Right Text Content */}
@@ -58,7 +44,7 @@ function CollectionCard({ collection, odd }) {
   }
   if (odd) {
     return (
-      <div className="relative flex flex-col md:flex-row w-full aspect-square     xs:aspect-video md:aspect-[2/1] overflow-hidden">
+      <div className="relative flex flex-col md:flex-row w-full aspect-square  xs:aspect-video md:aspect-2/1 overflow-hidden">
         <div className="flex -z-10 md:hidden items-center justify-center absolute ">
           <img src={collection.image} alt="" />
         </div>
@@ -86,12 +72,12 @@ function CollectionCard({ collection, odd }) {
           <img
             src={collection.image}
             alt="Image Could Not Load"
-            className="absolute hidden md:block right-0 lg:w-[55%] lg:max-w-[400px] object-contain"
+            className="absolute hidden md:block right-0 lg:w-[55%] lg:max-w-100 object-contain"
           />
           <img
             src={collection.image}
             alt="Image Could Not Load"
-            className="hidden lg:block absolute left-[20%] bottom-0 w-[50%] md:w-[40%] md:max-w-[300px] object-contain"
+            className="hidden lg:block absolute left-[20%] bottom-0 w-[50%] md:w-[40%] md:max-w-75 object-contain"
           />
         </div>
       </div>

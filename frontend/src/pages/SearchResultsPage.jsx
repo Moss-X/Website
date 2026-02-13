@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import axios from '../lib/axios'
 import ProductCard from '../components/ProductCard'
 import { Tag, X, IndianRupee } from 'lucide-react'
-import BundleCard from '../components/BundleCard'
+import BundleCard from '../components/home/BundleCard'
 import PriceRangeSlider from '../components/PriceRangeSlider'
 
 const productCategories = [

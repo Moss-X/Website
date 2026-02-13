@@ -1,6 +1,6 @@
-import { Plus, ShoppingCart, Zap } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { useNavigate, Link } from 'react-router-dom'
-import { useCartStore } from '../stores/useCartStore'
+import { useCartStore } from '../../stores/useCartStore'
 
 function BundleCard({ bundle }) {
   // console.log("Length:", bundle.products);
@@ -11,11 +11,7 @@ function BundleCard({ bundle }) {
     e.stopPropagation()
     addBundleToCart(bundle)
   }
-  function handleBuyNow(e, bundle) {
-    e.stopPropagation()
-    addBundleToCart(bundle)
-    navigate('/cart')
-  }
+
   const savings = Math.max(0, bundle.totalPrice - bundle.discountedPrice)
 
   return (

@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react'
 import BundleCard from './BundleCard'
-import { useBundleStore } from '../stores/useBundleStore'
-import { useNavigate, Link } from 'react-router-dom'
+import { useBundleStore } from '../../stores/useBundleStore'
 
 function BundlesPreview() {
   const [visibleCount, setVisibleCount] = useState(6)
   const [showAll, setShowAll] = useState(false)
   const { bundles, fetchBundles, loading, error } = useBundleStore()
-  // fetch bundles on mount
+
   useEffect(() => {
     fetchBundles()
   }, [fetchBundles])
-  // determine initial visible count based on screen size and listen for resize
+
   useEffect(() => {
     function updateCount() {
       setVisibleCount(window.innerWidth < 768 ? 4 : 6)

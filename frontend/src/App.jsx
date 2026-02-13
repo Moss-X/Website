@@ -29,25 +29,20 @@ function App() {
 
   useEffect(() => {
     checkAuth()
-  }, []) // Remove checkAuth dependency to prevent infinite loops
+  }, [])
 
   useEffect(() => {
-    // Initialize cart session for both guest and authenticated users
     initializeSession()
 
-    // Only fetch cart items if user is authenticated
     if (user) {
       getCartItems()
     }
-  }, [user]) // Only depend on user changes
-
-  console.log('App checkingAuth:', checkingAuth)
+  }, [user])
+  //  console.log('App checkingAuth:', checkingAuth)
   if (checkingAuth) return <LoadingSpinner />
 
   return (
     <div className="min-h-screen bg-white text-white relative overflow-hidden flex flex-col">
-      {/* Background gradient */}
-
       <div className="relative z-50 flex-grow">
         <DisclaimerModal />
         {location.pathname !== '/login' && location.pathname !== '/signup' && <Navbar />}
@@ -60,7 +55,6 @@ function App() {
           <Route path="/bundle/:id" element={<BundlePage />} />
           <Route path="/product/:id" element={<ProductPage />} />
           <Route path="/collections/:id" element={<CollectionPage />} />
-          {/* Cart route - no authentication required for guest users */}
           <Route path="/cart" element={<CartPage />} />
           <Route path="/search" element={<SearchResultsPage />} />
           <Route path="/purchase-success" element={user ? <PurchaseSuccessPage /> : <Navigate to="/login" />} />

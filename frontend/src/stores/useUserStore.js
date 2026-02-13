@@ -57,22 +57,19 @@ export const useUserStore = create((set, get) => ({
   logout: async () => {
     try {
       await axios.post('/auth/logout')
-      set({ user: null })
     } catch (error) {
-      toast.error(error.response?.data?.message || 'An error occurred during logout')
+      console.error('Error during logout:', error)
+    } finally {
+      set({ user: null })
     }
   },
 
   checkAuth: async () => {
     set({ checkingAuth: true })
     try {
-      console.log('in auth check')
-
       const response = await axios.get('/auth/profile')
-      console.log(response)
       set({ user: response.data, checkingAuth: false })
     } catch (error) {
-      console.log('error check auth ', error)
       set({ checkingAuth: false, user: null })
     }
   },
@@ -111,14 +108,20 @@ axios.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't retry for these specific auth routes
+      const isAuthRoute =
+        originalRequest.url?.includes('/auth/login') ||
+        originalRequest.url?.includes('/auth/signup') ||
+        originalRequest.url?.includes('/auth/logout') ||
+        originalRequest.url?.includes('/auth/refresh-token')
+
+      if (isAuthRoute) {
+        return Promise.reject(error)
+      }
+
       originalRequest._retry = true
 
       try {
-        // If the failed request is the refresh token request itself, don't retry
-        if (originalRequest.url && originalRequest.url.includes('refresh-token')) {
-          throw new Error('Refresh token expired')
-        }
-
         // If a refresh is already in progress, wait for it to complete
         if (refreshPromise) {
           await refreshPromise
@@ -132,7 +135,8 @@ axios.interceptors.response.use(
 
         return axios(originalRequest)
       } catch (refreshError) {
-        // If refresh fails, redirect to login or handle as needed
+        refreshPromise = null
+        // If refresh fails, clear user state
         useUserStore.getState().logout()
         return Promise.reject(refreshError)
       }
