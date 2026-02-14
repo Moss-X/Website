@@ -5,7 +5,8 @@ import {
   getBundleById,
   updateBundle,
   deleteBundle,
-  searchBundles
+  searchBundles,
+  getBundlePriceRange
 } from '../controllers/bundle.controller.js'
 import { protectRoute, adminRoute } from '../middleware/auth.middleware.js'
 
@@ -13,6 +14,7 @@ const router = express.Router()
 
 router.get('/', getAllBundles)
 router.get('/search', searchBundles)
+router.get('/price-range', getBundlePriceRange)
 router.get('/:id', getBundleById)
 router.post('/', protectRoute, adminRoute, createBundle)
 router.put('/:id', protectRoute, adminRoute, updateBundle)

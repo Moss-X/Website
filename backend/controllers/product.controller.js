@@ -167,6 +167,40 @@ export const toggleFeaturedProduct = async (req, res) => {
   }
 }
 
+export const getSearchPriceRange = async (req, res) => {
+  try {
+    const { q, category } = req.query
+    const query = {}
+    if (q) {
+      const regex = new RegExp(q, 'i')
+      query.$or = [{ name: regex }, { description: regex }]
+    }
+    if (category) {
+      const categories = category.split(',')
+      query.category = { $in: categories }
+    }
+
+    const result = await Product.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: null,
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' }
+        }
+      }
+    ])
+
+    if (result.length > 0) {
+      res.json({ minPrice: result[0].minPrice, maxPrice: result[0].maxPrice })
+    } else {
+      res.json({ minPrice: 0, maxPrice: 0 })
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
 export const searchProducts = async (req, res) => {
   const { q, category, minPrice, maxPrice } = req.query
   const query = {}

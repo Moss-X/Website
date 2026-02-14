@@ -86,6 +86,36 @@ export async function deleteCollection(req, res) {
   }
 }
 
+export const getCollectionPriceRange = async (req, res) => {
+  try {
+    const { q } = req.query
+    const query = {}
+    if (q) {
+      const regex = new RegExp(q, 'i')
+      query.$or = [{ title: regex }, { description: regex }]
+    }
+
+    const result = await Collection.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: null,
+          minPrice: { $min: '$totalPrice' },
+          maxPrice: { $max: '$totalPrice' }
+        }
+      }
+    ])
+
+    if (result.length > 0) {
+      res.json({ minPrice: result[0].minPrice, maxPrice: result[0].maxPrice })
+    } else {
+      res.json({ minPrice: 0, maxPrice: 0 })
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
 export const searchCollections = async (req, res) => {
   const { q, minPrice, maxPrice } = req.query
   const query = {}

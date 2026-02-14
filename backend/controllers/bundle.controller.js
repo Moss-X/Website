@@ -93,6 +93,36 @@ export async function deleteBundle(req, res) {
   }
 }
 
+export const getBundlePriceRange = async (req, res) => {
+  try {
+    const { q } = req.query
+    const query = {}
+    if (q) {
+      const regex = new RegExp(q, 'i')
+      query.$or = [{ title: regex }, { description: regex }]
+    }
+
+    const result = await Bundle.aggregate([
+      { $match: query },
+      {
+        $group: {
+          _id: null,
+          minPrice: { $min: '$discountedPrice' },
+          maxPrice: { $max: '$discountedPrice' }
+        }
+      }
+    ])
+
+    if (result.length > 0) {
+      res.json({ minPrice: result[0].minPrice, maxPrice: result[0].maxPrice })
+    } else {
+      res.json({ minPrice: 0, maxPrice: 0 })
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
+  }
+}
+
 export const searchBundles = async (req, res) => {
   const { q, minPrice, maxPrice } = req.query
   const query = {}
