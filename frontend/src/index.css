@@ -47,4 +47,14 @@
       url('/cursor.webp') 0 0,
       pointer;
   }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+
+    scrollbar-width: none;
+  }
 }
