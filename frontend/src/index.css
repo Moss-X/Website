@@ -29,4 +29,22 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
   }
+
+  html,
+  body {
+    cursor:
+      url('/cursor.webp') 0 0,
+      auto;
+  }
+
+  a,
+  button,
+  input[type='submit'],
+  input[type='button'],
+  label,
+  [role='button'] {
+    cursor:
+      url('/cursor.webp') 0 0,
+      pointer;
+  }
 }
