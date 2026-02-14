@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useCollectionStore } from '../../stores/useCollectionStore'
 import CollectionCard from './CollectionCard'
-import { motion, useScroll, useTransform } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 const containerVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -33,13 +33,6 @@ function CollectionsPreview() {
   const [visibleCount, setVisibleCount] = useState(6)
   const { collections, fetchCollections, error } = useCollectionStore()
   const sectionRef = useRef(null)
-
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start end', 'end start']
-  })
-
-  const backgroundY = useTransform(scrollYProgress, [0, 1], ['-20%', '20%'])
 
   useEffect(() => {
     fetchCollections()
