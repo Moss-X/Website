@@ -19,7 +19,7 @@ import { useCartStore } from './stores/useCartStore'
 import PurchaseSuccessPage from './pages/PurchaseSuccessPage'
 import PurchaseCancelPage from './pages/PurchaseCancelPage'
 import DisclaimerModal from './components/DisclaimerModal'
-import LoadingSpinner from './components/LoadingSpinner'
+import LoadingSpinner from './components/loading/LoadingSpinner'
 import Footer from './components/Footer'
 
 function App() {
@@ -59,6 +59,7 @@ function App() {
           <Route path="/search" element={<SearchResultsPage />} />
           <Route path="/purchase-success" element={user ? <PurchaseSuccessPage /> : <Navigate to="/login" />} />
           <Route path="/purchase-cancel" element={user ? <PurchaseCancelPage /> : <Navigate to="/login" />} />
+          <Route path="/loading" element={<LoadingSpinner />} />
         </Routes>
       </div>
       {location.pathname !== '/login' && location.pathname !== '/signup' && <Footer />}

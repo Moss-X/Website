@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import axios from '../lib/axios'
 import { useCartStore } from '../stores/useCartStore'
 import ProductCard from '../components/ProductCard'
+import ParallaxBackground from '../components/loading/ParallaxBackground'
 
 function BundlePage() {
   const { id } = useParams()
@@ -37,6 +38,7 @@ function BundlePage() {
 
   return (
     <div className="min-h-screen pt-19">
+      <ParallaxBackground />
       {/* Hero Banner */}
       <section className="relative w-full max-w-(--breakpoint-xl) mx-auto flex flex-col md:flex-row items-center md:items-start gap-8 px-4 sm:px-6 lg:px-8 pt-12 pb-8">
         <div className="w-full md:w-1/2 flex flex-col items-center md:items-start">

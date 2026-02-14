@@ -7,7 +7,7 @@ import PeopleAlsoBought from '../components/PeopleAlsoBought'
 import OrderSummary from '../components/OrderSummary'
 import GiftCouponCard from '../components/GiftCouponCard'
 import { useEffect } from 'react'
-import LoadingSpinner from '../components/LoadingSpinner'
+import LoadingSpinner from '../components/loading/LoadingSpinner'
 
 const CartPage = () => {
   const { cart, loading, initializeSession, getCartItems } = useCartStore()

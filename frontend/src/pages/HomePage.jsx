@@ -23,7 +23,9 @@ function HomePage() {
         <section id="best-seller-section">
           {!isLoading && products.length > 0 && <FeaturedProducts featuredProducts={products} />}
         </section>
-        <BundlesPreview />
+      </div>
+      <BundlesPreview />
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         <CollectionsPreview />
       </div>
     </div>

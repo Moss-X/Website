@@ -31,7 +31,7 @@ const FeaturedProducts = ({ featuredProducts }) => {
   const visibleProducts = featuredProducts.slice(currentIndex, currentIndex + itemsPerPage)
 
   return (
-    <div className=" relative flex flex-col px-4 items-center py-8">
+    <div className=" relative flex flex-col px-4 items-center py-8 justify-center lg:min-h-[75vh]">
       <div className="mr-auto my-12">
         <h1 className=" text-heading font-bold text-5xl font-sans ">Best Sellers</h1>
       </div>
