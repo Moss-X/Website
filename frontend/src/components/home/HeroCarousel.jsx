@@ -8,7 +8,7 @@ function HeroCarousel() {
 
   return (
     <section
-      className="w-screen max-w-none flex flex-col md:flex-row items-center justify-center md:justify-between bg-secondary rounded-none shadow-lg overflow-hidden  md:min-h-175 relative -mx-[50vw] md:-mx-[50vw] md:left-1/2 md:right-1/2 h-125 pt-12 md:pt-0"
+      className="w-screen max-w-none flex flex-col md:flex-row items-center justify-center md:justify-between bg-secondary rounded-none shadow-lg overflow-hidden lg:min-h-200 md:min-h-175 relative -mx-[50vw] md:-mx-[50vw] md:left-1/2 md:right-1/2 h-125 pt-12 md:pt-0"
       style={{
         left: '50%',
         right: '50%',
@@ -17,7 +17,7 @@ function HeroCarousel() {
       }}
     >
       {/*Left */}
-      <div className="bg-secondary w-full md:w-2/3 h-87.5j md:h-auto flex items-center justify-center">
+      <div className="bg-secondary w-full md:w-2/3 lg:min-h-200 h-87.5j md:h-auto flex items-center justify-center">
         <div className="text-left px-8 xs:pr-28 md:px-16">
           <h1 className="text-4xl md:text-6xl font-bold text-heading leading-tight ">
             Think Green and
@@ -42,7 +42,7 @@ function HeroCarousel() {
         className=" absolute h-52 xs:h-[50%] sm:h-[55%] lg:hidden bottom-0 right-0"
       />
       {/* Branding Right */}
-      <div className="hidden lg:flex relative w-full lg:w-1/3 lg:h-175 bg-primary items-center justify-center">
+      <div className="hidden lg:flex relative w-full lg:w-1/3 md:h-175 lg:h-200 bg-primary items-center justify-center">
         <img
           src="/heroPlant.webp"
           alt="Moss-x Icon"

@@ -70,6 +70,11 @@ function CollectionCard({ collection, odd }) {
 
         {/* Right Image Content */}
         <div className="relative hidden md:block overflow-hidden w-full md:w-[50%] h-full">
+          {/* Top Shadow Overlay */}
+          <div className="absolute top-0 left-0 w-full h-24 bg-linear-to-b from-black/15 to-transparent z-1 pointer-events-none" />
+          {/* Bottom Shadow Overlay */}
+          <div className="absolute bottom-0 left-0 w-full h-24 bg-linear-to-t from-black/15 to-transparent z-1 pointer-events-none" />
+
           <img
             src={collection.image}
             alt="Image Could Not Load"

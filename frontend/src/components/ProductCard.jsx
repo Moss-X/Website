@@ -1,11 +1,8 @@
-import toast from 'react-hot-toast'
 import { Plus } from 'lucide-react'
-import { useUserStore } from '../stores/useUserStore'
 import { useCartStore } from '../stores/useCartStore'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
-function ProductCard({ product, variant = 'default' }) {
-  const { user } = useUserStore()
+function ProductCard({ product }) {
   const { addToCart } = useCartStore()
   const navigate = useNavigate()
 
@@ -16,15 +13,9 @@ function ProductCard({ product, variant = 'default' }) {
     addToCart(product)
   }
 
-  const handleBuyNow = (e) => {
-    e.stopPropagation()
-    addToCart(product)
-    navigate('/cart')
-  }
-
   return (
     <div
-      className="bg-gray p-0 cursor-pointer  hover:scale-[1.01] transition transform flex flex-col aspect-4/5 drop-shadow-md hover:drop-shadow-xl "
+      className="bg-gray p-0 cursor-pointer hover:scale-[1.01] transition transform flex flex-col aspect-4/5 drop-shadow-md hover:drop-shadow-xl "
       onClick={() => navigate(`/product/${product._id}`)}
       tabIndex={0}
       role="button"

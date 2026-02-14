@@ -26,9 +26,12 @@ function BundlesPreview() {
   if (!bundles.length) return null
 
   return (
-    <section className="relative my-16 py-12 overflow-hidden w-full">
+    <section className="relative mt-16 py-12 overflow-hidden w-full ">
+      {/* Top Shadow Overlay */}
+      <div className="absolute top-0 left-0 w-full h-4 bg-linear-to-b from-black/8 to-transparent z-1 pointer-events-none" />
+
       <motion.div
-        className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none"
+        className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none "
         initial={{ scale: 1.05 }}
         animate={{
           x: [0, -10, 0, 10, 0],
