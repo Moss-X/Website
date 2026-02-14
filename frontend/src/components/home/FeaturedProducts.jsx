@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductCard from '../ProductCard'
+import { motion } from 'framer-motion'
 
 const FeaturedProducts = ({ featuredProducts }) => {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -31,7 +32,13 @@ const FeaturedProducts = ({ featuredProducts }) => {
   const visibleProducts = featuredProducts.slice(currentIndex, currentIndex + itemsPerPage)
 
   return (
-    <div className=" relative flex flex-col px-4 items-center py-8 justify-center lg:min-h-[75vh]">
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
+      className=" relative flex flex-col px-4 items-center py-8 justify-center lg:min-h-[75vh]"
+    >
       <div className="mr-auto my-12">
         <h1 className=" text-heading font-bold text-5xl font-sans ">Best Sellers</h1>
       </div>
@@ -45,8 +52,16 @@ const FeaturedProducts = ({ featuredProducts }) => {
       </button>
 
       <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3  gap-4 items-center">
-        {visibleProducts.map((product) => (
-          <ProductCard product={product} key={product._id} />
+        {visibleProducts.map((product, index) => (
+          <motion.div
+            key={product._id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+          >
+            <ProductCard product={product} />
+          </motion.div>
         ))}
       </div>
 
@@ -57,7 +72,7 @@ const FeaturedProducts = ({ featuredProducts }) => {
       >
         <ChevronRight />
       </button>
-    </div>
+    </motion.div>
   )
 }
 
