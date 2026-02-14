@@ -1,8 +1,18 @@
 import { useNavigate } from 'react-router-dom'
-// make a collection.content in the be
+import { motion } from 'framer-motion'
 
 function CollectionCard({ collection, odd }) {
   const navigate = useNavigate()
+
+  const floatingAnimation = {
+    y: [0, -10, 0],
+    transition: {
+      duration: 4,
+      repeat: Infinity,
+      ease: 'easeInOut'
+    }
+  }
+
   if (!odd) {
     return (
       <div className="relative flex flex-col md:flex-row w-full aspect-square xs:aspect-video md:aspect-2/1 overflow-hidden">
@@ -11,12 +21,14 @@ function CollectionCard({ collection, odd }) {
         </div>
         {/* Left Image Content */}
         <div className="relative hidden md:block overflow-hidden w-full md:w-[50%] h-full">
-          <img
+          <motion.img
+            animate={floatingAnimation}
             src={collection.image}
             alt="Image Could Not Load"
             className="absolute hidden md:block left-0 lg:w-[55%] lg:max-w-100 object-contain"
           />
-          <img
+          <motion.img
+            animate={floatingAnimation}
             src={collection.image}
             alt="Image Could Not Load"
             className="hidden lg:block absolute right-[20%] bottom-0 w-[50%] md:w-[40%] md:max-w-75 object-contain"
@@ -75,12 +87,14 @@ function CollectionCard({ collection, odd }) {
           {/* Bottom Shadow Overlay */}
           <div className="absolute bottom-0 left-0 w-full h-24 bg-linear-to-t from-black/15 to-transparent z-1 pointer-events-none" />
 
-          <img
+          <motion.img
+            animate={floatingAnimation}
             src={collection.image}
             alt="Image Could Not Load"
             className="absolute hidden md:block right-0 lg:w-[55%] lg:max-w-100 object-contain"
           />
-          <img
+          <motion.img
+            animate={floatingAnimation}
             src={collection.image}
             alt="Image Could Not Load"
             className="hidden lg:block absolute left-[20%] bottom-0 w-[50%] md:w-[40%] md:max-w-75 object-contain"
