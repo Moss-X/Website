@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+// make a collection.content in the be
 
 function CollectionCard({ collection, odd }) {
   const navigate = useNavigate()
