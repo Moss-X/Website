@@ -1,3 +1,5 @@
+import { motion } from 'framer-motion'
+
 function HeroCarousel() {
   const handleShopNowClick = () => {
     const el = document.getElementById('best-seller-section')
@@ -19,31 +21,62 @@ function HeroCarousel() {
       {/*Left */}
       <div className="bg-secondary w-full md:w-2/3 lg:min-h-200 h-87.5j md:h-auto flex items-center justify-center">
         <div className="text-left px-8 xs:pr-28 md:px-16">
-          <h1 className="text-4xl md:text-6xl font-bold text-heading leading-tight ">
+          <motion.h1
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="text-4xl md:text-6xl font-bold text-heading leading-tight "
+          >
             Think Green and
             <br />
             <span className="text-primary z-10">Plant Something</span>
-          </h1>
-          <p className="mt-4 text-lg text-heading/70 max-w-md z-10">
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+            className="mt-4 text-lg text-heading/70 max-w-md z-10"
+          >
             Find your dream plants for your home decorations with us, and we will make it happen.
-          </p>
-          <button
+          </motion.p>
+          <motion.button
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.5 }}
             className="mt-6 z-10 px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition"
             onClick={handleShopNowClick}
           >
             🌿 Shop Now
-          </button>
+          </motion.button>
         </div>
       </div>
-      <img
+
+      {/* Mobile Plant Image */}
+      <motion.img
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1, delay: 0.3 }}
         src="/heroPlant.webp"
         alt=""
-        srcSet=""
-        className=" absolute h-52 xs:h-[50%] sm:h-[55%] lg:hidden bottom-0 right-0"
+        className=" absolute h-52 xs:h-[50%] sm:h-[55%] lg:hidden bottom-0 right-0 object-contain"
       />
+
       {/* Branding Right */}
       <div className="hidden lg:flex relative w-full lg:w-1/3 md:h-175 lg:h-200 bg-primary items-center justify-center">
-        <img
+        <motion.img
+          initial={{ opacity: 0, y: 50 }}
+          animate={{
+            opacity: 1,
+            y: [0, -20, 0]
+          }}
+          transition={{
+            opacity: { duration: 1, delay: 0.4 },
+            y: {
+              duration: 4,
+              repeat: Infinity,
+              ease: 'easeInOut'
+            }
+          }}
           src="/heroPlant.webp"
           alt="Moss-x Icon"
           className="z-0 absolute top-5/8 -translate-y-1/2 -translate-x-1/2 md:min-h-full mb-6 drop-shadow-2xl object-cover pb-12 "
