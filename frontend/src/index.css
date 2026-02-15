@@ -33,18 +33,18 @@
   html,
   body {
     cursor:
-      url('/cursor.webp') 0 0,
+      url('/cursor.png') 0 0,
       auto;
   }
 
   a,
   button,
+  .pointer,
   input[type='submit'],
   input[type='button'],
   label,
   [role='button'] {
     cursor:
-      url('/cursor.webp') 0 0,
-      pointer;
+      /* url('/cursor.webp') 0 0, */ pointer;
   }
 }

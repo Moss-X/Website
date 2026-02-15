@@ -1,7 +1,7 @@
 import React from 'react'
 import { Slider } from './ui/slider'
 
-const PriceRangeSlider = ({ min = 0, max = 10000, step = 10, minVal, maxVal, setMinVal, setMaxVal }) => {
+const PriceRangeSlider = ({ min = 0, max = 20000, step = 10, minVal, maxVal, setMinVal, setMaxVal }) => {
   const handleValueChange = (values) => {
     setMinVal(values[0])
     setMaxVal(values[1])
@@ -60,7 +60,7 @@ const PriceRangeSlider = ({ min = 0, max = 10000, step = 10, minVal, maxVal, set
       </div>
 
       {/* Shadcn Slider */}
-      <div className="px-1">
+      <div className="px-1 pointer pointer-fine:">
         <Slider
           min={min}
           max={max}
