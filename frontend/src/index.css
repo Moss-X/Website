@@ -32,9 +32,7 @@
 
   html,
   body {
-    cursor:
-      url('/cursor.png') 0 0,
-      auto;
+    cursor: url('/cursor.png'), auto;
   }
 
   a,
