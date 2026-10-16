@@ -1,93 +1,69 @@
-import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { Ticket } from 'lucide-react'
 import { useCartStore } from '../stores/useCartStore'
+import { useUserStore } from '../stores/useUserStore'
 
 const GiftCouponCard = () => {
-  const [userInputCode, setUserInputCode] = useState('')
+  const user = useUserStore((s) => s.user)
+  const [code, setCode] = useState('')
   const { coupon, isCouponApplied, applyCoupon, getMyCoupon, removeCoupon } = useCartStore()
 
   useEffect(() => {
-    getMyCoupon()
-  }, [getMyCoupon])
+    if (user) getMyCoupon()
+  }, [getMyCoupon, user])
 
-  useEffect(() => {
-    if (coupon) setUserInputCode(coupon.code)
-  }, [coupon])
-
-  const handleApplyCoupon = () => {
-    if (!userInputCode) return
-    applyCoupon(userInputCode)
-  }
-
-  const handleRemoveCoupon = async () => {
-    await removeCoupon()
-    setUserInputCode('')
-  }
+  if (!user) return null
 
   return (
-    <motion.div
-      className="space-y-4 rounded-lg bg-secondary p-4 shadow-xs sm:p-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.2 }}
-    >
-      <div className="space-y-4">
-        <div>
-          <label htmlFor="voucher" className="mb-2 block text-sm font-medium text-black">
-            Do you have a voucher or gift card?
+    <section aria-labelledby="coupon-heading" className="rounded-3xl border border-line bg-surface p-6">
+      <h2 id="coupon-heading" className="mb-3 flex items-center gap-2 font-bold">
+        <Ticket className="h-5 w-5 text-moss" aria-hidden="true" />
+        Gift card or coupon
+      </h2>
+      {isCouponApplied && coupon ? (
+        <div className="flex items-center justify-between gap-3 rounded-2xl bg-sage px-4 py-3">
+          <span>
+            <span className="font-bold">{coupon.code}</span> · {coupon.discountPercentage}% off applied
+          </span>
+          <button type="button" onClick={removeCoupon} className="text-sm font-bold underline hover:text-clay">
+            Remove
+          </button>
+        </div>
+      ) : (
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (code.trim()) applyCoupon(code.trim())
+          }}
+        >
+          <label htmlFor="voucher" className="sr-only">
+            Coupon code
           </label>
           <input
-            type="text"
             id="voucher"
-            className="block w-full rounded-lg border border-gray-400 bg-white 
-            p-2.5 text-sm text-black placeholder-gray-400 focus:border-primary 
-            focus:ring-primary"
-            placeholder="Enter code here"
-            value={userInputCode}
-            onChange={(e) => setUserInputCode(e.target.value)}
-            required
+            type="text"
+            className="field flex-1 uppercase placeholder:normal-case"
+            placeholder="Enter code"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            autoComplete="off"
           />
-        </div>
-
-        <motion.button
-          type="button"
-          className="flex w-full items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-darkGreen "
-          onClick={handleApplyCoupon}
-        >
-          Apply Code
-        </motion.button>
-      </div>
-      {isCouponApplied && coupon && (
-        <div className="mt-4">
-          <h3 className="text-lg font-medium text-black">Applied Coupon</h3>
-
-          <p className="mt-2 text-sm text-gray-600">
-            {coupon.code} - {coupon.discountPercentage}% off
-          </p>
-
-          <motion.button
-            type="button"
-            className="mt-2 flex w-full items-center justify-center rounded-lg bg-red-600 
-            px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700 focus:outline-hidden
-             focus:ring-4 focus:ring-red-300"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleRemoveCoupon}
-          >
-            Remove Coupon
-          </motion.button>
-        </div>
+          <button type="submit" className="btn-outline h-11 px-5">
+            Apply
+          </button>
+        </form>
       )}
-
-      {coupon && (
-        <div className="mt-4">
-          <h3 className="text-lg font-medium text-black">Your Available Coupon:</h3>
-          <p className="mt-2 text-sm text-gray-600">
-            {coupon.code} - {coupon.discountPercentage}% off
-          </p>
-        </div>
+      {coupon && !isCouponApplied && (
+        <p className="mt-3 text-sm text-muted">
+          You have a coupon:{' '}
+          <button type="button" className="font-bold text-moss underline" onClick={() => applyCoupon(coupon.code)}>
+            {coupon.code}
+          </button>{' '}
+          for {coupon.discountPercentage}% off.
+        </p>
       )}
-    </motion.div>
+    </section>
   )
 }
 export default GiftCouponCard

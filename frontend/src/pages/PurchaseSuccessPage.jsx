@@ -1,92 +1,99 @@
-import { ArrowRight, CheckCircle, HandHeart } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useCartStore } from '../stores/useCartStore'
-import axios from '../lib/axios'
+import { CheckCircle2 } from 'lucide-react'
 import Confetti from 'react-confetti'
+import { useCartStore } from '../stores/useCartStore'
+import { useFetch } from '../hooks/useFetch'
+import { formatCurrency } from '../utils/formatCurrency'
 
 const PurchaseSuccessPage = () => {
-  const [isProcessing, setIsProcessing] = useState(true)
-  const { clearCart } = useCartStore()
-  const [error, setError] = useState(null)
+  const orderId = new URLSearchParams(window.location.search).get('order_id')
+  const { data: order, loading, error } = useFetch(orderId ? `/payments/orders/${orderId}` : null)
+  const { clearCart, getMyCoupon } = useCartStore()
+  const [size, setSize] = useState({ w: window.innerWidth, h: window.innerHeight })
 
   useEffect(() => {
-    const handleSuccess = async (orderId) => {
-      try {
-        // Optionally fetch order details or mark as seen
-        await axios.post('/orders/mark-success', { orderId })
-        clearCart()
-      } catch (error) {
-        console.error(error)
-      } finally {
-        setIsProcessing(false)
-      }
+    // the server already emptied the cart when it verified payment; sync local state
+    if (order) {
+      clearCart()
+      getMyCoupon()
     }
+  }, [order, clearCart, getMyCoupon])
 
-    const orderId = new URLSearchParams(window.location.search).get('order_id')
-    if (orderId) {
-      handleSuccess(orderId)
-    } else {
-      setIsProcessing(false)
-      setError('No order id in URL')
-    }
-  }, [clearCart])
+  useEffect(() => {
+    const onResize = () => setSize({ w: window.innerWidth, h: window.innerHeight })
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
 
-  if (isProcessing) return 'Processing...'
+  if (loading) {
+    return <div className="container-page py-24 text-center text-muted">Confirming your order…</div>
+  }
 
-  if (error) return `Error: ${error}`
+  if (!orderId || error || !order) {
+    return (
+      <section className="container-page flex flex-col items-center gap-4 py-24 text-center">
+        <h1 className="heading-display text-4xl">We couldn&apos;t find that order</h1>
+        <p className="max-w-md text-muted">
+          If you were charged, your order is safe — it can take a moment to appear. Contact us with your payment
+          reference if you need help.
+        </p>
+        <Link to="/" className="btn-primary">
+          Back to the shop
+        </Link>
+      </section>
+    )
+  }
 
   return (
-    <div className="h-screen flex items-center justify-center px-4">
+    <section className="container-page flex justify-center py-16 sm:py-24">
       <Confetti
-        width={window.innerWidth}
-        height={window.innerHeight}
-        gravity={0.1}
-        style={{ zIndex: 99 }}
-        numberOfPieces={700}
+        width={size.w}
+        height={size.h}
+        gravity={0.12}
+        numberOfPieces={400}
         recycle={false}
+        style={{ position: 'fixed', zIndex: 60 }}
+        colors={['#4F6A47', '#C0D3BB', '#B4532A', '#E3EBDF', '#07592C']}
       />
+      <div className="w-full max-w-lg rounded-3xl border border-line bg-surface p-8 text-center sm:p-10">
+        <CheckCircle2 className="mx-auto mb-4 h-14 w-14 text-moss" aria-hidden="true" />
+        <h1 className="heading-display mb-2 text-4xl">Thank you!</h1>
+        <p className="mb-8 text-muted">Your order is confirmed and your plants are being prepared.</p>
 
-      <div className="max-w-md w-full bg-gray-800 rounded-lg shadow-xl overflow-hidden relative z-10">
-        <div className="p-6 sm:p-8">
-          <div className="flex justify-center">
-            <CheckCircle className="text-emerald-400 w-16 h-16 mb-4" />
+        <dl className="mb-6 flex flex-col gap-2 rounded-2xl bg-ground p-5 text-left text-[15px]">
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted">Order number</dt>
+            <dd className="font-mono font-bold">#{String(order._id).slice(-8).toUpperCase()}</dd>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-center text-emerald-400 mb-2">Purchase Successful!</h1>
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted">Amount paid</dt>
+            <dd className="font-bold">{formatCurrency(order.totalAmount)}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-muted">Deliver to</dt>
+            <dd className="text-right">
+              {order.shippingAddress?.fullName}, {order.shippingAddress?.city}
+            </dd>
+          </div>
+        </dl>
 
-          <p className="text-gray-300 text-center mb-2">Thank you for your order. {"We're"} processing it now.</p>
-          <p className="text-emerald-400 text-center text-sm mb-6">Check your email for order details and updates.</p>
-          <div className="bg-gray-700 rounded-lg p-4 mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-400">Order number</span>
-              <span className="text-sm font-semibold text-emerald-400">#12345</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-400">Estimated delivery</span>
-              <span className="text-sm font-semibold text-emerald-400">3-5 business days</span>
-            </div>
-          </div>
+        <ul className="mb-8 divide-y divide-line text-left text-[15px]">
+          {order.items.map((item, i) => (
+            <li key={i} className="flex justify-between gap-4 py-2.5">
+              <span>
+                {item.name} <span className="text-muted">× {item.quantity}</span>
+              </span>
+              <span className="tabular-nums">{formatCurrency(item.price * item.quantity)}</span>
+            </li>
+          ))}
+        </ul>
 
-          <div className="space-y-4">
-            <button
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4
-             rounded-lg transition duration-300 flex items-center justify-center"
-            >
-              <HandHeart className="mr-2" size={18} />
-              Thanks for trusting us!
-            </button>
-            <Link
-              to={'/'}
-              className="w-full bg-gray-700 hover:bg-gray-600 text-emerald-400 font-bold py-2 px-4 
-            rounded-lg transition duration-300 flex items-center justify-center"
-            >
-              Continue Shopping
-              <ArrowRight className="ml-2" size={18} />
-            </Link>
-          </div>
-        </div>
+        <Link to="/" className="btn-primary w-full">
+          Continue shopping
+        </Link>
       </div>
-    </div>
+    </section>
   )
 }
 export default PurchaseSuccessPage

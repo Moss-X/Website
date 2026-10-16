@@ -1,15 +1,6 @@
-import { Tag, X, IndianRupee } from 'lucide-react'
+import { X } from 'lucide-react'
 import PriceRangeSlider from '../PriceRangeSlider'
-
-const productCategories = [
-  'Ornamental Houseplants',
-  'Flowering Bedding Plants',
-  'Herbs and Edible Plants',
-  'Succulents and Cacti',
-  'Fruit Trees and Bushes',
-  'Vegetable Plants and Seedlings',
-  'Indoor Air-Purifying Plants'
-]
+import { CATEGORIES } from '../../lib/catalog'
 
 const FilterSidebar = ({
   filtersOpen,
@@ -22,125 +13,86 @@ const FilterSidebar = ({
   setMaxPrice,
   applyFilters,
   resetFilters,
-  loading,
-  SLIDER_MIN,
-  SLIDER_MAX,
-  SLIDER_STEP
+  sliderMin,
+  sliderMax,
+  sliderStep
 }) => {
   return (
     <>
       {filtersOpen && (
-        <div className="fixed inset-0 bg-black/50 z-30 md:hidden" onClick={() => setFiltersOpen(false)} />
+        <div
+          className="fixed inset-0 z-40 bg-ink/50 md:hidden"
+          onClick={() => setFiltersOpen(false)}
+          aria-hidden="true"
+        />
       )}
 
       <form
+        aria-label="Filters"
         onSubmit={(e) => {
           applyFilters(e)
           setFiltersOpen(false)
         }}
-        className={`
-          fixed md:sticky
-          top-16 md:top-0
-          left-0
-          h-[calc(100vh-64px)] md:h-auto
-          bg-secondary p-4
-          z-40
-          w-65 max-w-xs
-          transform transition-transform duration-300
-          ${filtersOpen ? 'translate-x-0' : '-translate-x-full'}
-          md:translate-x-0
-          md:relative
-          rounded-md
-          flex flex-col gap-4
-          text-primary
-        `}
+        className={`fixed inset-y-0 left-0 z-50 flex w-[300px] max-w-[85vw] flex-col gap-6 overflow-y-auto bg-surface p-6 transition-transform duration-300 md:sticky md:top-24 md:z-0 md:w-auto md:max-w-none md:translate-x-0 md:rounded-3xl md:border md:border-line ${filtersOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="flex justify-between items-center md:hidden mb-2">
-          <span className="font-semibold text-black">Filters</span>
-          <button type="button" onClick={() => setFiltersOpen(false)}>
-            <X className="w-5 h-5 text-black" />
+        <div className="flex items-center justify-between md:hidden">
+          <span className="text-lg font-bold">Filters</span>
+          <button
+            type="button"
+            onClick={() => setFiltersOpen(false)}
+            aria-label="Close filters"
+            className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-sage"
+          >
+            <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Tag className="w-3 h-3" />
-          <label className="text-sm font-medium mb-1">Category</label>
-        </div>
-        <div className="flex pl-2 flex-col gap-4">
-          {productCategories.map((cat) => (
-            <label key={cat} className="flex text-xs gap-1 items-center text-black">
+        <fieldset className="flex flex-col gap-3">
+          <legend className="eyebrow mb-3 text-xs">Category</legend>
+          {CATEGORIES.map((cat) => (
+            <label key={cat.slug} className="flex items-center gap-3 text-[15px]">
               <input
                 type="checkbox"
-                value={cat}
-                checked={category.includes(cat)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setCategory((prev) => [...prev, cat])
-                  } else {
-                    setCategory((prev) => prev.filter((c) => c !== cat))
-                  }
-                }}
+                value={cat.name}
+                checked={category.includes(cat.name)}
+                onChange={(e) =>
+                  setCategory((prev) => (e.target.checked ? [...prev, cat.name] : prev.filter((c) => c !== cat.name)))
+                }
+                className="h-[18px] w-[18px] shrink-0 accent-moss"
               />
-              <span>{cat}</span>
+              {cat.short}
             </label>
           ))}
-        </div>
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <IndianRupee className="w-3 h-3 " />
-          <label className="text-sm font-medium mb-1">Price</label>
-        </div>
+        </fieldset>
 
-        <PriceRangeSlider
-          min={SLIDER_MIN}
-          max={SLIDER_MAX}
-          step={SLIDER_STEP}
-          minVal={minPrice}
-          maxVal={maxPrice}
-          setMinVal={setMinPrice}
-          setMaxVal={setMaxPrice}
-        />
-        <button
-          type="submit"
-          className="bg-primary text-white font-semibold px-4 py-2 rounded-sm cursor-pointer transition-colors"
-        >
-          {loading ? (
-            <span className="flex items-center gap-2">
-              <svg className="animate-spin h-4 w-4 text-black" viewBox="0 0 24 24">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-              </svg>{' '}
-              Loading...
-            </span>
-          ) : (
-            'Apply Filters'
-          )}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            resetFilters()
-            setFiltersOpen(false) // close on mobile
-          }}
-          className="bg-primary/80 text-white font-medium px-4 py-1.5 rounded-sm cursor-pointer transition-colors text-sm hover:bg-primary"
-        >
-          Clear all filters
-        </button>
+        <fieldset className="flex flex-col gap-3">
+          <legend className="eyebrow mb-3 text-xs">Price</legend>
+          <PriceRangeSlider
+            min={sliderMin}
+            max={sliderMax}
+            step={sliderStep}
+            minVal={minPrice}
+            maxVal={maxPrice}
+            setMinVal={setMinPrice}
+            setMaxVal={setMaxPrice}
+          />
+        </fieldset>
 
-        <button
-          type="button"
-          onClick={resetFilters}
-          className="bg-pastelpink text-secondary cursor-pointer font-semibold px-4 py-2 rounded-sm transition-colors"
-        >
-          Reset
-        </button>
+        <div className="flex flex-col gap-1">
+          <button type="submit" className="btn-primary">
+            Apply filters
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              resetFilters()
+              setFiltersOpen(false)
+            }}
+            className="h-11 rounded-full font-medium underline underline-offset-4 hover:bg-sage"
+          >
+            Clear all
+          </button>
+        </div>
       </form>
     </>
   )

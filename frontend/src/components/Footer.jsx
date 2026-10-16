@@ -1,80 +1,52 @@
 import { Link } from 'react-router-dom'
-import { Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'
+import { CATEGORIES } from '../lib/catalog'
 
 function Footer() {
   return (
-    <footer className="bg-primary text-secondary px-6 py-12 z-[100]">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-        {/* Logo & Tagline */}
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-secondary">
-            Moss <span className="text-darkGreen">X</span>
-          </h2>
-          <p className="text-sm text-neutral">Making your life greener, one plant at a time.</p>
+    <footer className="mt-auto bg-ink text-[#C9D3C4]">
+      <div className="container-page grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+        <div className="flex flex-col gap-3">
+          <span className="font-display text-[28px] font-semibold text-ground">
+            Moss<span className="text-sage-strong">X</span>
+          </span>
+          <p className="max-w-xs leading-relaxed">Making homes greener, one plant at a time.</p>
         </div>
-
-        {/* Quick Links */}
-        <div>
-          <h3 className="text-lg font-semibold text-secondary mb-2">Quick Links</h3>
-          <ul className="space-y-1 text-sm text-neutral">
-            <li>
-              <Link to="/" className="hover:text-darkGreen transition duration-300">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link to="/search" className="hover:text-darkGreen transition duration-300">
-                Explore
-              </Link>
-            </li>
-            <li>
-              <Link to="/cart" className="hover:text-darkGreen transition duration-300">
-                Cart
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Resources */}
-        <div>
-          <h3 className="text-lg font-semibold text-secondary mb-2">Resources</h3>
-          <ul className="space-y-1 text-sm text-neutral">
-            <li>
-              <a href="#" className="hover:text-darkGreen transition duration-300">
-                Privacy Policy
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:text-darkGreen transition duration-300">
-                Terms & Conditions
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        {/* Socials */}
-        <div>
-          <h3 className="text-lg font-semibold text-secondary mb-2">Connect</h3>
-          <div className="flex gap-4 text-neutral">
-            <a href="#" className="hover:text-darkGreen transition duration-300">
-              <Facebook size={20} />
-            </a>
-            <a href="#" className="hover:text-darkGreen transition duration-300">
-              <Twitter size={20} />
-            </a>
-            <a href="#" className="hover:text-darkGreen transition duration-300">
-              <Instagram size={20} />
-            </a>
-            <a href="#" className="hover:text-darkGreen transition duration-300">
-              <Linkedin size={20} />
-            </a>
-          </div>
-        </div>
+        <nav aria-label="Shop by category" className="flex flex-col gap-2.5">
+          <span className="font-bold text-ground">Categories</span>
+          {CATEGORIES.slice(0, 5).map((c) => (
+            <Link key={c.slug} to={`/category/${c.slug}`} className="hover:text-ground">
+              {c.short}
+            </Link>
+          ))}
+        </nav>
+        <nav aria-label="Shop" className="flex flex-col gap-2.5">
+          <span className="font-bold text-ground">Shop</span>
+          <Link to="/search" className="hover:text-ground">
+            All plants
+          </Link>
+          <Link to="/#bundles" className="hover:text-ground">
+            Bundles
+          </Link>
+          <Link to="/#collections" className="hover:text-ground">
+            Collections
+          </Link>
+        </nav>
+        <nav aria-label="Account" className="flex flex-col gap-2.5">
+          <span className="font-bold text-ground">Account</span>
+          <Link to="/login" className="hover:text-ground">
+            Sign in
+          </Link>
+          <Link to="/signup" className="hover:text-ground">
+            Create account
+          </Link>
+          <Link to="/cart" className="hover:text-ground">
+            Cart
+          </Link>
+        </nav>
       </div>
-
-      {/* Bottom Bar */}
-      <div className="border-t border-neutral mt-12 pt-6 text-center text-sm text-neutral">
-        © {new Date().getFullYear()} Moss X. All rights reserved.
+      <div className="container-page flex flex-col gap-2 border-t border-[#34432F] py-6 text-sm sm:flex-row sm:justify-between">
+        <span>© {new Date().getFullYear()} Moss X. All rights reserved.</span>
+        <span>Plant photography by Wikimedia Commons contributors, credited on each product.</span>
       </div>
     </footer>
   )

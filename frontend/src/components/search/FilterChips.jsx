@@ -4,23 +4,24 @@ const FilterChips = ({ activeFilters, removeFilter }) => {
   if (activeFilters.length === 0) return null
 
   return (
-    <div className="flex flex-wrap gap-2 mb-6">
+    <ul className="flex flex-wrap gap-2" aria-label="Active filters">
       {activeFilters.map((f) => (
-        <span
-          key={`${f.type}-${f.label}`}
-          className="flex items-center bg-primary text-white px-3 py-1 rounded-full text-xs font-medium"
+        <li
+          key={`${f.type}-${f.value}`}
+          className="inline-flex h-9 items-center gap-2 rounded-full bg-ink pr-1.5 pl-3.5 text-sm font-medium text-ground"
         >
           {f.label}
           <button
-            onClick={() => removeFilter(f.type)}
-            className="ml-2 hover:text-red-300"
-            aria-label={`Remove ${f.label}`}
+            type="button"
+            onClick={() => removeFilter(f.type, f.value)}
+            className="flex h-6 w-6 items-center justify-center rounded-full bg-night hover:bg-clay"
+            aria-label={`Remove filter ${f.label}`}
           >
-            <X className="w-3 h-3" />
+            <X className="h-3.5 w-3.5" />
           </button>
-        </span>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }
 

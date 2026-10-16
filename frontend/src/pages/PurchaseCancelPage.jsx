@@ -1,40 +1,31 @@
-import { XCircle, ArrowLeft } from 'lucide-react'
-import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import { XCircle } from 'lucide-react'
 
 const PurchaseCancelPage = () => {
+  const reason = new URLSearchParams(window.location.search).get('reason')
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-50">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="max-w-md w-full bg-white rounded-lg shadow-xl overflow-hidden relative z-10"
-      >
-        <div className="p-6 sm:p-8">
-          <div className="flex justify-center">
-            <XCircle className="text-red-500 w-16 h-16 mb-4" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-center text-black mb-2">Purchase Cancelled</h1>
-          <p className="text-gray-600 text-center mb-6">Your order has been cancelled. No charges have been made.</p>
-          <div className="bg-gray-100 rounded-lg p-4 mb-6">
-            <p className="text-sm text-gray-500 text-center">
-              If you encountered any issues during the checkout process, please don&apos;t hesitate to contact our
-              support team.
-            </p>
-          </div>
-          <div className="space-y-4">
-            <Link
-              to={'/'}
-              className="w-full bg-primary hover:bg-darkGreen text-white font-bold py-2 px-4 rounded-full shadow-md transition flex items-center justify-center"
-            >
-              <ArrowLeft className="mr-2" size={18} />
-              Return to Shop
-            </Link>
-          </div>
+    <section className="container-page flex justify-center py-16 sm:py-24">
+      <div className="w-full max-w-md rounded-3xl border border-line bg-surface p-8 text-center sm:p-10">
+        <XCircle className="mx-auto mb-4 h-14 w-14 text-clay" aria-hidden="true" />
+        <h1 className="heading-display mb-2 text-4xl">Payment not completed</h1>
+        <p className="mb-6 text-muted">
+          {reason === 'verify_error'
+            ? "We couldn't confirm your payment. If money was deducted it will be refunded automatically by your bank."
+            : 'Your order was cancelled and no charges were made.'}
+        </p>
+        <p className="mb-8 rounded-2xl bg-ground p-4 text-sm text-muted">
+          Your cart has been kept so you can try again.
+        </p>
+        <div className="flex flex-col gap-3">
+          <Link to="/cart" className="btn-primary">
+            Back to cart
+          </Link>
+          <Link to="/" className="btn-outline">
+            Continue shopping
+          </Link>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </section>
   )
 }
 

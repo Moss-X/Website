@@ -1,57 +1,61 @@
-import { Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Check, Plus } from 'lucide-react'
 import { useCartStore } from '../stores/useCartStore'
-import { useNavigate } from 'react-router-dom'
+import { cld } from '../lib/image'
+import { formatCurrency } from '../utils/formatCurrency'
 
 function ProductCard({ product }) {
-  const { addToCart } = useCartStore()
-  const navigate = useNavigate()
+  const addToCart = useCartStore((s) => s.addToCart)
+  const [added, setAdded] = useState(false)
 
-  const savings = Math.max(0, product.totalPrice - product.discountedPrice)
-
-  const handleAddToCart = (e) => {
-    e.stopPropagation()
-    addToCart(product)
+  async function handleAdd() {
+    if (await addToCart(product)) {
+      setAdded(true)
+      setTimeout(() => setAdded(false), 1400)
+    }
   }
 
   return (
-    <div
-      className="bg-gray p-0 cursor-pointer hover:scale-[1.01] transition transform flex flex-col aspect-4/5 drop-shadow-md hover:drop-shadow-xl "
-      onClick={() => navigate(`/product/${product._id}`)}
-      tabIndex={0}
-      role="button"
-      aria-label={`View product ${product.name}`}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') navigate(`/product/${product._id}`)
-      }}
-    >
-      <div className="relative bg-gray flex items-center justify-center w-full h-[75%] aspect-square basis-1/2 md:basis-auto">
-        <img src={product.image} alt={product.name} className="w-full h-full object-contain" />
-        {/* Conditional savings badge, similar to the bundle card */}
-        {savings > 0 && (
-          <span className="absolute top-2 left-2 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
-            Save ₹{savings}
+    <article className="group relative flex flex-col gap-3">
+      <div className="relative overflow-hidden rounded-[22px] bg-placeholder">
+        <img
+          src={cld(product.image, { w: 600, h: 750 })}
+          alt={product.name}
+          loading="lazy"
+          className="aspect-[4/5] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+        />
+        {product.care?.level && (
+          <span className="absolute top-3 left-3 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-ink">
+            {product.care.level} care
           </span>
         )}
-      </div>
-      <div className="flex flex-row p-4">
-        <div className="flex-1 flex flex-col gap-1 ">
-          <h3 className="text-xl md:text-2xl  text-black font-bold  line-clamp-1">{product.name}</h3>
-          <div className="flex items-center gap-4 mb-4">
-            <span className="text-black font-semibold text-md md:text-xl">₹{product.price}</span>
-            {/* Display discounted price if applicable */}
-            {product.discountedPrice && (
-              <span className="text-gray-400 line-through md:text-2xl">₹{product.totalPrice}</span>
-            )}
-          </div>
-        </div>
-        <div
-          onClick={handleAddToCart}
-          className="flex text-white aspect-square hover:ring-amber-400 rounded-full items-center just"
+        <button
+          type="button"
+          onClick={handleAdd}
+          aria-label={`Add ${product.name} to cart`}
+          className="absolute right-3 bottom-3 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-ink text-white shadow-lg transition-[background-color,transform] hover:scale-105 hover:bg-forest active:scale-95"
         >
-          <Plus size={48} className="bg-black rounded-full p-2 hover:border-neutral border-4 border-gray" />
-        </div>
+          {added ? <Check className="h-5 w-5" aria-hidden="true" /> : <Plus className="h-5 w-5" aria-hidden="true" />}
+        </button>
       </div>
-    </div>
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <h3 className="text-[15px] leading-snug font-bold sm:text-[17px]">
+            <Link
+              to={`/product/${product._id}`}
+              className="text-ink after:absolute after:inset-0 after:rounded-[22px] after:content-[''] hover:text-forest"
+            >
+              {product.name}
+            </Link>
+          </h3>
+          {product.botanicalName && <span className="truncate text-sm text-muted italic">{product.botanicalName}</span>}
+        </div>
+        <span className="font-display text-lg font-semibold whitespace-nowrap sm:text-xl">
+          {formatCurrency(product.price)}
+        </span>
+      </div>
+    </article>
   )
 }
 

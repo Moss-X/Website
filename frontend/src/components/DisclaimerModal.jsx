@@ -1,34 +1,56 @@
-import { X } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Info } from 'lucide-react'
 
+const STORAGE_KEY = 'mossx-demo-notice-dismissed'
+
+// Shown once per browser: this is a demo store backed by a shared database.
 const DisclaimerModal = () => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(() => {
+    try {
+      return !localStorage.getItem(STORAGE_KEY)
+    } catch {
+      return true
+    }
+  })
+
+  const close = () => {
+    try {
+      localStorage.setItem(STORAGE_KEY, '1')
+    } catch {
+      /* storage blocked: just close */
+    }
+    setIsOpen(false)
+  }
 
   useEffect(() => {
-    setIsOpen(true)
-  }, [])
+    if (!isOpen) return
+    const onKey = (e) => e.key === 'Escape' && close()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isOpen])
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-6 max-w-md w-full relative">
-        <button onClick={() => setIsOpen(false)} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600">
-          <X className="h-6 w-6" />
-        </button>
-
-        <h2 className="text-xl font-bold text-red-600 mb-4">Disclaimer</h2>
-        <p className="text-gray-700 mb-4 font-medium">
-          Warning: Do not add personal details as they might be stored in our database.
-        </p>
-        <p className="text-gray-600 text-sm">Contact us to remove yourself.</p>
-
-        <button
-          onClick={() => setIsOpen(false)}
-          className="mt-6 w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition"
-        >
-          I Understand
-        </button>
+    <div className="fixed inset-x-0 bottom-0 z-[70] p-4 sm:bottom-4 sm:left-4 sm:right-auto sm:max-w-md">
+      <div
+        role="dialog"
+        aria-labelledby="notice-title"
+        className="flex gap-4 rounded-3xl bg-ink p-5 text-ground shadow-[0_18px_40px_rgba(31,42,30,0.3)]"
+      >
+        <Info className="mt-0.5 h-5 w-5 shrink-0 text-sage-strong" aria-hidden="true" />
+        <div className="flex flex-col gap-3">
+          <h2 id="notice-title" className="font-bold">
+            This is a demo store
+          </h2>
+          <p className="text-sm leading-relaxed text-[#C9D3C4]">
+            Please don&apos;t enter real personal details — anything you submit may be stored in our database. Contact
+            us to have your data removed.
+          </p>
+          <button type="button" onClick={close} className="btn-light h-10 self-start px-5 text-sm">
+            Got it
+          </button>
+        </div>
       </div>
     </div>
   )

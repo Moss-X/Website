@@ -1,78 +1,28 @@
-import { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import ProductCard from '../ProductCard'
-import { motion } from 'framer-motion'
+import ProductGridSkeleton from '../ProductGridSkeleton'
 
-const FeaturedProducts = ({ featuredProducts }) => {
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [itemsPerPage, setItemsPerPage] = useState(4)
-
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 640) setItemsPerPage(2)
-      else if (window.innerWidth < 1024) setItemsPerPage(3)
-      else if (window.innerWidth < 1280) setItemsPerPage(3)
-      else setItemsPerPage(4)
-    }
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
-
-  const nextSlide = () => {
-    setCurrentIndex((prev) => Math.min(prev + itemsPerPage, featuredProducts.length - itemsPerPage))
-  }
-  const prevSlide = () => {
-    setCurrentIndex((prev) => Math.max(prev - itemsPerPage, 0))
-  }
-
-  const isStartDisabled = currentIndex === 0
-  const isEndDisabled = currentIndex >= featuredProducts.length - itemsPerPage
-
-  const visibleProducts = featuredProducts.slice(currentIndex, currentIndex + itemsPerPage)
+const FeaturedProducts = ({ products, loading }) => {
+  if (!loading && products.length === 0) return null
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.8, ease: 'easeOut' }}
-      className=" relative flex flex-col px-4 items-center py-8 justify-center lg:min-h-[75vh]"
-    >
-      <div className="mr-auto my-12">
-        <h1 className=" text-heading font-bold text-5xl font-sans ">Best Sellers</h1>
+    <section id="best-sellers" aria-labelledby="best-sellers-heading" className="container-page scroll-mt-24 pb-24">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <h2 id="best-sellers-heading" className="heading-display text-[40px] sm:text-[44px]">
+          Best sellers
+        </h2>
+        <Link to="/search" className="font-bold text-moss hover:text-forest">
+          View all plants <span aria-hidden="true">→</span>
+        </Link>
       </div>
-
-      <button
-        onClick={prevSlide}
-        disabled={isStartDisabled}
-        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-darkGray text-black p-2 rounded-full shadow-md z-10 disabled:bg-gray disabled:opacity-55 disabled:text-gray-600"
-      >
-        <ChevronLeft />
-      </button>
-
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3  gap-4 items-center">
-        {visibleProducts.map((product, index) => (
-          <motion.div
-            key={product._id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-          >
-            <ProductCard product={product} />
-          </motion.div>
-        ))}
+      <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 lg:grid-cols-4">
+        {loading ? (
+          <ProductGridSkeleton count={4} />
+        ) : (
+          products.slice(0, 8).map((product) => <ProductCard key={product._id} product={product} />)
+        )}
       </div>
-
-      <button
-        onClick={nextSlide}
-        disabled={isEndDisabled}
-        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-darkGray p-2 text-black rounded-full shadow-md z-10 disabled:bg-gray disabled:opacity-55 disabled:text-gray-600	"
-      >
-        <ChevronRight />
-      </button>
-    </motion.div>
+    </section>
   )
 }
 

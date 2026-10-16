@@ -1,85 +1,66 @@
-import { Plus } from 'lucide-react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useCartStore } from '../../stores/useCartStore'
+import { cld } from '../../lib/image'
+import { formatCurrency } from '../../utils/formatCurrency'
 
-function BundleCard({ bundle }) {
-  // console.log("Length:", bundle.products);
-  const { addBundleToCart } = useCartStore()
-  const navigate = useNavigate()
-
-  function handleAddToCart(e, bundle) {
-    e.stopPropagation()
-    addBundleToCart(bundle)
-  }
-
+// `tone="dark"` is used on the dark bundles band on the home page.
+function BundleCard({ bundle, tone = 'light' }) {
+  const addBundleToCart = useCartStore((s) => s.addBundleToCart)
   const savings = Math.max(0, bundle.totalPrice - bundle.discountedPrice)
+  const dark = tone === 'dark'
+  const names = (bundle.products || []).map((p) => p.name).filter(Boolean)
 
   return (
-    <div
-      key={bundle._id}
-      className="bg-gray p-0 cursor-pointer  hover:scale-[1.01] transition transform flex flex-col aspect-4/5 drop-shadow-sm hover:drop-shadow-lg"
-      onClick={() => navigate(`/bundle/${bundle._id}`)}
-      tabIndex={0}
-      role="button"
-      aria-label={`View bundle ${bundle.title}`}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') navigate(`/bundle/${bundle._id}`)
-      }}
+    <article
+      className={`relative flex flex-col overflow-hidden rounded-[26px] sm:flex-row ${dark ? 'bg-night text-ground' : 'border border-line bg-surface'}`}
     >
-      <div className="relative bg-gray flex items-center justify-center w-full h-[75%] aspect-square basis-1/2 md:basis-auto">
-        <img src={bundle.image} alt={bundle.title} className="w-full h-full object-contain " />
-        <span className="absolute top-2 right-2 bg-primary rounded-full text-white text-xs font-semibold px-3 py-1  shadow-lg">
-          {bundle.products.length} plants
-        </span>
-        {savings > 0 && (
-          <span className="absolute top-2 left-2 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full shadow-lg">
-            Save ₹{savings}
-          </span>
-        )}
-      </div>
-      <div className="flex-1 flex flex-col gap-1 p-5">
-        <div className="flex flex-row justify-between">
-          <div className="flex flex-col gap-1">
-            <h3 className="text-xl md:text-2xl  text-black font-bold  line-clamp-1">{bundle.title}</h3>
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-md md:text-xl  text-black font-semibold  line-clamp-1">
-                ₹{bundle.discountedPrice}
-              </span>
-              <span className="text-gray-400 line-through text-md md:text-xl">₹{bundle.totalPrice}</span>
-            </div>
-          </div>
-          <div
-            onClick={handleAddToCart}
-            className="flex text-white aspect-square hover:ring-amber-400 rounded-full items-center just"
+      <img
+        src={cld(bundle.image, { w: 640, h: 640 })}
+        alt=""
+        loading="lazy"
+        className="aspect-square w-full object-cover sm:aspect-auto sm:w-[46%]"
+      />
+      <div className="flex flex-1 flex-col gap-3 p-6 sm:p-7">
+        <div className="flex flex-wrap gap-2">
+          {savings > 0 && (
+            <span className="rounded-full bg-clay px-3 py-1.5 text-xs font-bold text-white">
+              Save {formatCurrency(savings)}
+            </span>
+          )}
+          <span
+            className={`rounded-full px-3 py-1.5 text-xs font-bold ${dark ? 'bg-ink/60 text-sage' : 'bg-sage text-ink'}`}
           >
-            <Plus size={48} className="bg-black rounded-full p-2 hover:border-neutral border-4 border-gray" />
-          </div>
+            {bundle.products?.length} plants
+          </span>
         </div>
-        <div className="flex flex-wrap gap-2 mt-auto pt-2 border-t border-darkGray ">
-          {bundle.products.slice(0, 2).map((p) => (
-            <Link
-              key={p._id}
-              to={`/product/${p._id}`}
-              className="flex items-center gap-1 bg-darkGray px-2 py-1 text-xs group "
-              onClick={(e) => e.stopPropagation()}
-              tabIndex={0}
-            >
-              {p.image && (
-                <img
-                  src={p.image}
-                  alt={p.name}
-                  className="w-6 h-6 object-cover rounded-sm group-hover:ring-2 group-hover:ring-primary transition"
-                />
-              )}
-              <span className="text-black max-w-20 truncate transition">{p.name}</span>
-            </Link>
-          ))}
-          {bundle.products.length > 2 && (
-            <span className="text-gray-400 text-xs">+{bundle.products.length - 2} more</span>
+        <h3 className="heading-display text-[26px] leading-tight">
+          <Link
+            to={`/bundle/${bundle._id}`}
+            className={`after:absolute after:inset-0 after:content-[''] ${dark ? 'text-ground hover:text-sage-strong' : 'text-ink hover:text-forest'}`}
+          >
+            {bundle.title}
+          </Link>
+        </h3>
+        {names.length > 0 && (
+          <p className={`text-[15px] leading-relaxed ${dark ? 'text-[#C9D3C4]' : 'text-muted'}`}>{names.join(' · ')}</p>
+        )}
+        <div className="mt-auto flex items-baseline gap-2.5 pt-2">
+          <span className="font-display text-[26px] font-semibold">{formatCurrency(bundle.discountedPrice)}</span>
+          {savings > 0 && (
+            <span className={`line-through ${dark ? 'text-[#A3B09E]' : 'text-muted'}`}>
+              {formatCurrency(bundle.totalPrice)}
+            </span>
           )}
         </div>
+        <button
+          type="button"
+          onClick={() => addBundleToCart(bundle)}
+          className={`relative z-10 ${dark ? 'btn-light' : 'btn-primary'}`}
+        >
+          Add bundle to cart
+        </button>
       </div>
-    </div>
+    </article>
   )
 }
 

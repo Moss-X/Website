@@ -1,76 +1,35 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect } from 'react'
 import { useCollectionStore } from '../../stores/useCollectionStore'
 import CollectionCard from './CollectionCard'
-import { motion } from 'framer-motion'
-
-const containerVariants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.8,
-      ease: 'easeOut',
-      staggerChildren: 0.2,
-      when: 'beforeChildren'
-    }
-  }
-}
-
-const itemVariants = {
-  hidden: (index) => ({
-    opacity: 0,
-    x: index % 2 === 0 ? -30 : 30
-  }),
-  visible: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.8, ease: 'easeOut' }
-  }
-}
 
 function CollectionsPreview() {
-  const [visibleCount, setVisibleCount] = useState(6)
-  const { collections, fetchCollections, error } = useCollectionStore()
-  const sectionRef = useRef(null)
+  const { collections, fetchCollections, loading } = useCollectionStore()
 
   useEffect(() => {
     fetchCollections()
   }, [fetchCollections])
 
-  useEffect(() => {
-    function updateCount() {
-      setVisibleCount(window.innerWidth < 768 ? 4 : 6)
-    }
-    updateCount()
-    window.addEventListener('resize', updateCount)
-    return () => window.removeEventListener('resize', updateCount)
-  }, [])
-
-  if (error) return <div className="text-red-400 text-center py-20">{error}</div>
-  if (!collections.length) return null
+  if (!loading && !collections.length) return null
 
   return (
-    <section ref={sectionRef} className="relative w-full overflow-hidden py-20 bg-secondary/40">
-      {/* Top Shadow Overlay */}
-      <div className="absolute top-0 left-0 w-full h-6 bg-linear-to-b from-black/10 to-transparent z-1 pointer-events-none" />
-
-      {/* Bottom Shadow Overlay */}
-      <div className="absolute bottom-0 left-0 w-full h-32 bg-linear-to-t from-black/10 to-transparent z-1 pointer-events-none" />
-
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
-        className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-16 my-16"
-      >
-        {collections.slice(0, visibleCount).map((collection, index) => (
-          <motion.div key={collection._id || index} custom={index} variants={itemVariants}>
-            <CollectionCard collection={collection} odd={index % 2 !== 0} />
-          </motion.div>
-        ))}
-      </motion.div>
+    <section
+      id="collections"
+      aria-labelledby="collections-heading"
+      className="container-page scroll-mt-20 py-20 sm:py-24"
+    >
+      <div className="mb-10 flex max-w-[38em] flex-col gap-3">
+        <h2 id="collections-heading" className="heading-display text-[40px] sm:text-[44px]">
+          Collections
+        </h2>
+        <p className="text-[17px] leading-relaxed text-muted">
+          Hand-picked edits for the spaces and lifestyles we hear about most.
+        </p>
+      </div>
+      <div className="grid gap-6 sm:grid-cols-2">
+        {loading && !collections.length
+          ? [0, 1].map((i) => <div key={i} className="h-[420px] animate-pulse rounded-[26px] bg-placeholder" />)
+          : collections.map((collection) => <CollectionCard key={collection._id} collection={collection} />)}
+      </div>
     </section>
   )
 }

@@ -1,38 +1,69 @@
 @import 'tailwindcss';
 
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-
 @theme {
   --breakpoint-xs: 460px;
-  --color-gray: #f7f7f7;
-  --color-darkGray: #d1d1d1;
-  --color-black: #303030;
-  --color-primary: #6c7c66;
-  --color-secondary: #fffaf6;
+
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+
+  /* Moss X palette */
+  --color-ground: #fbf8f3; /* page background */
+  --color-surface: #ffffff;
+  --color-ink: #1f2a1e; /* text + dark sections */
+  --color-night: #2a3829; /* cards on dark sections */
+  --color-muted: #5b6657; /* secondary text, 5.9:1 on ground */
+  --color-line: #e6e0d5;
+  --color-moss: #4f6a47; /* primary action, 5.9:1 with white */
+  --color-forest: #07592c; /* hover / links */
+  --color-sage: #e3ebdf; /* chips and soft fills */
+  --color-sage-strong: #c0d3bb;
+  --color-clay: #b4532a; /* savings + badges, 4.9:1 with white */
+  --color-placeholder: #efe9df;
+
+  /* legacy names still used by the admin screens */
+  --color-primary: #4f6a47;
+  --color-secondary: #fbf8f3;
   --color-neutral: #c0d3bb;
-  --color-heading: #21201e;
-  --color-textGreen: #7e9774;
+  --color-heading: #1f2a1e;
+  --color-textGreen: #4f6a47;
   --color-darkGreen: #07592c;
+  --color-gray: #f4efe6;
+  --color-darkGray: #d9d2c5;
+  --color-black: #1f2a1e;
+
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
+
 @layer base {
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
+    border-color: var(--color-line, currentcolor);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
   }
 
   html,
   body {
     cursor: url('/cursor.png'), auto;
+    background: var(--color-ground);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
   }
 
   a,
@@ -42,7 +73,57 @@
   input[type='button'],
   label,
   [role='button'] {
-    cursor:
-      /* url('/cursor.webp') 0 0, */ pointer;
+    cursor: pointer;
   }
+
+  :focus-visible {
+    outline: 2px solid var(--color-moss);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility btn {
+  @apply inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-[15px] font-bold whitespace-nowrap transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@utility btn-primary {
+  @apply btn bg-moss text-white hover:bg-forest;
+}
+
+@utility btn-outline {
+  @apply btn border-[1.5px] border-ink text-ink hover:bg-ink hover:text-ground;
+}
+
+@utility btn-light {
+  @apply btn bg-ground text-ink hover:bg-sage;
+}
+
+@utility container-page {
+  @apply mx-auto w-full max-w-[1240px] px-4 sm:px-6;
+}
+
+@utility eyebrow {
+  @apply text-[13px] font-bold tracking-[0.14em] text-muted uppercase;
+}
+
+@utility heading-display {
+  @apply font-display font-medium tracking-[-0.02em];
+}
+
+@utility field {
+  @apply block h-11 w-full rounded-xl border border-line bg-surface px-3.5 text-[15px] text-ink placeholder:text-muted/70 focus:border-moss focus:ring-2 focus:ring-moss/25 focus:outline-none;
+}
+
+@utility chip {
+  @apply inline-flex h-11 items-center rounded-full bg-sage px-5 font-medium text-ink transition-colors hover:bg-sage-strong;
 }

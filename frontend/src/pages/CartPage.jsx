@@ -1,83 +1,62 @@
 import { Link } from 'react-router-dom'
+import { ShoppingBag } from 'lucide-react'
 import { useCartStore } from '../stores/useCartStore'
-import { motion } from 'framer-motion'
-import { ShoppingCart } from 'lucide-react'
 import CartItem from '../components/CartItem'
 import PeopleAlsoBought from '../components/PeopleAlsoBought'
 import OrderSummary from '../components/OrderSummary'
 import GiftCouponCard from '../components/GiftCouponCard'
-import { useEffect } from 'react'
-import LoadingSpinner from '../components/loading/LoadingSpinner'
 
 const CartPage = () => {
-  const { cart, loading, initializeSession, getCartItems } = useCartStore()
+  const { cart, loading } = useCartStore()
+  const count = cart.reduce((n, i) => n + i.quantity, 0)
 
-  useEffect(() => {
-    if (!loading) {
-      initializeSession()
-      getCartItems()
-    }
-  }, [])
-  if (loading) {
+  if (loading && !cart.length) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
+      <div className="container-page py-16" aria-busy="true">
+        <div className="h-12 w-60 animate-pulse rounded-2xl bg-placeholder" />
+        <div className="mt-8 h-40 animate-pulse rounded-3xl bg-placeholder" />
       </div>
     )
   }
 
-  return (
-    <div className="py-8 md:py-16">
-      <div className="mx-auto max-w-(--breakpoint-xl) px-4 2xl:px-0">
-        <div className="mt-16 md:mt-8 md:gap-6 lg:flex lg:items-start xl:gap-8">
-          <motion.div
-            className="mx-auto w-full flex-none lg:max-w-2xl xl:max-w-4xl"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
-            {cart.length === 0 ? (
-              <EmptyCartUI />
-            ) : (
-              <div className="space-y-6">
-                {cart.map((item) => (
-                  <CartItem key={item._id} item={item} />
-                ))}
-              </div>
-            )}
-            {cart.length > 0 && <PeopleAlsoBought />}
-          </motion.div>
+  if (!cart.length) {
+    return (
+      <section className="container-page flex flex-col items-center gap-4 py-24 text-center">
+        <span className="flex h-20 w-20 items-center justify-center rounded-full bg-sage">
+          <ShoppingBag className="h-9 w-9 text-moss" aria-hidden="true" />
+        </span>
+        <h1 className="heading-display text-4xl">Your cart is empty</h1>
+        <p className="max-w-sm text-muted">
+          Find a plant that suits your light and routine — every listing has care notes.
+        </p>
+        <Link className="btn-primary mt-2" to="/search">
+          Browse plants
+        </Link>
+      </section>
+    )
+  }
 
-          {cart.length > 0 && (
-            <motion.div
-              className="mx-auto mt-6 max-w-4xl flex-1 space-y-6 lg:mt-0 lg:w-full"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              <OrderSummary />
-              <GiftCouponCard />
-            </motion.div>
-          )}
+  return (
+    <div className="container-page pt-10 pb-24">
+      <h1 className="heading-display mb-2 text-[40px] sm:text-[44px]">Your cart</h1>
+      <p className="mb-6 text-muted">
+        {count} item{count === 1 ? '' : 's'}
+      </p>
+      <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div>
+          <ul className="divide-y divide-line border-y border-line">
+            {cart.map((item) => (
+              <CartItem key={`${item.type}-${item._id}`} item={item} />
+            ))}
+          </ul>
+          <PeopleAlsoBought exclude={cart.filter((i) => i.type === 'product').map((i) => i._id)} />
+        </div>
+        <div className="flex flex-col gap-4 lg:sticky lg:top-24">
+          <OrderSummary />
+          <GiftCouponCard />
         </div>
       </div>
     </div>
   )
 }
 export default CartPage
-
-const EmptyCartUI = () => (
-  <motion.div
-    className="flex flex-col items-center justify-center space-y-4 py-16"
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5 }}
-  >
-    <ShoppingCart className="h-24 w-24 text-gray-300" />
-    <h3 className="text-2xl font-semibold ">Your cart is empty</h3>
-    <p className="text-gray-400">Looks like you {"haven't"} added anything to your cart yet.</p>
-    <Link className="mt-4 px-6 py-3 bg-primary text-white rounded-full shadow-md hover:bg-darkGreen transition" to="/">
-      Start Shopping
-    </Link>
-  </motion.div>
-)

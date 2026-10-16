@@ -48,6 +48,7 @@ export default defineConfig([
   },
   { files: ['**/*.json'], plugins: { json }, language: 'json/json' },
   { files: ['**/*.md'], plugins: { markdown }, language: 'markdown/commonmark' },
-  { files: ['**/*.css'], plugins: { css }, language: 'css/css' },
+  // tolerant: Tailwind v4 at-rules (@theme, @utility) and arbitrary values aren't standard CSS
+  { files: ['**/*.css'], plugins: { css }, language: 'css/css', languageOptions: { tolerant: true } },
   eslintConfigPrettier
 ])

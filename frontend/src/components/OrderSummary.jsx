@@ -1,12 +1,26 @@
-import { motion } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Lock, MapPin, X } from 'lucide-react'
+import { toast } from 'react-hot-toast'
+import axios from '../lib/axios'
 import { useCartStore } from '../stores/useCartStore'
 import { useUserStore } from '../stores/useUserStore'
-import { Link } from 'react-router-dom'
-import { MoveRight, MapPin, User } from 'lucide-react'
-import axios from '../lib/axios'
-import { useState, useEffect } from 'react'
+import { formatCurrency } from '../utils/formatCurrency'
 import ShippingAddressForm from './ShippingAddressForm'
-import { toast } from 'react-hot-toast'
+
+let razorpayScript
+const loadRazorpay = () =>
+  (razorpayScript ||= new Promise((resolve, reject) => {
+    if (window.Razorpay) return resolve()
+    const script = document.createElement('script')
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js'
+    script.onload = resolve
+    script.onerror = () => {
+      razorpayScript = null
+      reject(new Error('Could not load Razorpay'))
+    }
+    document.head.appendChild(script)
+  }))
 
 const OrderSummary = () => {
   const { total, subtotal, coupon, isCouponApplied, cart, shippingAddress, setShippingAddress } = useCartStore()
@@ -14,242 +28,167 @@ const OrderSummary = () => {
   const [razorpayKey, setRazorpayKey] = useState('')
   const [loading, setLoading] = useState(false)
   const [showAddressForm, setShowAddressForm] = useState(false)
-  const [checkoutStep, setCheckoutStep] = useState('address')
   const savings = subtotal - total
-  const formattedSubtotal = subtotal.toFixed(2)
-  const formattedTotal = total.toFixed(2)
-  const formattedSavings = savings.toFixed(2)
 
   useEffect(() => {
-    const fetchRazorpayKey = async () => {
-      try {
-        const response = await axios.get('/payments/razorpay-key')
-        setRazorpayKey(response.data.key)
-      } catch (error) {
-        console.error('Error fetching Razorpay key:', error)
-      }
-    }
-    fetchRazorpayKey()
+    axios
+      .get('/payments/razorpay-key')
+      .then((res) => setRazorpayKey(res.data.key))
+      .catch(() => setRazorpayKey(''))
   }, [])
 
-  const canProceedToCheckout = () => {
-    if (!user) return false
-    if (!shippingAddress) return false
-    return true
-  }
-
-  const handleAddressSubmit = (address) => {
-    setShippingAddress(address)
-    setShowAddressForm(false)
-    setCheckoutStep('payment')
-  }
+  useEffect(() => {
+    if (!showAddressForm) return
+    const onKey = (e) => e.key === 'Escape' && setShowAddressForm(false)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [showAddressForm])
 
   const handlePayment = async () => {
-    if (!razorpayKey) {
-      console.error('Razorpay key not loaded')
-      return
-    }
-
-    if (!user) {
-      toast.error('Please login to proceed with checkout')
-      return
-    }
-
-    if (!shippingAddress) {
-      setShowAddressForm(true)
-      setCheckoutStep('address')
-      return
-    }
+    if (!shippingAddress) return setShowAddressForm(true)
+    if (!razorpayKey) return toast.error('Payments are not configured right now')
 
     setLoading(true)
     try {
-      const transformed = cart.map((item) => {
-        if (item.type === 'bundle') return { ...item, price: item.discountedPrice }
-        if (item.type === 'collection') return { ...item, price: item.totalPrice }
-        return item
+      await loadRazorpay()
+      // The server prices every item itself; only ids, types and quantities are sent.
+      const { data } = await axios.post('/payments/create-razorpay-order', {
+        products: cart.map(({ _id, type, quantity }) => ({ _id, type, quantity })),
+        couponCode: coupon && isCouponApplied ? coupon.code : null,
+        shippingAddress
       })
 
-      const orderResponse = await axios.post('/payments/create-razorpay-order', {
-        products: transformed,
-        couponCode: coupon ? coupon.code : null,
-        shippingAddress: shippingAddress
-      })
-
-      const { orderId, amount, currency } = orderResponse.data
-
-      const script = document.createElement('script')
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js'
-      script.onload = () => {
-        const options = {
-          key: razorpayKey,
-          amount: amount,
-          currency: currency,
-          name: 'Moss X Store',
-          description: 'Purchase from Moss X',
-          order_id: orderId,
-          handler: async (response) => {
-            try {
-              const verifyResponse = await axios.post('/payments/verify-razorpay-payment', {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature
-              })
-
-              if (verifyResponse.data.success) {
-                window.location.href = `/purchase-success?order_id=${verifyResponse.data.orderId}`
-              } else {
-                window.location.href = '/purchase-cancel?reason=verification_failed'
-              }
-            } catch (error) {
-              console.error('Error verifying payment:', error)
-              window.location.href = '/purchase-cancel?reason=verify_error'
-            }
-          },
-          prefill: {
-            name: shippingAddress.fullName,
-            email: user.email || 'customer@example.com',
-            contact: shippingAddress.phone
-          },
-          theme: {
-            color: '#10b981'
-          },
-          modal: {
-            ondismiss: () => {
-              setLoading(false)
-            }
+      const rzp = new window.Razorpay({
+        key: razorpayKey,
+        amount: data.amount,
+        currency: data.currency,
+        name: 'Moss X',
+        description: `${cart.length} item${cart.length === 1 ? '' : 's'}`,
+        order_id: data.orderId,
+        handler: async (response) => {
+          try {
+            const verify = await axios.post('/payments/verify-razorpay-payment', response)
+            window.location.href = `/purchase-success?order_id=${verify.data.orderId}`
+          } catch {
+            window.location.href = '/purchase-cancel?reason=verify_error'
           }
-        }
-
-        const rzp = new window.Razorpay(options)
-        rzp.open()
-      }
-      document.head.appendChild(script)
+        },
+        prefill: { name: shippingAddress.fullName, email: user.email, contact: shippingAddress.phone },
+        theme: { color: '#4F6A47' },
+        modal: { ondismiss: () => setLoading(false) }
+      })
+      rzp.on('payment.failed', () => toast.error('Payment failed. You have not been charged.'))
+      rzp.open()
     } catch (error) {
-      console.error('Error creating order:', error)
+      toast.error(error.response?.data?.message || error.message || 'Could not start checkout')
       setLoading(false)
     }
   }
 
-  const renderCheckoutButton = () => {
-    if (!user) {
-      return (
-        <Link
-          to="/login"
-          className="flex w-full items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-darkGreen focus:outline-hidden transition-colors"
-        >
-          <User className="w-4 h-4 mr-2" />
-          Login to Checkout
-        </Link>
-      )
-    }
-
-    if (!shippingAddress) {
-      return (
-        <button
-          onClick={() => setShowAddressForm(true)}
-          className="flex w-full items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-darkGreen transition-colors"
-        >
-          <MapPin className="w-4 h-4 mr-2" />
-          Add Shipping Address
-        </button>
-      )
-    }
-
-    return (
-      <motion.button
-        className="flex w-full items-center justify-center rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-darkGreen focus:outline-hidden focus:ring-4 focus:ring-emerald-300 disabled:opacity-50 transition disabled:cursor-not-allowed"
-        whileTap={{ scale: loading ? 1 : 0.95 }}
-        onClick={handlePayment}
-        disabled={loading || !razorpayKey}
-      >
-        {loading ? 'Processing...' : 'Proceed to Checkout'}
-      </motion.button>
-    )
-  }
-
   return (
-    <motion.div
-      className="space-y-4 rounded-lg  bg-secondary p-4 shadow-xs sm:p-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+    <section
+      aria-labelledby="summary-heading"
+      className="flex flex-col gap-5 rounded-3xl border border-line bg-surface p-6"
     >
-      <p className="text-xl font-semibold text-black">Order summary</p>
+      <h2 id="summary-heading" className="heading-display text-2xl">
+        Order summary
+      </h2>
 
-      {shippingAddress && (
-        <div className="rounded-lg p-3">
-          <div className="flex items-start gap-2">
-            <MapPin className="w-4 h-4 text-black mt-0.5 flex-shrink-0" />
-            <div className="text-sm text-black">
-              <p className="font-medium ">{shippingAddress.fullName}</p>
-              <p>{shippingAddress.addressLine1}</p>
-              {shippingAddress.addressLine2 && <p>{shippingAddress.addressLine2}</p>}
-              <p>
-                {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
-              </p>
-              <p>{shippingAddress.country}</p>
-              <p className="text-black">{shippingAddress.phone}</p>
-            </div>
+      <dl className="flex flex-col gap-2.5 text-[15px]">
+        <div className="flex justify-between">
+          <dt className="text-muted">Subtotal</dt>
+          <dd className="tabular-nums">{formatCurrency(subtotal)}</dd>
+        </div>
+        {savings > 0 && (
+          <div className="flex justify-between">
+            <dt className="text-muted">Coupon ({coupon.code})</dt>
+            <dd className="text-moss tabular-nums">−{formatCurrency(Math.round(savings * 100) / 100)}</dd>
           </div>
+        )}
+        <div className="flex justify-between">
+          <dt className="text-muted">Delivery</dt>
+          <dd className="text-moss">Free</dd>
+        </div>
+        <div className="mt-1 flex items-baseline justify-between border-t border-line pt-3">
+          <dt className="font-bold">Total</dt>
+          <dd className="font-display text-2xl font-semibold tabular-nums">
+            {formatCurrency(Math.round(total * 100) / 100)}
+          </dd>
+        </div>
+      </dl>
+
+      {user && shippingAddress && (
+        <div className="flex items-start gap-3 rounded-2xl bg-ground p-4 text-sm">
+          <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-moss" aria-hidden="true" />
+          <div className="flex-1 leading-relaxed">
+            <p className="font-bold">{shippingAddress.fullName}</p>
+            <p>
+              {shippingAddress.addressLine1}
+              {shippingAddress.addressLine2 && `, ${shippingAddress.addressLine2}`}
+            </p>
+            <p>
+              {shippingAddress.city}, {shippingAddress.state} {shippingAddress.postalCode}
+            </p>
+            <p className="text-muted">{shippingAddress.phone}</p>
+          </div>
+          <button type="button" onClick={() => setShowAddressForm(true)} className="font-bold text-moss underline">
+            Edit
+          </button>
         </div>
       )}
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <dl className="flex items-center justify-between gap-4">
-            <dt className="text-base font-normal text-gray-600">Original price</dt>
-            <dd className="text-base font-medium text-black">₹{formattedSubtotal}</dd>
-          </dl>
-
-          {savings > 0 && (
-            <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-gray-600  ">Savings</dt>
-              <dd className="text-base font-medium text-black">-₹{formattedSavings}</dd>
-            </dl>
-          )}
-
-          {coupon && isCouponApplied && (
-            <dl className="flex items-center justify-between gap-4">
-              <dt className="text-base font-normal text-black">Coupon ({coupon.code})</dt>
-              <dd className="text-base font-medium text-black">-{coupon.discountPercentage}%</dd>
-            </dl>
-          )}
-          <dl className="flex items-center justify-between gap-4 border-t border-gray-600 pt-2">
-            <dt className="text-base font-bold text-gray-600">Total</dt>
-            <dd className="text-base font-bold text-black">₹{formattedTotal}</dd>
-          </dl>
-        </div>
-
-        {renderCheckoutButton()}
-
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-sm font-normal text-gray-400">or</span>
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-primary underline hover:text-darkGreen hover:no-underline"
-          >
-            Continue Shopping
-            <MoveRight size={16} />
-          </Link>
-        </div>
-      </div>
+      {!user ? (
+        <Link to="/login" className="btn-primary h-[52px]">
+          Sign in to check out
+        </Link>
+      ) : !shippingAddress ? (
+        <button type="button" onClick={() => setShowAddressForm(true)} className="btn-primary h-[52px]">
+          <MapPin className="h-4 w-4" aria-hidden="true" />
+          Add delivery address
+        </button>
+      ) : (
+        <button type="button" className="btn-primary h-[52px]" onClick={handlePayment} disabled={loading}>
+          <Lock className="h-4 w-4" aria-hidden="true" />
+          {loading ? 'Opening secure checkout…' : `Pay ${formatCurrency(Math.round(total * 100) / 100)}`}
+        </button>
+      )}
+      {!user && <p className="-mt-2 text-center text-sm text-muted">Your cart will be saved to your account.</p>}
 
       {showAddressForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-4 border-b border-gray-700 flex justify-between items-center">
-              <h3 className="text-lg font-semibold text-white">Shipping Address</h3>
-              <button onClick={() => setShowAddressForm(false)} className="text-gray-400 hover:text-white text-2xl">
-                &times;
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-ink/50 p-0 sm:items-center sm:p-4"
+          onClick={(e) => e.target === e.currentTarget && setShowAddressForm(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="address-heading"
+            className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-t-3xl bg-surface p-6 sm:rounded-3xl sm:p-8"
+          >
+            <div className="mb-6 flex items-center justify-between">
+              <h3 id="address-heading" className="heading-display text-2xl">
+                Delivery address
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAddressForm(false)}
+                aria-label="Close"
+                className="flex h-11 w-11 items-center justify-center rounded-full hover:bg-sage"
+              >
+                <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="p-4">
-              <ShippingAddressForm onAddressSubmit={handleAddressSubmit} isCheckout={true} />
-            </div>
+            <ShippingAddressForm
+              initial={shippingAddress || user?.defaultAddress}
+              onAddressSubmit={(address) => {
+                setShippingAddress(address)
+                setShowAddressForm(false)
+              }}
+            />
           </div>
         </div>
       )}
-    </motion.div>
+    </section>
   )
 }
 export default OrderSummary

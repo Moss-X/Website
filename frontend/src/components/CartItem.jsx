@@ -1,121 +1,70 @@
-import { Minus, Plus, Trash } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Trash2 } from 'lucide-react'
 import { useCartStore } from '../stores/useCartStore'
+import { cld } from '../lib/image'
+import { itemHref, itemTitle, unitPrice } from '../lib/catalog'
+import { formatCurrency } from '../utils/formatCurrency'
+import QuantityPicker from './detail/QuantityPicker'
+
+const TYPE_LABEL = { bundle: 'Bundle', collection: 'Collection' }
 
 const CartItem = ({ item }) => {
   const { removeFromCart, updateQuantity } = useCartStore()
+  const title = itemTitle(item)
+  const price = unitPrice(item)
+  const included = (item.products || []).map((p) => p.name).filter(Boolean)
 
-  // Responsive, consistent styling for all item types
-  if (item.type === 'bundle' || item.type === 'collection') {
-    return (
-      <div className="rounded-lg p-4 md:p-6 shadow-xs bg-gray-100 flex flex-col md:flex-row gap-4 md:gap-6 items-center">
-        <div className="shrink-0 flex items-center justify-center w-full md:w-auto">
-          <img className="h-20 w-20 md:h-32 md:w-32 rounded-sm object-cover" src={item.image} alt={item.title} />
-        </div>
-        <div className="flex-1 min-w-0 w-full space-y-2">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <span className="text-base font-bold text-black">{item.title}</span>
-            <span className="bg-primary text-white text-xs font-semibold px-2 py-0.5 rounded-full">
-              {item.type === 'bundle' ? 'Bundle' : 'Collection'}
-            </span>
-          </div>
-          <p className="text-sm text-gray-600 mb-2 line-clamp-2">{item.description}</p>
-          <div className="flex flex-wrap gap-2 items-center mb-2">
-            {item.products?.slice(0, 4).map((p) => (
-              <div key={p._id} className="flex items-center gap-1 bg-gray-200 rounded-sm px-2 py-1 text-xs">
-                {p.image && <img src={p.image} alt={p.name} className="w-5 h-5 object-cover rounded-sm" />}
-                <span className="text-black max-w-16 truncate">{p.name}</span>
-              </div>
-            ))}
-            {item.products?.length > 4 && (
-              <span className="text-gray-500 text-xs">+{item.products.length - 4} more</span>
-            )}
-          </div>
-          <div className="flex items-center gap-4 mt-2">
-            <div className="flex items-center gap-2">
-              <button
-                className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-darkGreen bg-primary hover:bg-darkGreen focus:outline-hidden focus:ring-2 focus:ring-darkGreen"
-                onClick={() => {
-                  console.log('Updating quantity for item:', item)
-                  updateQuantity(item._id, item.quantity - 1, item.type)
-                }}
-              >
-                <Minus className="text-white" />
-              </button>
-              <p className="text-black font-semibold">{item.quantity}</p>
-              <button
-                className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-darkGreen bg-primary hover:bg-darkGreen focus:outline-hidden focus:ring-2 focus:ring-darkGreen"
-                onClick={() => {
-                  console.log('Updating quantity for item:', item)
-                  updateQuantity(item._id, item.quantity + 1, item.type)
-                }}
-              >
-                <Plus className="text-white" />
-              </button>
-            </div>
-            <div className="text-start md:w-32">
-              <p className="text-base font-bold text-black">₹{item.discountedPrice || item.totalPrice || item.price}</p>
-            </div>
-            <button
-              className="inline-flex items-center text-sm font-medium text-red-500 hover:text-red-400 hover:underline ml-auto"
-              onClick={() => {
-                console.log('Removing item:', item)
-                removeFromCart(item._id, item.type)
-              }}
-            >
-              <Trash />
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Product item
   return (
-    <div className="rounded-lg p-4 md:p-6 shadow-xs bg-gray-100 flex flex-col md:flex-row gap-4 md:gap-6 items-center">
-      <div className="shrink-0 flex items-center justify-start w-full md:w-auto">
-        <img className="h-20 w-20 md:h-32 md:w-32 rounded-sm object-cover" src={item.image} alt={item.name} />
-      </div>
-      <div className="flex-1 min-w-0 w-full space-y-2">
-        <p className="text-base font-medium text-black hover:text-primary hover:underline">{item.name}</p>
-        <p className="text-sm text-gray-600 line-clamp-2">{item.description}</p>
-        <div className="flex items-center gap-4 mt-2">
-          <div className="flex items-center gap-2">
+    <li className="flex gap-4 py-6 sm:gap-6">
+      <Link to={itemHref(item)} className="shrink-0">
+        <img
+          src={cld(item.image, { w: 240, h: 240 })}
+          alt=""
+          className="h-24 w-24 rounded-2xl bg-placeholder object-cover sm:h-32 sm:w-32"
+        />
+      </Link>
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            {TYPE_LABEL[item.type] && (
+              <span className="mb-1 inline-block rounded-full bg-sage px-2.5 py-0.5 text-xs font-bold">
+                {TYPE_LABEL[item.type]}
+              </span>
+            )}
+            <h3 className="text-[17px] leading-snug font-bold">
+              <Link to={itemHref(item)} className="hover:text-forest">
+                {title}
+              </Link>
+            </h3>
+            {item.botanicalName && <p className="text-sm text-muted italic">{item.botanicalName}</p>}
+            {included.length > 0 && <p className="line-clamp-2 text-sm text-muted">{included.join(' · ')}</p>}
+          </div>
+          <p className="font-display text-lg font-semibold whitespace-nowrap">
+            {formatCurrency(price * item.quantity)}
+          </p>
+        </div>
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-3">
+          <QuantityPicker
+            size="sm"
+            min={0}
+            label={`Quantity of ${title}`}
+            value={item.quantity}
+            onChange={(q) => updateQuantity(item._id, q, item.type)}
+          />
+          <div className="flex items-center gap-3">
+            {item.quantity > 1 && <span className="text-sm text-muted">{formatCurrency(price)} each</span>}
             <button
-              className="inline-flex h-6 w-6 items-center justify-center rounded-full  bg-primary hover:bg-darkGreen focus:outline-hidden hover:ring-2 hover:ring-neutral"
-              onClick={() => {
-                console.log('Updating quantity for product:', item)
-                updateQuantity(item._id, item.quantity - 1, item.type)
-              }}
+              type="button"
+              className="inline-flex h-10 items-center gap-1.5 rounded-full px-3 text-sm font-medium text-muted hover:bg-sage hover:text-clay"
+              onClick={() => removeFromCart(item._id, item.type)}
             >
-              <Minus className="text-white" />
-            </button>
-            <p className="text-black font-semibold">{item.quantity}</p>
-            <button
-              className="inline-flex h-6 w-6 items-center justify-center rounded-full  bg-primary hover:bg-darkGreen focus:outline-hidden hover:ring-2 hover:ring-neutral"
-              onClick={() => {
-                console.log('Updating quantity for product:', item)
-                updateQuantity(item._id, item.quantity + 1, item.type)
-              }}
-            >
-              <Plus className="text-white" />
+              <Trash2 className="h-4 w-4" aria-hidden="true" />
+              Remove
             </button>
           </div>
-          <div className="text-start md:w-32">
-            <p className="text-base font-bold text-black">₹{item.price}</p>
-          </div>
-          <button
-            className="inline-flex items-center text-sm font-medium text-red-500 hover:text-red-400 hover:underline ml-auto"
-            onClick={() => {
-              console.log('Removing product:', item)
-              removeFromCart(item._id, item.type)
-            }}
-          >
-            <Trash />
-          </button>
         </div>
       </div>
-    </div>
+    </li>
   )
 }
 

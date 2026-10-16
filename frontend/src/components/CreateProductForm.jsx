@@ -1,17 +1,9 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import toast from 'react-hot-toast'
 import { PlusCircle, Upload, Loader } from 'lucide-react'
 import { useProductStore } from '../stores/useProductStore'
-
-const categories = [
-  'Ornamental Houseplants',
-  'Flowering Bedding Plants',
-  'Herbs and Edible Plants',
-  'Succulents and Cacti',
-  'Fruit Trees and Bushes',
-  'Vegetable Plants and Seedlings',
-  'Indoor Air-Purifying Plants'
-]
+import { CATEGORY_NAMES as categories } from '../lib/catalog'
 
 const CreateProductForm = () => {
   const [newProduct, setNewProduct] = useState({
@@ -26,11 +18,9 @@ const CreateProductForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    try {
-      await createProduct(newProduct)
+    if (!newProduct.image) return toast.error('Please upload a product image')
+    if (await createProduct(newProduct)) {
       setNewProduct({ name: '', description: '', price: '', category: '', image: '' })
-    } catch {
-      console.log('error creating a product')
     }
   }
 
@@ -49,34 +39,34 @@ const CreateProductForm = () => {
 
   return (
     <motion.div
-      className="bg-gray-800 shadow-lg rounded-lg p-8 mb-8 max-w-xl mx-auto"
+      className="bg-surface border border-line shadow-lg rounded-2xl p-8 mb-8 max-w-xl mx-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
     >
-      <h2 className="text-2xl font-semibold mb-6 text-emerald-300">Create New Product</h2>
+      <h2 className="text-2xl font-semibold mb-6 text-moss">Create New Product</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="name" className="block text-sm font-medium text-ink">
             Product Name
           </label>
-          <p className="text-xs text-gray-400 mb-1">The first character should be uppercase.</p>
+          <p className="text-xs text-muted mb-1">The first character should be uppercase.</p>
           <input
             type="text"
             id="name"
             name="name"
             value={newProduct.name}
             onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-xs py-2
-						 px-3 text-white focus:outline-hidden focus:ring-2
-						focus:ring-emerald-500 focus:border-emerald-500"
+            className="mt-1 block w-full bg-ground border border-line rounded-md shadow-xs py-2
+						 px-3 text-ink focus:outline-hidden focus:ring-2
+						focus:ring-moss focus:border-moss"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="description" className="block text-sm font-medium text-ink">
             Description
           </label>
           <textarea
@@ -85,15 +75,15 @@ const CreateProductForm = () => {
             value={newProduct.description}
             onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
             rows="3"
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-xs
-						 py-2 px-3 text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500 
-						 focus:border-emerald-500"
+            className="mt-1 block w-full bg-ground border border-line rounded-md shadow-xs
+						 py-2 px-3 text-ink focus:outline-hidden focus:ring-2 focus:ring-moss 
+						 focus:border-moss"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="price" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="price" className="block text-sm font-medium text-ink">
             Price
           </label>
           <input
@@ -103,15 +93,15 @@ const CreateProductForm = () => {
             value={newProduct.price}
             onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
             step="0.01"
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-xs 
-						py-2 px-3 text-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500
-						 focus:border-emerald-500"
+            className="mt-1 block w-full bg-ground border border-line rounded-md shadow-xs 
+						py-2 px-3 text-ink focus:outline-hidden focus:ring-2 focus:ring-moss
+						 focus:border-moss"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-300">
+          <label htmlFor="category" className="block text-sm font-medium text-ink">
             Category
           </label>
           <select
@@ -119,9 +109,9 @@ const CreateProductForm = () => {
             name="category"
             value={newProduct.category}
             onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-            className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md
-						 shadow-xs py-2 px-3 text-white focus:outline-hidden 
-						 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            className="mt-1 block w-full bg-ground border border-line rounded-md
+						 shadow-xs py-2 px-3 text-ink focus:outline-hidden 
+						 focus:ring-2 focus:ring-moss focus:border-moss"
             required
           >
             <option value="">Select a category</option>
@@ -137,20 +127,22 @@ const CreateProductForm = () => {
           <input type="file" id="image" className="sr-only" accept="image/*" onChange={handleImageChange} />
           <label
             htmlFor="image"
-            className="cursor-pointer bg-gray-700 py-2 px-3 border border-gray-600 rounded-md shadow-xs text-sm leading-4 font-medium text-gray-300 hover:bg-gray-600 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500"
+            className="cursor-pointer bg-ground py-2 px-3 border border-line rounded-md shadow-xs text-sm leading-4 font-medium text-ink hover:bg-sage focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-moss"
           >
             <Upload className="h-5 w-5 inline-block mr-2" />
             Upload Image
           </label>
-          {newProduct.image && <span className="ml-3 text-sm text-gray-400">Image uploaded </span>}
+          {newProduct.image && (
+            <img src={newProduct.image} alt="Preview" className="ml-3 h-12 w-12 rounded-xl object-cover" />
+          )}
         </div>
-        <p className="text-xs text-gray-400 mt-1">For best results, use a 1:1 aspect ratio image.</p>
+        <p className="text-xs text-muted mt-1">For best results, use a 1:1 aspect ratio image.</p>
 
         <button
           type="submit"
           className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md 
-					shadow-xs text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 
-					focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 disabled:opacity-50"
+					shadow-xs text-sm font-medium text-white bg-moss hover:bg-forest 
+					focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-moss disabled:opacity-50"
           disabled={loading}
         >
           {loading ? (

@@ -1,8 +1,9 @@
 import axios from 'axios'
 
+// In development Vite proxies /api to the Express server (see vite.config.js);
+// in production Express serves both the API and the built frontend.
 const axiosInstance = axios.create({
-  baseURL: import.meta.mode === 'development' ? 'http://localhost:5000/api' : '/api',
-  // baseURL: import.meta.env.VITE_API_URL,
+  baseURL: '/api',
   withCredentials: true // send cookies to the server
 })
 

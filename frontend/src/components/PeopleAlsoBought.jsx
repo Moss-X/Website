@@ -1,39 +1,33 @@
 import { useEffect, useState } from 'react'
 import ProductCard from './ProductCard'
 import axios from '../lib/axios'
-import toast from 'react-hot-toast'
-import LoadingSpinner from './loading/LoadingSpinner'
 
-const PeopleAlsoBought = () => {
+// Suggestions are random, so fetch once per visit rather than every time the cart changes.
+const PeopleAlsoBought = ({ exclude = [] }) => {
   const [recommendations, setRecommendations] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
-      try {
-        const res = await axios.get('/products/recommendations')
-        setRecommendations(res.data)
-      } catch (error) {
-        toast.error(error.response.data.message || 'An error occurred while fetching recommendations')
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchRecommendations()
+    axios
+      .get('/products/recommendations', { params: { exclude: exclude.join(',') } })
+      .then((res) => setRecommendations(res.data))
+      .catch(() => setRecommendations([]))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  if (isLoading) return <LoadingSpinner />
+  const visible = recommendations.filter((p) => !exclude.includes(p._id)).slice(0, 3)
+  if (!visible.length) return null
 
   return (
-    <div className="mt-8">
-      <h3 className="text-2xl font-semibold text-black">People also bought</h3>
-      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
-        {recommendations.map((product) => (
+    <section aria-labelledby="also-bought-heading" className="mt-14">
+      <h2 id="also-bought-heading" className="heading-display mb-6 text-[28px]">
+        You might also like
+      </h2>
+      <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 sm:gap-x-6">
+        {visible.map((product) => (
           <ProductCard key={product._id} product={product} />
         ))}
       </div>
-    </div>
+    </section>
   )
 }
 export default PeopleAlsoBought

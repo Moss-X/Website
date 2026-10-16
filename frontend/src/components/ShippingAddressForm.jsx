@@ -1,258 +1,92 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { useUserStore } from '../stores/useUserStore'
-import { useCartStore } from '../stores/useCartStore'
+import { useState } from 'react'
 
-const ShippingAddressForm = ({ onAddressSubmit, isCheckout = false }) => {
-  const { user } = useUserStore()
-  const { shippingAddress, setShippingAddress } = useCartStore()
+const EMPTY = {
+  fullName: '',
+  phone: '',
+  addressLine1: '',
+  addressLine2: '',
+  city: '',
+  state: '',
+  postalCode: '',
+  country: 'India'
+}
 
-  const [formData, setFormData] = useState({
-    fullName: '',
-    phone: '',
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: 'India'
-  })
+const FIELDS = [
+  { name: 'fullName', label: 'Full name', autoComplete: 'name', span: 1 },
+  { name: 'phone', label: 'Phone number', autoComplete: 'tel', type: 'tel', inputMode: 'numeric', span: 1 },
+  { name: 'addressLine1', label: 'Address line 1', autoComplete: 'address-line1', span: 2 },
+  { name: 'addressLine2', label: 'Address line 2 (optional)', autoComplete: 'address-line2', span: 2, optional: true },
+  { name: 'city', label: 'City', autoComplete: 'address-level2', span: 1 },
+  { name: 'state', label: 'State', autoComplete: 'address-level1', span: 1 },
+  { name: 'postalCode', label: 'PIN code', autoComplete: 'postal-code', inputMode: 'numeric', span: 1 }
+]
 
-  const [errors, setErrors] = useState({})
-
-  useEffect(() => {
-    if (user?.defaultAddress) {
-      setFormData(user.defaultAddress)
-      setShippingAddress(user.defaultAddress)
-    } else if (shippingAddress) {
-      setFormData(shippingAddress)
-    }
-  }, [user, shippingAddress, setShippingAddress])
-
-  const validateForm = () => {
-    const newErrors = {}
-
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required'
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required'
-    } else if (!/^[0-9]{10}$/.test(formData.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Please enter a valid 10-digit phone number'
-    }
-
-    if (!formData.addressLine1.trim()) {
-      newErrors.addressLine1 = 'Address line 1 is required'
-    }
-
-    if (!formData.city.trim()) {
-      newErrors.city = 'City is required'
-    }
-
-    if (!formData.state.trim()) {
-      newErrors.state = 'State is required'
-    }
-
-    if (!formData.postalCode.trim()) {
-      newErrors.postalCode = 'Postal code is required'
-    } else if (!/^[0-9]{6}$/.test(formData.postalCode)) {
-      newErrors.postalCode = 'Please enter a valid 6-digit postal code'
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+function validate(data) {
+  const errors = {}
+  for (const f of FIELDS) {
+    if (!f.optional && !String(data[f.name] || '').trim()) errors[f.name] = `${f.label} is required`
   }
+  if (data.phone && !/^[6-9]\d{9}$/.test(data.phone.replace(/[\s-]/g, '').replace(/^\+?91/, '')))
+    errors.phone = 'Enter a valid 10-digit mobile number'
+  if (data.postalCode && !/^\d{6}$/.test(data.postalCode.trim())) errors.postalCode = 'Enter a valid 6-digit PIN code'
+  return errors
+}
+
+const ShippingAddressForm = ({ initial, onAddressSubmit }) => {
+  const [formData, setFormData] = useState({ ...EMPTY, ...(initial || {}) })
+  const [errors, setErrors] = useState({})
 
   const handleSubmit = (e) => {
     e.preventDefault()
-
-    if (validateForm()) {
-      setShippingAddress(formData)
-      if (onAddressSubmit) {
-        onAddressSubmit(formData)
-      }
+    const nextErrors = validate(formData)
+    setErrors(nextErrors)
+    if (Object.keys(nextErrors).length === 0) {
+      onAddressSubmit({ ...formData, phone: formData.phone.replace(/[\s-]/g, '').replace(/^\+?91/, '') })
     }
   }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }))
-
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors((prev) => ({
-        ...prev,
-        [name]: ''
-      }))
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
   }
 
   return (
-    <motion.div
-      className="bg-white rounded-lg p-6 shadow-lg"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <h3 className="text-xl font-semibold text-black mb-6">{isCheckout ? 'Shipping Address' : 'Delivery Address'}</h3>
-
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-black mb-1">
-              Full Name *
-            </label>
-            <input
-              type="text"
-              id="fullName"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleInputChange}
-              className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
-                errors.fullName ? 'border-red-500' : 'border-darkGray'
-              }`}
-              placeholder="Enter your full name"
-            />
-            {errors.fullName && <p className="text-red-400 text-sm mt-1">{errors.fullName}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-black mb-1">
-              Phone Number *
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
-                errors.phone ? 'border-red-500' : 'border-darkGray'
-              }`}
-              placeholder="Enter 10-digit phone number"
-            />
-            {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="addressLine1" className="block text-sm font-medium text-black mb-1">
-            Address Line 1 *
+    <form onSubmit={handleSubmit} noValidate className="grid gap-4 sm:grid-cols-2">
+      {FIELDS.map((f) => (
+        <div key={f.name} className={f.span === 2 ? 'sm:col-span-2' : ''}>
+          <label htmlFor={f.name} className="mb-1.5 block text-sm font-medium">
+            {f.label}
           </label>
           <input
-            type="text"
-            id="addressLine1"
-            name="addressLine1"
-            value={formData.addressLine1}
+            id={f.name}
+            name={f.name}
+            type={f.type || 'text'}
+            inputMode={f.inputMode}
+            autoComplete={f.autoComplete}
+            value={formData[f.name]}
             onChange={handleInputChange}
-            className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
-              errors.addressLine1 ? 'border-red-500' : 'border-darkGray'
-            }`}
-            placeholder="Street address, apartment, suite, etc."
+            aria-invalid={Boolean(errors[f.name])}
+            aria-describedby={errors[f.name] ? `${f.name}-error` : undefined}
+            className={`field ${errors[f.name] ? 'border-clay' : ''}`}
           />
-          {errors.addressLine1 && <p className="text-red-400 text-sm mt-1">{errors.addressLine1}</p>}
+          {errors[f.name] && (
+            <p id={`${f.name}-error`} className="mt-1 text-sm text-clay">
+              {errors[f.name]}
+            </p>
+          )}
         </div>
-
-        <div>
-          <label htmlFor="addressLine2" className="block text-sm font-medium text-black mb-1">
-            Address Line 2 (Optional)
-          </label>
-          <input
-            type="text"
-            id="addressLine2"
-            name="addressLine2"
-            value={formData.addressLine2}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 bg-white border border-darkGray rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen"
-            placeholder="Apartment, suite, unit, etc. (optional)"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-black mb-1">
-              City *
-            </label>
-            <input
-              type="text"
-              id="city"
-              name="city"
-              value={formData.city}
-              onChange={handleInputChange}
-              className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
-                errors.city ? 'border-red-500' : 'border-darkGray'
-              }`}
-              placeholder="Enter city"
-            />
-            {errors.city && <p className="text-red-400 text-sm mt-1">{errors.city}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="state" className="block text-sm font-medium text-black mb-1">
-              State *
-            </label>
-            <input
-              type="text"
-              id="state"
-              name="state"
-              value={formData.state}
-              onChange={handleInputChange}
-              className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
-                errors.state ? 'border-red-500' : 'border-darkGray'
-              }`}
-              placeholder="Enter state"
-            />
-            {errors.state && <p className="text-red-400 text-sm mt-1">{errors.state}</p>}
-          </div>
-
-          <div>
-            <label htmlFor="postalCode" className="block text-sm font-medium text-black mb-1">
-              Postal Code *
-            </label>
-            <input
-              type="text"
-              id="postalCode"
-              name="postalCode"
-              value={formData.postalCode}
-              onChange={handleInputChange}
-              className={`w-full px-3 py-2 bg-white border rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen ${
-                errors.postalCode ? 'border-red-500' : 'border-darkGray'
-              }`}
-              placeholder="Enter 6-digit postal code"
-            />
-            {errors.postalCode && <p className="text-red-400 text-sm mt-1">{errors.postalCode}</p>}
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="country" className="block text-sm font-medium text-black mb-1">
-            Country
-          </label>
-          <select
-            id="country"
-            name="country"
-            value={formData.country}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 bg-white border border-darkGray rounded-md text-black focus:outline-hidden focus:ring-2 focus:ring-darkGreen"
-          >
-            <option value="India">India</option>
-          </select>
-        </div>
-
-        <div className="pt-4">
-          <button
-            type="submit"
-            className="w-full bg-darkGreen text-white py-2 px-4 rounded-md hover:bg-primary focus:outline-hidden focus:ring-2 focus:ring-darkGreen transition-colors"
-          >
-            {isCheckout ? 'Continue to Payment' : 'Save Address'}
-          </button>
-        </div>
-      </form>
-    </motion.div>
+      ))}
+      <div>
+        <label htmlFor="country" className="mb-1.5 block text-sm font-medium">
+          Country
+        </label>
+        <input id="country" value="India" readOnly className="field bg-ground text-muted" />
+      </div>
+      <button type="submit" className="btn-primary h-[52px] sm:col-span-2">
+        Save and continue
+      </button>
+    </form>
   )
 }
 
