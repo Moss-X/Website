@@ -16,6 +16,11 @@ const bundleSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Image is required']
     },
+    imageCredit: {
+      author: String,
+      license: String,
+      source: String
+    },
     products: [
       {
         type: mongoose.Schema.Types.ObjectId,

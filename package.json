@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "pnpm  --filter frontend run dev & nodemon backend/server.js ",
     "start": "node backend/server.js",
+    "seed": "node backend/scripts/seedCatalog.js",
     "build": "pnpm install -r && pnpm --filter frontend build",
     "build:profile": "pnpm install -r && pnpm --filter frontend build:profile",
     "build_pnpm": "pnpm install && pnpm install --prefix frontend && pnpm run build --prefix frontend",

@@ -27,6 +27,11 @@ const collectionSchema = new mongoose.Schema(
     image: {
       type: String,
       required: [true, 'Image is required']
+    },
+    imageCredit: {
+      author: String,
+      license: String,
+      source: String
     }
   },
   { timestamps: true }
