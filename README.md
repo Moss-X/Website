@@ -19,7 +19,7 @@
 
 **MossX** is a production-ready, full-stack E-Commerce application designed to provide a seamless shopping experience for users while offering robust management capabilities for administrators.
 
-Built with scalability and modern developer experience in mind, MossX leverages an Express-driven microservices-like architecture on the backend, complemented by a lightning-fast React frontend. Whether you need guest cart merging, secure Razorpay and Stripe payments, or real-time analytics, MossX handles it with elegance and speed. It aims to solve the complexity of modern e-commerce boilerplate by providing a robust, extensible foundation for startups and retail businesses.
+Built with scalability and modern developer experience in mind, MossX pairs a modular Express API with a fast React storefront. It ships with a real, seeded plant catalog (32 plants, 7 bundles, 4 collections with photography and care notes), guest carts that merge on login, server-verified Razorpay payments and an admin dashboard with sales analytics.
 
 ---
 
@@ -27,7 +27,8 @@ Built with scalability and modern developer experience in mind, MossX leverages 
 
 ### User Features
 
-- **Seamless Shopping Flow**: Browse products by category, search with price ranges, and view tailored recommendations.
+- **Seamless Shopping Flow**: Browse by category, search by common or botanical name with multi-category and price-range filters, and get suggestions that skip what's already in your cart.
+- **Plant-first product pages**: Every plant lists its botanical name plus light, water and difficulty, with a photo credit linking to the source image.
 - **Advanced Cart System**: Fully featured cart supporting both authenticated users and anonymous guest sessions with intelligent cart merging upon login.
 - **Secure Authentication**: Robust JWT-based authentication with seamless token refreshing.
 - **Profile & Order Management**: Track past orders, apply promotional coupons, and manage account details.
@@ -41,14 +42,15 @@ Built with scalability and modern developer experience in mind, MossX leverages 
 ### E-commerce Features
 
 - **Dynamic Bundles & Collections**: Curate customized product offerings for specific campaigns.
-- **Flexible Checkout**: Multi-gateway payment integration featuring Stripe and Razorpay.
+- **Checkout**: Razorpay (UPI, cards, netbanking) with server-side pricing and signature verification.
 - **Coupons & Discounts**: Validation engine for promotional codes.
 
 ### Security Features
 
 - **Stateless JWT Auth**: Utilizing short-lived access tokens and secure, HttpOnly refresh tokens.
 - **Robust Validation**: Input sanitization and error handling.
-- **Payment Security**: Cryptographic webhook signature verification for all payment gateways.
+- **Payment Security**: Orders are priced on the server from the database (client prices are ignored) and Razorpay signatures are checked with a constant-time comparison.
+- **Safe Search**: User search input is regex-escaped before it reaches MongoDB.
 
 ### Performance Features
 
@@ -81,7 +83,6 @@ graph TD
     Payment --> Mongo
     Analytics --> Mongo
 
-    Payment --> Stripe[Stripe API]
     Payment --> Razorpay[Razorpay API]
 
     Product --> Cloudinary[Cloudinary CDN]
@@ -91,18 +92,18 @@ graph TD
 
 ## Tech Stack
 
-| Layer                | Technology                 | Purpose                                       |
-| -------------------- | -------------------------- | --------------------------------------------- |
-| **Frontend**         | React 18, Vite             | High-performance, reactive UI                 |
-| **Styling**          | TailwindCSS, Framer Motion | Utility-first styling & fluid animations      |
-| **State Management** | Zustand                    | Lightweight, scalable client-side state       |
-| **Backend**          | Node.js, Express           | Non-blocking, event-driven API server         |
-| **Database**         | MongoDB, Mongoose          | Flexible, document-oriented data storage      |
-| **Caching**          | Redis (Upstash)            | In-memory caching for reduced database load   |
-| **Authentication**   | JSON Web Tokens (JWT)      | Stateless, secure user session management     |
-| **Payments**         | Stripe & Razorpay          | Secure, reliable payment processing gateways  |
-| **Storage**          | Cloudinary                 | Cloud-based image management and optimization |
-| **Deployment**       | Docker                     | Consistent, reproducible environments         |
+| Layer                | Technology            | Purpose                                       |
+| -------------------- | --------------------- | --------------------------------------------- |
+| **Frontend**         | React 18, Vite        | High-performance, reactive UI                 |
+| **Styling**          | Tailwind CSS v4       | Design tokens + utility-first styling         |
+| **State Management** | Zustand               | Lightweight, scalable client-side state       |
+| **Backend**          | Node.js, Express      | Non-blocking, event-driven API server         |
+| **Database**         | MongoDB, Mongoose     | Flexible, document-oriented data storage      |
+| **Caching**          | Redis (Upstash)       | In-memory caching for reduced database load   |
+| **Authentication**   | JSON Web Tokens (JWT) | Stateless, secure user session management     |
+| **Payments**         | Razorpay              | Secure payment processing (INR)               |
+| **Storage**          | Cloudinary            | Cloud-based image management and optimization |
+| **Deployment**       | Docker                | Consistent, reproducible environments         |
 
 ---
 
@@ -112,7 +113,7 @@ graph TD
 - **Redis Caching Layer**: To handle traffic spikes during sales events, Redis is employed to cache heavily requested endpoints (like featured products and category lists). This dramatically reduces MongoDB read pressure and latency.
 - **Dual-Token Authentication**: Instead of relying purely on session cookies, we use a short-lived JWT Access Token paired with a long-lived, HttpOnly Refresh Token. This mitigates CSRF and XSS risks while providing a smooth UX.
 - **Guest Cart Merging Strategy**: To lower the friction of shopping, users can build their cart anonymously. The state is temporarily held, and upon authentication, the system intelligently merges the guest cart with their persistent cloud cart.
-- **Multi-Gateway Payment Architecture**: Relying on a single payment provider can be a single point of failure. MossX abstracts payment logic to seamlessly toggle or support both Stripe and Razorpay based on regional requirements.
+- **Pending-then-Paid Orders**: Checkout creates a `pending` order (priced server-side) alongside the Razorpay order. Only a verified payment flips it to `paid`, deactivates the used coupon, issues a gift coupon on orders of ₹999+ and empties the cart. Analytics ignore pending orders.
 
 ---
 
@@ -126,10 +127,16 @@ mossx/
 │   ├── middleware/           # Auth and validation pipelines
 │   ├── models/               # Mongoose schemas
 │   ├── routes/               # API endpoint definitions
+│   ├── scripts/              # Catalog data + `pnpm seed` script
 │   └── server.js             # Application entry point
 ├── frontend/                 # React SPA
 │   ├── public/               # Static assets
-│   ├── src/                  # React components, stores, & views
+│   ├── src/
+│   │   ├── components/       # UI (home/, detail/, search/, auth/, admin forms)
+│   │   ├── pages/            # Route-level views
+│   │   ├── stores/           # Zustand stores (user, cart, products…)
+│   │   ├── lib/              # axios, catalog helpers, Cloudinary image helper
+│   │   └── index.css         # Design tokens (@theme) + shared utilities
 │   ├── package.json
 │   └── vite.config.js
 ├── Dockerfile                # Production container blueprint
@@ -171,16 +178,25 @@ cp .env.example .env
 - `UPSTASH_REDIS_URL`: Connection string for Redis instance.
 - `ACCESS_TOKEN_SECRET` / `REFRESH_TOKEN_SECRET`: Cryptographic keys for JWT signing.
 - `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET`: For image uploads.
-- `STRIPE_SECRET_KEY` / `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`: Payment gateway credentials.
+- `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`: Razorpay credentials (test keys work for local development).
 - `CLIENT_URL`: URL of the frontend (e.g., `http://localhost:5173`).
 
-### 4. Run the Dev Server
+### 4. Seed the catalog (optional)
+
+```bash
+pnpm seed                    # upserts 32 plants, 7 bundles and 4 collections
+pnpm seed --replace-legacy   # also removes the old lorem-ipsum test bundles
+```
+
+The script (`backend/scripts/seedCatalog.js`) downloads each photo from Wikimedia Commons, uploads it to Cloudinary under `mossx/`, builds collage images for bundles with Cloudinary overlays, stores author/license credits on each product and refreshes the Redis featured-products cache. It is idempotent: re-running it reuses existing uploads and updates records by name.
+
+### 5. Run the Dev Server
 
 ```bash
 pnpm dev
 ```
 
-This command concurrently spins up the Vite development server and the Node backend using `nodemon`.
+This command concurrently spins up the Vite development server (http://localhost:5173, proxying `/api` to the backend) and the Node backend using `nodemon`.
 
 ---
 
@@ -188,16 +204,20 @@ This command concurrently spins up the Vite development server and the Node back
 
 Below is a snapshot of critical API endpoints.
 
-| Method | Route                                 | Purpose                             | Auth Required |
-| ------ | ------------------------------------- | ----------------------------------- | ------------- |
-| `POST` | `/api/auth/signup`                    | Register a new user account         | No            |
-| `POST` | `/api/auth/login`                     | Authenticate user & issue tokens    | No            |
-| `GET`  | `/api/products`                       | Retrieve all products (Admin)       | Admin         |
-| `GET`  | `/api/products/category/:category`    | Fetch products by specific category | No            |
-| `POST` | `/api/cart`                           | Add product to user/guest cart      | Optional      |
-| `POST` | `/api/cart/merge`                     | Merge guest cart into user cart     | Yes           |
-| `POST` | `/api/payments/create-razorpay-order` | Initialize payment intent           | Yes           |
-| `GET`  | `/api/analytics`                      | Fetch sales & revenue analytics     | Admin         |
+| Method | Route                                   | Purpose                                             | Auth Required |
+| ------ | --------------------------------------- | --------------------------------------------------- | ------------- |
+| `POST` | `/api/auth/signup`                      | Register a new user account                         | No            |
+| `POST` | `/api/auth/login`                       | Authenticate user & issue tokens                    | No            |
+| `GET`  | `/api/products`                         | Retrieve all products (Admin)                       | Admin         |
+| `GET`  | `/api/products/category/:category`      | Fetch products by category slug                     | No            |
+| `GET`  | `/api/products/search`                  | Search (`q`, `category`, `minPrice`, `maxPrice`)    | No            |
+| `GET`  | `/api/products/recommendations`         | Random suggestions (`?exclude=id,id`)               | No            |
+| `POST` | `/api/cart`                             | Add product to user/guest cart                      | Optional      |
+| `POST` | `/api/cart/merge`                       | Merge guest cart into user cart                     | Yes           |
+| `POST` | `/api/payments/create-razorpay-order`   | Price the cart server-side and open a pending order | Yes           |
+| `POST` | `/api/payments/verify-razorpay-payment` | Verify signature and mark the order paid            | Yes           |
+| `GET`  | `/api/payments/orders/:id`              | Paid order summary for the confirmation page        | Yes           |
+| `GET`  | `/api/analytics`                        | Fetch sales & revenue analytics                     | Admin         |
 
 ---
 
@@ -208,8 +228,8 @@ MossX revolves around a highly relational NoSQL design utilizing Mongoose refere
 **Major Collections:**
 
 - **Users**: Core identity management, stores hashed passwords, role (`admin`/`customer`), and cart references.
-- **Products**: Catalog data including dynamic pricing, categorization, stock tracking, and image URLs.
-- **Orders**: Immutable transaction records linking `User`, `Products`, total value, and the payment gateway's Session ID.
+- **Products**: Name, botanical name, price, category, care notes (light / water / level), image URL and image credit.
+- **Orders**: Line items (product, bundle or collection with the price charged), total, shipping address, status (`pending` / `paid`) and Razorpay order/payment ids.
 - **Coupons**: Promotional codes with expiration logic and relational links to users who have utilized them.
 - **GuestCarts**: Temporary storage for anonymous shoppers.
 
@@ -231,7 +251,7 @@ MossX takes a zero-trust approach to application security:
 - **JWT Architecture**: Utilizing split access (memory/short-lived) and refresh (HttpOnly cookie) tokens to eliminate local storage vulnerabilities.
 - **Password Cryptography**: All passwords are automatically hashed via `bcryptjs` before reaching the database.
 - **Input Validation**: Strict schema enforcement at the model level preventing NoSQL injection.
-- **Webhook Verification**: Payment webhooks strictly verify cryptographic signatures from Stripe/Razorpay to prevent spoofed successful payments.
+- **Payment Verification**: Razorpay payment signatures are verified (timing-safe) before an order is marked paid, and prices always come from the database.
 - **Rate Limiting**: (Planned) API endpoint protection against brute force and DDoS attacks.
 - **Environment Isolation**: Sensitive keys are exclusively managed via `dotenv` and never exposed to the client bundle.
 
@@ -240,9 +260,9 @@ MossX takes a zero-trust approach to application security:
 ## Performance Optimizations
 
 - **Redis Caching**: Frequent, read-heavy operations like fetching featured products or category layouts are cached in Redis, resulting in sub-50ms API response times.
-- **Database Indexing**: Critical fields in MongoDB (like `email`, `category`, and `stripeSessionId`) are heavily indexed to reduce query execution time.
-- **Lazy Loading**: The React frontend heavily utilizes code-splitting and `React.lazy()` to ensure the initial JS payload is minimal.
-- **Image Optimization**: Cloudinary handles dynamic resizing and next-gen format conversion (WebP/AVIF), radically improving LCP (Largest Contentful Paint).
+- **Database Indexing**: Critical fields in MongoDB (`email`, product `category` and `isFeatured`, and Razorpay order ids) are indexed to reduce query execution time.
+- **Lazy Loading**: The admin dashboard (and its charting library) is split out with `React.lazy()`, so shoppers never download it.
+- **Image Optimization**: A small helper (`frontend/src/lib/image.js`) requests Cloudinary images at the exact size each component needs, with `f_auto,q_auto` for WebP/AVIF delivery.
 
 ---
 
@@ -267,6 +287,30 @@ In a production environment, the backend serves the statically generated Vite as
 
 ---
 
+## Design System
+
+The storefront uses a small set of design tokens defined in `frontend/src/index.css` (`@theme`):
+
+| Token    | Value     | Use                                |
+| -------- | --------- | ---------------------------------- |
+| `ground` | `#FBF8F3` | Page background                    |
+| `ink`    | `#1F2A1E` | Text, dark bands, footer           |
+| `muted`  | `#5B6657` | Secondary text (5.9:1 on ground)   |
+| `moss`   | `#4F6A47` | Primary actions (5.9:1 with white) |
+| `forest` | `#07592C` | Hover states                       |
+| `sage`   | `#E3EBDF` | Chips and soft fills               |
+| `clay`   | `#B4532A` | Savings badges, cart count         |
+
+Type pairs **Fraunces** (display) with **DM Sans** (body). Shared utilities (`btn-primary`, `btn-outline`, `container-page`, `field`, `chip`, `eyebrow`) keep components consistent. Interactive elements are real buttons/links with visible focus rings and 44px+ touch targets, and the layout works down to 360px wide.
+
+---
+
+## Catalog & Image Credits
+
+Product photography comes from [Wikimedia Commons](https://commons.wikimedia.org/) under Creative Commons licenses (mostly CC BY-SA). The author, license and source link for every image are stored on the product (`imageCredit`) and shown under the photo on its product page. Bundle images are collages generated from those photos.
+
+---
+
 ## Challenges & Learnings
 
 Building MossX presented several unique engineering challenges:
@@ -280,7 +324,9 @@ Building MossX presented several unique engineering challenges:
 ## Roadmap
 
 - [x] JWT Authentication & Security
-- [x] Stripe & Razorpay Integrations
+- [x] Razorpay integration with server-side pricing
+- [x] Seeded catalog with real photography and care notes
+- [x] Storefront redesign (design tokens, accessible components, responsive layouts)
 - [x] Admin Analytics Dashboard
 - [x] Redis Caching Implementation
 - [ ] Analytics Platform Integration
