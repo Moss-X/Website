@@ -1,6 +1,8 @@
+import mongoose from 'mongoose'
 import Bundle from '../models/bundle.model.js'
 import Product from '../models/product.model.js'
 import cloudinary from '../lib/cloudinary.js'
+import { searchRegex, priceFilter } from '../lib/search.js'
 
 export async function createBundle(req, res) {
   try {
@@ -40,6 +42,7 @@ export async function getAllBundles(req, res) {
 
 export async function getBundleById(req, res) {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: 'Bundle not found' })
     const bundle = await Bundle.findById(req.params.id).populate('products')
     if (!bundle) return res.status(404).json({ message: 'Bundle not found' })
     res.json(bundle)
@@ -98,7 +101,7 @@ export const getBundlePriceRange = async (req, res) => {
     const { q } = req.query
     const query = {}
     if (q) {
-      const regex = new RegExp(q, 'i')
+      const regex = searchRegex(q)
       query.$or = [{ title: regex }, { description: regex }]
     }
 
@@ -124,17 +127,18 @@ export const getBundlePriceRange = async (req, res) => {
 }
 
 export const searchBundles = async (req, res) => {
-  const { q, minPrice, maxPrice } = req.query
-  const query = {}
-  if (q) {
-    const regex = new RegExp(q, 'i')
-    query.$or = [{ title: regex }, { description: regex }]
+  try {
+    const { q, minPrice, maxPrice } = req.query
+    const query = {}
+    if (q) {
+      const regex = searchRegex(q)
+      query.$or = [{ title: regex }, { description: regex }]
+    }
+    const price = priceFilter(minPrice, maxPrice)
+    if (price) query.discountedPrice = price
+    const bundles = await Bundle.find(query).populate('products').limit(20)
+    res.json(bundles)
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
   }
-  if (minPrice || maxPrice) {
-    query.discountedPrice = {}
-    if (minPrice) query.discountedPrice.$gte = Number(minPrice)
-    if (maxPrice) query.discountedPrice.$lte = Number(maxPrice)
-  }
-  const bundles = await Bundle.find(query).limit(20)
-  res.json(bundles)
 }

@@ -1,6 +1,8 @@
+import mongoose from 'mongoose'
 import Collection from '../models/collection.model.js'
 import Product from '../models/product.model.js'
 import cloudinary from '../lib/cloudinary.js'
+import { searchRegex, priceFilter } from '../lib/search.js'
 
 export async function createCollection(req, res) {
   try {
@@ -38,6 +40,7 @@ export async function getAllCollections(req, res) {
 
 export async function getCollectionById(req, res) {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: 'Collection not found' })
     const collection = await Collection.findById(req.params.id).populate('products')
     if (!collection) return res.status(404).json({ message: 'Collection not found' })
     res.json(collection)
@@ -91,7 +94,7 @@ export const getCollectionPriceRange = async (req, res) => {
     const { q } = req.query
     const query = {}
     if (q) {
-      const regex = new RegExp(q, 'i')
+      const regex = searchRegex(q)
       query.$or = [{ title: regex }, { description: regex }]
     }
 
@@ -117,17 +120,18 @@ export const getCollectionPriceRange = async (req, res) => {
 }
 
 export const searchCollections = async (req, res) => {
-  const { q, minPrice, maxPrice } = req.query
-  const query = {}
-  if (q) {
-    const regex = new RegExp(q, 'i')
-    query.$or = [{ title: regex }, { description: regex }]
+  try {
+    const { q, minPrice, maxPrice } = req.query
+    const query = {}
+    if (q) {
+      const regex = searchRegex(q)
+      query.$or = [{ title: regex }, { description: regex }]
+    }
+    const price = priceFilter(minPrice, maxPrice)
+    if (price) query.totalPrice = price
+    const collections = await Collection.find(query).populate('products').limit(20)
+    res.json(collections)
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message })
   }
-  if (minPrice || maxPrice) {
-    query.totalPrice = {}
-    if (minPrice) query.totalPrice.$gte = Number(minPrice)
-    if (maxPrice) query.totalPrice.$lte = Number(maxPrice)
-  }
-  const collections = await Collection.find(query).limit(20)
-  res.json(collections)
 }

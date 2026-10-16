@@ -40,6 +40,10 @@ app.get('/api/test', (req, res) => {
   })
 })
 
+app.use('/api', (req, res) => {
+  res.status(404).json({ message: 'Not found' })
+})
+
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '/frontend/dist')))
 

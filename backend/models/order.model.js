@@ -14,6 +14,13 @@ const orderSchema = new mongoose.Schema(
           ref: 'Product',
           required: true
         },
+        // bundles and collections are stored as a single line item referencing their own id
+        itemType: {
+          type: String,
+          enum: ['product', 'bundle', 'collection'],
+          default: 'product'
+        },
+        name: String,
         quantity: {
           type: Number,
           required: true,
@@ -74,6 +81,12 @@ const orderSchema = new mongoose.Schema(
     // 	sparse: true,
     // 	default: undefined,
     // },
+    status: {
+      type: String,
+      enum: ['pending', 'paid'],
+      default: 'paid'
+    },
+    couponCode: String,
     razorpayOrderId: {
       type: String,
       unique: true,

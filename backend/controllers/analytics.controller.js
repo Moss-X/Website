@@ -7,6 +7,7 @@ export const getAnalyticsData = async () => {
   const totalProducts = await Product.countDocuments()
 
   const salesData = await Order.aggregate([
+    { $match: { status: { $ne: 'pending' } } },
     {
       $group: {
         _id: null, // it groups all documents together,
@@ -34,7 +35,8 @@ export const getDailySalesData = async (startDate, endDate) => {
           createdAt: {
             $gte: startDate,
             $lte: endDate
-          }
+          },
+          status: { $ne: 'pending' }
         }
       },
       {

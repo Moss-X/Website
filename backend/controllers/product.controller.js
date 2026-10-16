@@ -1,6 +1,8 @@
+import mongoose from 'mongoose'
 import { redis } from '../lib/redis.js'
 import cloudinary from '../lib/cloudinary.js'
 import Product from '../models/product.model.js'
+import { searchRegex, priceFilter } from '../lib/search.js'
 
 export const getAllProducts = async (req, res) => {
   try {
@@ -14,7 +16,12 @@ export const getAllProducts = async (req, res) => {
 
 export const getFeaturedProducts = async (req, res) => {
   try {
-    let featuredProducts = await redis.get('featured_products')
+    let featuredProducts = null
+    try {
+      featuredProducts = await redis.get('featured_products')
+    } catch (error) {
+      console.log('Redis unavailable, falling back to MongoDB', error.message)
+    }
     if (featuredProducts) {
       return res.json(JSON.parse(featuredProducts))
     }
@@ -24,13 +31,8 @@ export const getFeaturedProducts = async (req, res) => {
     // which is good for performance
     featuredProducts = await Product.find({ isFeatured: true }).lean()
 
-    if (!featuredProducts) {
-      return res.status(404).json({ message: 'No featured products found' })
-    }
-
     // store in redis for future quick access
-
-    await redis.set('featured_products', JSON.stringify(featuredProducts))
+    await redis.set('featured_products', JSON.stringify(featuredProducts)).catch(() => {})
 
     res.json(featuredProducts)
   } catch (error) {
@@ -43,15 +45,13 @@ export const createProduct = async (req, res) => {
   try {
     const { name, description, price, image, category } = req.body
 
-    let cloudinaryResponse = null
-    console.log('Image string starts with:', image?.substring(0, 30))
-    console.log('Cloudinary config:', cloudinary.config())
-    if (image) {
-      cloudinaryResponse = await cloudinary.uploader.upload(image, {
-        folder: 'products'
-      })
+    if (!name || !description || !category || !(Number(price) >= 0) || !image) {
+      return res.status(400).json({ message: 'Name, description, price, category and image are required' })
     }
-    console.log('Cloudinary upload response:', cloudinaryResponse)
+
+    const cloudinaryResponse = await cloudinary.uploader.upload(image, {
+      folder: 'products'
+    })
     const product = await Product.create({
       name,
       description,
@@ -86,6 +86,7 @@ export const deleteProduct = async (req, res) => {
     }
 
     await Product.findByIdAndDelete(req.params.id)
+    if (product.isFeatured) await updateFeaturedProductsCache()
 
     res.json({ message: 'Product deleted successfully' })
   } catch (error) {
@@ -96,7 +97,15 @@ export const deleteProduct = async (req, res) => {
 
 export const getRecommendedProducts = async (req, res) => {
   try {
+    // ?exclude=id1,id2 keeps items already in the cart out of the suggestions
+    const exclude = String(req.query.exclude || '')
+      .split(',')
+      .filter((id) => mongoose.isValidObjectId(id))
+      .map((id) => new mongoose.Types.ObjectId(id))
     const products = await Product.aggregate([
+      {
+        $match: exclude.length ? { _id: { $nin: exclude } } : {}
+      },
       {
         $sample: { size: 4 }
       },
@@ -104,9 +113,12 @@ export const getRecommendedProducts = async (req, res) => {
         $project: {
           _id: 1,
           name: 1,
+          botanicalName: 1,
           description: 1,
           image: 1,
-          price: 1
+          price: 1,
+          category: 1,
+          care: 1
         }
       }
     ])
@@ -120,6 +132,7 @@ export const getRecommendedProducts = async (req, res) => {
 
 export const getProductById = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) return res.status(404).json({ message: 'Product not found' })
     const product = await Product.findById(req.params.id)
     if (!product) return res.status(404).json({ message: 'Product not found' })
     res.json(product)
@@ -172,8 +185,8 @@ export const getSearchPriceRange = async (req, res) => {
     const { q, category } = req.query
     const query = {}
     if (q) {
-      const regex = new RegExp(q, 'i')
-      query.$or = [{ name: regex }, { description: regex }]
+      const regex = searchRegex(q)
+      query.$or = [{ name: regex }, { botanicalName: regex }, { description: regex }, { category: regex }]
     }
     if (category) {
       const categories = category.split(',')
@@ -202,20 +215,23 @@ export const getSearchPriceRange = async (req, res) => {
 }
 
 export const searchProducts = async (req, res) => {
-  const { q, category, minPrice, maxPrice } = req.query
-  const query = {}
-  if (q) {
-    const regex = new RegExp(q, 'i')
-    query.$or = [{ name: regex }, { description: regex }]
+  try {
+    const { q, category, minPrice, maxPrice } = req.query
+    const query = {}
+    if (q) {
+      const regex = searchRegex(q)
+      query.$or = [{ name: regex }, { botanicalName: regex }, { description: regex }, { category: regex }]
+    }
+    // the client sends a comma-separated list of categories
+    if (category) query.category = { $in: category.split(',') }
+    const price = priceFilter(minPrice, maxPrice)
+    if (price) query.price = price
+    const products = await Product.find(query).sort({ isFeatured: -1, name: 1 }).limit(48)
+    res.json(products)
+  } catch (error) {
+    console.log('Error in searchProducts controller', error.message)
+    res.status(500).json({ message: 'Server error', error: error.message })
   }
-  if (category) query.category = category
-  if (minPrice || maxPrice) {
-    query.price = {}
-    if (minPrice) query.price.$gte = Number(minPrice)
-    if (maxPrice) query.price.$lte = Number(maxPrice)
-  }
-  const products = await Product.find(query).limit(20)
-  res.json(products)
 }
 
 async function updateFeaturedProductsCache() {

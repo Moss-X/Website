@@ -1,185 +1,178 @@
+import crypto from 'crypto'
 import Coupon from '../models/coupon.model.js'
 import Order from '../models/order.model.js'
+import User from '../models/user.model.js'
+import Product from '../models/product.model.js'
+import Bundle from '../models/bundle.model.js'
+import Collection from '../models/collection.model.js'
 import { razorpay } from '../lib/razorpay.js'
-import crypto from 'crypto'
+
+// Orders at or above this value earn a 10% gift coupon for the next purchase.
+const GIFT_COUPON_THRESHOLD = 999
+
+const PRICED_MODELS = {
+  product: { Model: Product, price: (d) => d.price, name: (d) => d.name },
+  bundle: { Model: Bundle, price: (d) => d.discountedPrice, name: (d) => d.title },
+  collection: { Model: Collection, price: (d) => d.totalPrice, name: (d) => d.title }
+}
+
+// Never trust prices from the client: look every item up and price it from the database.
+async function priceCart(items) {
+  const lineItems = []
+  for (const item of items) {
+    const type = item.type || 'product'
+    const priced = PRICED_MODELS[type]
+    const quantity = Number(item.quantity)
+    if (!priced || !Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
+      throw Object.assign(new Error('Invalid cart item'), { status: 400 })
+    }
+    const doc = await priced.Model.findById(item._id).lean()
+    if (!doc) throw Object.assign(new Error('An item in your cart is no longer available'), { status: 400 })
+    lineItems.push({ product: doc._id, itemType: type, name: priced.name(doc), quantity, price: priced.price(doc) })
+  }
+  return lineItems
+}
+
+const REQUIRED_ADDRESS_FIELDS = ['fullName', 'phone', 'addressLine1', 'city', 'state', 'postalCode']
 
 export const createRazorpayOrder = async (req, res) => {
   try {
     const { products, couponCode, shippingAddress } = req.body
 
     if (!Array.isArray(products) || products.length === 0) {
-      return res.status(400).json({ error: 'Invalid or empty products array' })
+      return res.status(400).json({ message: 'Your cart is empty' })
+    }
+    if (!shippingAddress || REQUIRED_ADDRESS_FIELDS.some((f) => !String(shippingAddress[f] || '').trim())) {
+      return res.status(400).json({ message: 'Complete shipping address is required' })
     }
 
-    // Validate shipping address
-    if (
-      !shippingAddress ||
-      !shippingAddress.fullName ||
-      !shippingAddress.phone ||
-      !shippingAddress.addressLine1 ||
-      !shippingAddress.city ||
-      !shippingAddress.state ||
-      !shippingAddress.postalCode
-    ) {
-      return res.status(400).json({ error: 'Complete shipping address is required' })
-    }
+    const lineItems = await priceCart(products)
+    const subtotal = lineItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
 
-    let totalAmount = 0
-
-    // Calculate total amount
-    products.forEach((product) => {
-      const price = Number(product.price) || 0
-      const qty = Number(product.quantity) || 1
-      totalAmount += price * qty
-    })
-
-    let coupon = null
     let discountAmount = 0
+    let appliedCoupon = null
     if (couponCode) {
-      coupon = await Coupon.findOne({
-        code: couponCode,
-        userId: req.user._id,
-        isActive: true
-      })
-      if (coupon) {
-        discountAmount = (totalAmount * coupon.discountPercentage) / 100
-        totalAmount -= discountAmount
+      const coupon = await Coupon.findOne({ code: couponCode, userId: req.user._id, isActive: true })
+      if (coupon && coupon.expirationDate > new Date()) {
+        discountAmount = (subtotal * coupon.discountPercentage) / 100
+        appliedCoupon = coupon.code
       }
     }
 
-    // Razorpay expects amount in paise (smallest currency unit)
-    const amountInPaise = Math.round(Number(totalAmount) * 100)
-
+    const totalAmount = Math.round((subtotal - discountAmount) * 100) / 100
+    const amountInPaise = Math.round(totalAmount * 100)
     if (!amountInPaise || amountInPaise <= 0) {
-      return res.status(400).json({ error: 'Invalid amount calculated' })
+      return res.status(400).json({ message: 'Invalid order amount' })
     }
 
-    const options = {
+    const razorpayOrder = await razorpay.orders.create({
       amount: amountInPaise,
       currency: 'INR',
       receipt: `order_${Date.now()}`,
-      notes: {
-        userId: req.user._id.toString(),
-        couponCode: couponCode || '',
-        products: JSON.stringify(
-          products.map((p) => ({
-            id: p._id,
-            quantity: p.quantity,
-            price: p.price
-          }))
-        ),
-        discountAmount: discountAmount.toString(),
-        shippingAddress: JSON.stringify(shippingAddress)
-      }
-    }
+      notes: { userId: req.user._id.toString(), couponCode: appliedCoupon || '' }
+    })
 
-    const razorpayOrder = await razorpay.orders.create(options)
-
-    // Create new coupon if order value is >= 200 INR (equivalent to $20)
-    if (totalAmount >= 200) {
-      await createNewCoupon(req.user._id)
-    }
+    // Kept as pending until the payment signature is verified.
+    await Order.create({
+      user: req.user._id,
+      products: lineItems,
+      totalAmount,
+      shippingAddress: {
+        ...Object.fromEntries(REQUIRED_ADDRESS_FIELDS.map((f) => [f, String(shippingAddress[f]).trim()])),
+        addressLine2: shippingAddress.addressLine2 || '',
+        country: 'India'
+      },
+      couponCode: appliedCoupon,
+      status: 'pending',
+      razorpayOrderId: razorpayOrder.id
+    })
 
     res.status(200).json({
       orderId: razorpayOrder.id,
       amount: amountInPaise,
       currency: razorpayOrder.currency,
-      totalAmount: totalAmount,
-      discountAmount: discountAmount
+      totalAmount,
+      discountAmount
     })
   } catch (error) {
     console.error('Error creating Razorpay order:', error)
-    res.status(500).json({ message: 'Error creating Razorpay order', error: error.message })
+    res.status(error.status || 500).json({ message: error.status ? error.message : 'Could not start checkout' })
   }
 }
 
 export const verifyRazorpayPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      return res.status(400).json({ message: 'Missing payment details' })
+    }
 
-    // Verify the payment signature
-    const body = razorpay_order_id + '|' + razorpay_payment_id
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(body.toString())
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest('hex')
 
-    if (expectedSignature !== razorpay_signature) {
-      return res.status(400).json({ error: 'Invalid payment signature' })
+    const valid =
+      expectedSignature.length === razorpay_signature.length &&
+      crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(razorpay_signature))
+    if (!valid) {
+      return res.status(400).json({ message: 'Invalid payment signature' })
     }
 
-    // Fetch the order details from Razorpay
+    const order = await Order.findOne({ razorpayOrderId: razorpay_order_id, user: req.user._id })
+    if (!order) return res.status(404).json({ message: 'Order not found' })
+    if (order.status === 'paid') return res.json({ success: true, orderId: order._id })
+
     const razorpayOrder = await razorpay.orders.fetch(razorpay_order_id)
-
-    if (razorpayOrder.status === 'paid') {
-      // Deactivate coupon if used
-      if (razorpayOrder.notes.couponCode) {
-        await Coupon.findOneAndUpdate(
-          {
-            code: razorpayOrder.notes.couponCode,
-            userId: razorpayOrder.notes.userId
-          },
-          {
-            isActive: false
-          }
-        )
-      }
-
-      // Create a new Order in database
-      const products = JSON.parse(razorpayOrder.notes.products)
-      const shippingAddress = JSON.parse(razorpayOrder.notes.shippingAddress)
-
-      const newOrder = new Order({
-        user: razorpayOrder.notes.userId,
-        products: products.map((product) => ({
-          product: product.id,
-          quantity: product.quantity,
-          price: product.price
-        })),
-        totalAmount: razorpayOrder.amount / 100, // convert from paise to rupees
-        shippingAddress: shippingAddress,
-        razorpayOrderId: razorpay_order_id,
-        razorpayPaymentId: razorpay_payment_id
-      })
-
-      await newOrder.save()
-
-      res.status(200).json({
-        success: true,
-        message: 'Payment verified successfully, order created, and coupon deactivated if used.',
-        orderId: newOrder._id
-      })
-    } else {
-      res.status(400).json({ error: 'Payment not completed' })
+    if (razorpayOrder.status !== 'paid') {
+      return res.status(400).json({ message: 'Payment not completed' })
     }
+
+    order.status = 'paid'
+    order.razorpayPaymentId = razorpay_payment_id
+    await order.save()
+
+    if (order.couponCode) {
+      await Coupon.findOneAndUpdate({ code: order.couponCode, userId: order.user }, { isActive: false })
+    }
+    if (order.totalAmount >= GIFT_COUPON_THRESHOLD) {
+      await createNewCoupon(order.user)
+    }
+    await User.updateOne({ _id: order.user }, { $set: { cartItems: [] } })
+
+    res.status(200).json({ success: true, orderId: order._id })
   } catch (error) {
     console.error('Error verifying Razorpay payment:', error)
-    res.status(500).json({ message: 'Error verifying payment', error: error.message })
+    res.status(500).json({ message: 'Error verifying payment' })
+  }
+}
+
+export const getOrder = async (req, res) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.id, user: req.user._id, status: 'paid' }).lean()
+    if (!order) return res.status(404).json({ message: 'Order not found' })
+    res.json({
+      _id: order._id,
+      totalAmount: order.totalAmount,
+      createdAt: order.createdAt,
+      items: order.products.map((p) => ({ name: p.name, quantity: p.quantity, price: p.price })),
+      shippingAddress: order.shippingAddress
+    })
+  } catch {
+    res.status(404).json({ message: 'Order not found' })
   }
 }
 
 export const getRazorpayKey = async (req, res) => {
-  try {
-    res.status(200).json({
-      key: process.env.RAZORPAY_KEY_ID
-    })
-  } catch (error) {
-    console.error('Error fetching Razorpay key:', error)
-    res.status(500).json({ message: 'Error fetching Razorpay key', error: error.message })
-  }
+  res.status(200).json({ key: process.env.RAZORPAY_KEY_ID })
 }
 
 async function createNewCoupon(userId) {
   await Coupon.findOneAndDelete({ userId })
-
-  const newCoupon = new Coupon({
-    code: 'GIFT' + Math.random().toString(36).substring(2, 8).toUpperCase(),
+  return Coupon.create({
+    code: 'GIFT' + crypto.randomBytes(3).toString('hex').toUpperCase(),
     discountPercentage: 10,
-    expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-    userId: userId
+    expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    userId
   })
-
-  await newCoupon.save()
-
-  return newCoupon
 }

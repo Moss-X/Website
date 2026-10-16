@@ -34,7 +34,10 @@ const setCookies = (res, accessToken, refreshToken) => {
 }
 
 export const signup = async (req, res) => {
-  const { email, password, name } = req.body
+  const { password, name } = req.body
+  const email = String(req.body.email || '')
+    .trim()
+    .toLowerCase()
   try {
     const userExists = await User.findOne({ email })
 
@@ -56,14 +59,20 @@ export const signup = async (req, res) => {
       role: user.role
     })
   } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: Object.values(error.errors)[0].message })
+    }
     console.log('Error in signup controller', error.message)
-    res.status(500).json({ message: error.message })
+    res.status(500).json({ message: 'Could not create account' })
   }
 }
 
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { password } = req.body
+    const email = String(req.body.email || '')
+      .trim()
+      .toLowerCase()
     const user = await User.findOne({ email })
 
     if (user && (await user.comparePassword(password))) {
@@ -90,8 +99,12 @@ export const logout = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken
     if (refreshToken) {
-      const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
-      await redis.del(`refresh_token:${decoded.userId}`)
+      try {
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET)
+        await redis.del(`refresh_token:${decoded.userId}`)
+      } catch {
+        // an expired or tampered token still means "log me out"
+      }
     }
 
     res.clearCookie('accessToken')
