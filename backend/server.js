@@ -12,6 +12,7 @@ import analyticsRoutes from './routes/analytics.route.js'
 import bundleRoutes from './routes/bundle.route.js'
 import collectionRoutes from './routes/collection.route.js'
 
+import { razorpayWebhook } from './controllers/webhook.controller.js'
 import { connectDB } from './lib/db.js'
 
 dotenv.config()
@@ -20,6 +21,9 @@ const app = express()
 const PORT = process.env.PORT || 5000
 
 const __dirname = path.resolve()
+
+// The webhook signature covers the raw bytes, so this route must be registered before express.json.
+app.post('/api/payments/webhook', express.raw({ type: 'application/json', limit: '1mb' }), razorpayWebhook)
 
 app.use(express.json({ limit: '10mb' }))
 app.use(cookieParser())
