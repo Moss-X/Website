@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "bench": "node backend/scripts/benchmarkListing.js"
   },
   "lint-staged": {
     "backend/**/*.{js,mjs,cjs}": [
@@ -50,6 +51,7 @@
     "@eslint/css": "^0.14.1",
     "@eslint/json": "^1.0.1",
     "@eslint/markdown": "^7.5.1",
+    "autocannon": "^8.0.0",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-prettier": "^5.5.5",
