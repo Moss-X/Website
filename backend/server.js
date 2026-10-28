@@ -14,6 +14,7 @@ import collectionRoutes from './routes/collection.route.js'
 
 import { razorpayWebhook } from './controllers/webhook.controller.js'
 import { connectDB } from './lib/db.js'
+import { startOrderReconciler } from './lib/reconcileOrders.js'
 
 dotenv.config()
 
@@ -58,5 +59,5 @@ if (process.env.NODE_ENV === 'production') {
 
 app.listen(PORT, () => {
   console.log('Server is running on http://localhost:' + PORT)
-  connectDB()
+  connectDB().then(startOrderReconciler)
 })
