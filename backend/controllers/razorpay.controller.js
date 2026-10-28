@@ -32,9 +32,33 @@ async function priceCart(items) {
 
 const REQUIRED_ADDRESS_FIELDS = ['fullName', 'phone', 'addressLine1', 'city', 'state', 'postalCode']
 
+const IDEMPOTENCY_KEY_PATTERN = /^[A-Za-z0-9_-]{8,128}$/
+
+const checkoutResponse = (order, currency = 'INR') => ({
+  orderId: order.razorpayOrderId,
+  amount: Math.round(order.totalAmount * 100),
+  currency,
+  totalAmount: order.totalAmount,
+  discountAmount: order.discountAmount
+})
+
 export const createRazorpayOrder = async (req, res) => {
   try {
     const { products, couponCode, shippingAddress } = req.body
+
+    const idempotencyKey = req.get('Idempotency-Key')
+    if (idempotencyKey !== undefined) {
+      if (!IDEMPOTENCY_KEY_PATTERN.test(idempotencyKey)) {
+        return res.status(400).json({ message: 'Invalid Idempotency-Key' })
+      }
+      const existing = await Order.findOne({ user: req.user._id, idempotencyKey })
+      if (existing) {
+        if (existing.status === 'paid') {
+          return res.status(409).json({ message: 'This order has already been paid' })
+        }
+        return res.status(200).json(checkoutResponse(existing))
+      }
+    }
 
     if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ message: 'Your cart is empty' })
@@ -70,7 +94,7 @@ export const createRazorpayOrder = async (req, res) => {
     })
 
     // Kept as pending until the payment signature is verified.
-    await Order.create({
+    const order = await Order.create({
       user: req.user._id,
       products: lineItems,
       totalAmount,
@@ -80,18 +104,19 @@ export const createRazorpayOrder = async (req, res) => {
         country: 'India'
       },
       couponCode: appliedCoupon,
+      discountAmount: Math.round(discountAmount * 100) / 100,
+      idempotencyKey,
       status: 'pending',
       razorpayOrderId: razorpayOrder.id
     })
 
-    res.status(200).json({
-      orderId: razorpayOrder.id,
-      amount: amountInPaise,
-      currency: razorpayOrder.currency,
-      totalAmount,
-      discountAmount
-    })
+    res.status(200).json(checkoutResponse(order, razorpayOrder.currency))
   } catch (error) {
+    // Two concurrent requests with the same key: the loser returns the winner's order.
+    if (error.code === 11000 && req.get('Idempotency-Key')) {
+      const existing = await Order.findOne({ user: req.user._id, idempotencyKey: req.get('Idempotency-Key') })
+      if (existing) return res.status(200).json(checkoutResponse(existing))
+    }
     console.error('Error creating Razorpay order:', error)
     res.status(error.status || 500).json({ message: error.status ? error.message : 'Could not start checkout' })
   }

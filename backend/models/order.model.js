@@ -87,6 +87,16 @@ const orderSchema = new mongoose.Schema(
       default: 'paid'
     },
     couponCode: String,
+    discountAmount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    // Client-supplied Idempotency-Key for checkout; a retry with the same key returns this order.
+    idempotencyKey: {
+      type: String,
+      maxlength: 128
+    },
     razorpayOrderId: {
       type: String,
       unique: true,
@@ -99,6 +109,12 @@ const orderSchema = new mongoose.Schema(
     }
   },
   { timestamps: true }
+)
+
+// Scoped per user so one customer's key can never collide with another's.
+orderSchema.index(
+  { user: 1, idempotencyKey: 1 },
+  { unique: true, partialFilterExpression: { idempotencyKey: { $type: 'string' } } }
 )
 
 const Order = mongoose.model('Order', orderSchema)

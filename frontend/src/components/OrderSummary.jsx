@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Lock, MapPin, X } from 'lucide-react'
 import { toast } from 'react-hot-toast'
@@ -44,6 +44,17 @@ const OrderSummary = () => {
     return () => window.removeEventListener('keydown', onKey)
   }, [showAddressForm])
 
+  // Reused while the cart, coupon and address are unchanged, so a double click or a retry after a
+  // network drop resolves to the same server-side order instead of creating another one.
+  const checkoutAttempt = useRef({ fingerprint: null, key: null })
+  const idempotencyKeyFor = (payload) => {
+    const fingerprint = JSON.stringify(payload)
+    if (checkoutAttempt.current.fingerprint !== fingerprint) {
+      checkoutAttempt.current = { fingerprint, key: crypto.randomUUID() }
+    }
+    return checkoutAttempt.current.key
+  }
+
   const handlePayment = async () => {
     if (!shippingAddress) return setShowAddressForm(true)
     if (!razorpayKey) return toast.error('Payments are not configured right now')
@@ -52,10 +63,13 @@ const OrderSummary = () => {
     try {
       await loadRazorpay()
       // The server prices every item itself; only ids, types and quantities are sent.
-      const { data } = await axios.post('/payments/create-razorpay-order', {
+      const payload = {
         products: cart.map(({ _id, type, quantity }) => ({ _id, type, quantity })),
         couponCode: coupon && isCouponApplied ? coupon.code : null,
         shippingAddress
+      }
+      const { data } = await axios.post('/payments/create-razorpay-order', payload, {
+        headers: { 'Idempotency-Key': idempotencyKeyFor(payload) }
       })
 
       const rzp = new window.Razorpay({
