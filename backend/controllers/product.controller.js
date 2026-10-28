@@ -1,12 +1,13 @@
 import mongoose from 'mongoose'
 import { redis } from '../lib/redis.js'
+import { cachedProducts, invalidateProductCache, ttlWithJitter, FEATURED_KEY } from '../lib/productCache.js'
 import cloudinary from '../lib/cloudinary.js'
 import Product from '../models/product.model.js'
 import { searchRegex, priceFilter } from '../lib/search.js'
 
 export const getAllProducts = async (req, res) => {
   try {
-    const products = await Product.find({}) // find all products
+    const products = await cachedProducts('all', {}, () => Product.find({}).lean())
     res.json({ products })
   } catch (error) {
     console.log('Error in getAllProducts controller', error.message)
@@ -18,7 +19,7 @@ export const getFeaturedProducts = async (req, res) => {
   try {
     let featuredProducts = null
     try {
-      featuredProducts = await redis.get('featured_products')
+      featuredProducts = await redis.get(FEATURED_KEY)
     } catch (error) {
       console.log('Redis unavailable, falling back to MongoDB', error.message)
     }
@@ -32,7 +33,7 @@ export const getFeaturedProducts = async (req, res) => {
     featuredProducts = await Product.find({ isFeatured: true }).lean()
 
     // store in redis for future quick access
-    await redis.set('featured_products', JSON.stringify(featuredProducts)).catch(() => {})
+    await redis.set(FEATURED_KEY, JSON.stringify(featuredProducts), 'EX', ttlWithJitter()).catch(() => {})
 
     res.json(featuredProducts)
   } catch (error) {
@@ -59,6 +60,7 @@ export const createProduct = async (req, res) => {
       image: cloudinaryResponse?.secure_url ? cloudinaryResponse.secure_url : '',
       category
     })
+    await invalidateProductCache()
 
     res.status(201).json(product)
   } catch (error) {
@@ -86,7 +88,7 @@ export const deleteProduct = async (req, res) => {
     }
 
     await Product.findByIdAndDelete(req.params.id)
-    if (product.isFeatured) await updateFeaturedProductsCache()
+    await invalidateProductCache()
 
     res.json({ message: 'Product deleted successfully' })
   } catch (error) {
@@ -155,7 +157,9 @@ export const getProductsByCategory = async (req, res) => {
   const { category } = req.params
   const displayCategory = categorySlugToName[category] || category
   try {
-    const products = await Product.find({ category: displayCategory })
+    const products = await cachedProducts('category', displayCategory, () =>
+      Product.find({ category: displayCategory }).lean()
+    )
     res.json({ products })
   } catch (error) {
     console.log('Error in getProductsByCategory controller', error.message)
@@ -169,7 +173,7 @@ export const toggleFeaturedProduct = async (req, res) => {
     if (product) {
       product.isFeatured = !product.isFeatured
       const updatedProduct = await product.save()
-      await updateFeaturedProductsCache()
+      await invalidateProductCache()
       res.json(updatedProduct)
     } else {
       res.status(404).json({ message: 'Product not found' })
@@ -226,21 +230,12 @@ export const searchProducts = async (req, res) => {
     if (category) query.category = { $in: category.split(',') }
     const price = priceFilter(minPrice, maxPrice)
     if (price) query.price = price
-    const products = await Product.find(query).sort({ isFeatured: -1, name: 1 }).limit(48)
+    const products = await cachedProducts('search', { q, category, minPrice, maxPrice }, () =>
+      Product.find(query).sort({ isFeatured: -1, name: 1 }).limit(48).lean()
+    )
     res.json(products)
   } catch (error) {
     console.log('Error in searchProducts controller', error.message)
     res.status(500).json({ message: 'Server error', error: error.message })
-  }
-}
-
-async function updateFeaturedProductsCache() {
-  try {
-    // The lean() method  is used to return plain JavaScript objects instead of full Mongoose documents. This can significantly improve performance
-
-    const featuredProducts = await Product.find({ isFeatured: true }).lean()
-    await redis.set('featured_products', JSON.stringify(featuredProducts))
-  } catch (error) {
-    console.log('error in update cache function')
   }
 }
