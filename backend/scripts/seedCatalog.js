@@ -190,13 +190,14 @@ async function main() {
     console.log(`  collection ${c.title}`)
   }
 
-  // Featured products are cached in Redis; refresh so the home page picks up the new catalog.
+  // Listings, categories, search and featured products are cached in Redis; drop them so the
+  // storefront picks up the new catalog.
   try {
     const { redis } = await import('../lib/redis.js')
-    const featured = await Product.find({ isFeatured: true }).lean()
-    await redis.set('featured_products', JSON.stringify(featured))
+    const { invalidateProductCache } = await import('../lib/productCache.js')
+    await invalidateProductCache()
     redis.disconnect()
-    console.log('Refreshed featured products cache')
+    console.log('Invalidated product cache')
   } catch (error) {
     console.warn('Could not refresh Redis cache:', error.message)
   }
