@@ -13,6 +13,7 @@ const AnalyticsTab = () => {
   })
   const [isLoading, setIsLoading] = useState(true)
   const [dailySalesData, setDailySalesData] = useState([])
+  const [topProducts, setTopProducts] = useState([])
 
   useEffect(() => {
     const fetchAnalyticsData = async () => {
@@ -20,6 +21,7 @@ const AnalyticsTab = () => {
         const response = await axios.get('/analytics')
         setAnalyticsData(response.data.analyticsData)
         setDailySalesData(response.data.dailySalesData)
+        setTopProducts(response.data.topProducts || [])
       } catch (error) {
         console.error('Error fetching analytics data:', error)
       } finally {
@@ -72,6 +74,36 @@ const AnalyticsTab = () => {
           </LineChart>
         </ResponsiveContainer>
       </motion.div>
+      {topProducts.length > 0 && (
+        <motion.div
+          className="bg-surface border border-line rounded-2xl p-6 mt-8 overflow-x-auto"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.35 }}
+        >
+          <h3 className="text-ink text-lg font-bold mb-4">Top sellers</h3>
+          <table className="w-full text-left text-sm">
+            <thead className="text-muted">
+              <tr>
+                <th className="pb-2 font-semibold">Item</th>
+                <th className="pb-2 font-semibold text-right">Units</th>
+                <th className="pb-2 font-semibold text-right">Orders</th>
+                <th className="pb-2 font-semibold text-right">Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {topProducts.map((item) => (
+                <tr key={`${item.itemType}-${item._id}`} className="border-t border-line">
+                  <td className="py-2 text-ink">{item.name}</td>
+                  <td className="py-2 text-right tabular-nums">{item.unitsSold}</td>
+                  <td className="py-2 text-right tabular-nums">{item.orders}</td>
+                  <td className="py-2 text-right tabular-nums">₹{Math.round(item.revenue).toLocaleString('en-IN')}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </motion.div>
+      )}
     </div>
   )
 }

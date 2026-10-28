@@ -27,6 +27,42 @@ export const getAnalyticsData = async () => {
   }
 }
 
+// Best sellers by revenue: explode each paid order into its line items, total them per item, rank
+// them, and only then join the products collection for the top few (so the $lookup runs on `limit`
+// documents rather than on every line item).
+export const getTopProducts = async (limit = 5) => {
+  return Order.aggregate([
+    { $match: { status: 'paid' } },
+    { $unwind: '$products' },
+    {
+      $group: {
+        _id: { itemType: '$products.itemType', product: '$products.product' },
+        name: { $first: '$products.name' },
+        unitsSold: { $sum: '$products.quantity' },
+        revenue: { $sum: { $multiply: ['$products.price', '$products.quantity'] } },
+        orders: { $addToSet: '$_id' }
+      }
+    },
+    { $addFields: { orders: { $size: '$orders' } } },
+    { $sort: { revenue: -1, _id: 1 } },
+    { $limit: limit },
+    // Bundles and collections have their own collections, so only plain products resolve here.
+    { $lookup: { from: 'products', localField: '_id.product', foreignField: '_id', as: 'details' } },
+    {
+      $project: {
+        _id: '$_id.product',
+        itemType: '$_id.itemType',
+        name: 1,
+        unitsSold: 1,
+        revenue: 1,
+        orders: 1,
+        image: { $arrayElemAt: ['$details.image', 0] },
+        category: { $arrayElemAt: ['$details.category', 0] }
+      }
+    }
+  ])
+}
+
 export const getDailySalesData = async (startDate, endDate) => {
   try {
     const dailySalesData = await Order.aggregate([
