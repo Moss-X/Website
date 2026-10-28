@@ -110,10 +110,13 @@ graph TD
 ## System Design Decisions
 
 - **MongoDB as the Primary Data Store**: E-commerce catalogs often require flexible schemas for diverse product attributes (e.g., bundles vs. standalone products). MongoDB's document model handles this polymorphism natively without complex SQL joins.
-- **Redis Caching Layer**: To handle traffic spikes during sales events, Redis is employed to cache heavily requested endpoints (like featured products and category lists). This dramatically reduces MongoDB read pressure and latency.
+- **Redis Caching Layer (cache-aside)**: Product listing, category, search and featured endpoints are cached in Redis with a 5 minute TTL plus random jitter. Keys carry a version number that every product create, update and delete bumps, so one `INCR` retires all cached listings at once. Redis failures or timeouts fall back to MongoDB.
 - **Dual-Token Authentication**: Instead of relying purely on session cookies, we use a short-lived JWT Access Token paired with a long-lived, HttpOnly Refresh Token. This mitigates CSRF and XSS risks while providing a smooth UX.
 - **Guest Cart Merging Strategy**: To lower the friction of shopping, users can build their cart anonymously. The state is temporarily held, and upon authentication, the system intelligently merges the guest cart with their persistent cloud cart.
 - **Pending-then-Paid Orders**: Checkout creates a `pending` order (priced server-side) alongside the Razorpay order. Only a verified payment flips it to `paid`, deactivates the used coupon, issues a gift coupon on orders of ₹999+ and empties the cart. Analytics ignore pending orders.
+- **Three ways to confirm a payment, one winner**: the browser callback, the signed Razorpay webhook and a background reconciler (pending orders older than 15 minutes are checked with `razorpay.orders.fetch`) all call the same `markOrderPaid`, which flips `pending` to `paid` with an atomic `findOneAndUpdate`. Only the caller that wins runs the coupon, gift-coupon and cart side effects.
+- **Idempotent checkout**: `create-razorpay-order` accepts an `Idempotency-Key` header, stored on the order under a unique per-user partial index; a retry with the same key returns the existing order instead of opening another Razorpay order.
+- **Webhook dedupe**: `POST /api/payments/webhook` reads the raw body, verifies `X-Razorpay-Signature` with `RAZORPAY_WEBHOOK_SECRET`, and records each `X-Razorpay-Event-Id` in a unique `webhook_events` collection so redelivered events are no-ops.
 
 ---
 
@@ -179,6 +182,7 @@ cp .env.example .env
 - `ACCESS_TOKEN_SECRET` / `REFRESH_TOKEN_SECRET`: Cryptographic keys for JWT signing.
 - `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET`: For image uploads.
 - `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET`: Razorpay credentials (test keys work for local development).
+- `RAZORPAY_WEBHOOK_SECRET`: Secret set on the Razorpay dashboard webhook (subscribe to `payment.captured` and `order.paid`, URL `/api/payments/webhook`).
 - `CLIENT_URL`: URL of the frontend (e.g., `http://localhost:5173`).
 
 ### 4. Seed the catalog (optional)
@@ -216,6 +220,7 @@ Below is a snapshot of critical API endpoints.
 | `POST` | `/api/cart/merge`                       | Merge guest cart into user cart                     | Yes           |
 | `POST` | `/api/payments/create-razorpay-order`   | Price the cart server-side and open a pending order | Yes           |
 | `POST` | `/api/payments/verify-razorpay-payment` | Verify signature and mark the order paid            | Yes           |
+| `POST` | `/api/payments/webhook`                 | Signed Razorpay webhook (raw body, deduped)         | Signature     |
 | `GET`  | `/api/payments/orders/:id`              | Paid order summary for the confirmation page        | Yes           |
 | `GET`  | `/api/analytics`                        | Fetch sales & revenue analytics                     | Admin         |
 
@@ -259,7 +264,8 @@ MossX takes a zero-trust approach to application security:
 
 ## Performance Optimizations
 
-- **Redis Caching**: Frequent, read-heavy operations like fetching featured products or category layouts are cached in Redis, resulting in sub-50ms API response times.
+- **Redis Caching**: Listing, category, search and featured endpoints are cached in Redis. `pnpm bench` (autocannon, 50 connections, 2,000 products, local Mongo and Redis) measured the category listing at 305 ms average / 1,471 ms p99 uncached versus 49 ms / 63 ms cached, and search at 61 ms versus 11 ms. Absolute numbers depend on your database latency.
+- **Aggregation**: Mongo pipelines power revenue totals, daily sales and a top-sellers report (`$match`, `$unwind`, `$group`, `$sort`, `$limit`, then `$lookup` on only the top few). Catalog search uses `find()` with an escaped, length-capped regex.
 - **Database Indexing**: Critical fields in MongoDB (`email`, product `category` and `isFeatured`, and Razorpay order ids) are indexed to reduce query execution time.
 - **Lazy Loading**: The admin dashboard (and its charting library) is split out with `React.lazy()`, so shoppers never download it.
 - **Image Optimization**: A small helper (`frontend/src/lib/image.js`) requests Cloudinary images at the exact size each component needs, with `f_auto,q_auto` for WebP/AVIF delivery.
