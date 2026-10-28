@@ -1,14 +1,11 @@
 import crypto from 'crypto'
 import Coupon from '../models/coupon.model.js'
 import Order from '../models/order.model.js'
-import User from '../models/user.model.js'
 import Product from '../models/product.model.js'
 import Bundle from '../models/bundle.model.js'
 import Collection from '../models/collection.model.js'
 import { razorpay } from '../lib/razorpay.js'
-
-// Orders at or above this value earn a 10% gift coupon for the next purchase.
-const GIFT_COUPON_THRESHOLD = 999
+import { markOrderPaid } from '../lib/orderPayment.js'
 
 const PRICED_MODELS = {
   product: { Model: Product, price: (d) => d.price, name: (d) => d.name },
@@ -128,17 +125,9 @@ export const verifyRazorpayPayment = async (req, res) => {
       return res.status(400).json({ message: 'Payment not completed' })
     }
 
-    order.status = 'paid'
-    order.razorpayPaymentId = razorpay_payment_id
-    await order.save()
-
-    if (order.couponCode) {
-      await Coupon.findOneAndUpdate({ code: order.couponCode, userId: order.user }, { isActive: false })
-    }
-    if (order.totalAmount >= GIFT_COUPON_THRESHOLD) {
-      await createNewCoupon(order.user)
-    }
-    await User.updateOne({ _id: order.user }, { $set: { cartItems: [] } })
+    // Only the caller that wins the pending -> paid flip runs the side effects; a loser means the
+    // webhook or a retry got there first, which is still a successful payment.
+    await markOrderPaid({ _id: order._id }, razorpay_payment_id)
 
     res.status(200).json({ success: true, orderId: order._id })
   } catch (error) {
@@ -165,14 +154,4 @@ export const getOrder = async (req, res) => {
 
 export const getRazorpayKey = async (req, res) => {
   res.status(200).json({ key: process.env.RAZORPAY_KEY_ID })
-}
-
-async function createNewCoupon(userId) {
-  await Coupon.findOneAndDelete({ userId })
-  return Coupon.create({
-    code: 'GIFT' + crypto.randomBytes(3).toString('hex').toUpperCase(),
-    discountPercentage: 10,
-    expirationDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-    userId
-  })
 }
